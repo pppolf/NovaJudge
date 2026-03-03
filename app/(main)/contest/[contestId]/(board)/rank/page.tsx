@@ -12,6 +12,7 @@ import RankTable from "./RankTable";
 import Pagination from "@/components/Pagination";
 import { ContestConfig } from "@/app/(main)/page";
 import UnfreezeButton from "./UnfreezeButton";
+import { getDictionary } from "@/lib/get-dictionary";
 
 // 辅助函数：计算时间差
 function formatTime(startTime: number, submissionTime: number): string {
@@ -500,6 +501,9 @@ export default async function Rank({ params, searchParams }: Props) {
   const isContestEnded =
     contestInfo.status === ContestStatus.ENDED || now > contestInfo.endTime;
   const showUnfreezeButton = canSeeLiveBoard && isContestEnded && isFrozen;
+
+  const dict = await getDictionary();
+
   return (
     <div className="bg-white w-full mx-auto shadow-sm border border-gray-100 rounded-sm p-6">
       <div className="flex justify-between items-center border-b mb-4 pb-4">
@@ -526,7 +530,7 @@ export default async function Rank({ params, searchParams }: Props) {
 
       {contestInfo.status === ContestStatus.PENDING ? (
         <div className="text-center py-10 text-gray-500">
-          The contest has not started yet.
+          {dict.contestList.noContestsFound}
         </div>
       ) : (
         <>

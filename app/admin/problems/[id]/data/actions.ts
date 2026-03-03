@@ -48,9 +48,10 @@ async function autoDetectCases(dir: string, currentYamlContent: string) {
   const interactor = files.find((f) => f === "interactor.cpp");
   for (const input of inputs) {
     const basename = path.basename(input, ".in");
-    const output = `${basename}.out`;
-    if (files.includes(output)) {
-      detectedCases.push({ input: input, output: output });
+    if (files.includes(`${basename}.out`)) {
+      detectedCases.push({ input: input, output: `${basename}.out` });
+    } else if (files.includes(`${basename}.ans`)) {
+      detectedCases.push({ input: input, output: `${basename}.ans` });
     } else {
       detectedCases.push({ input: input, output: "/dev/null" });
     }

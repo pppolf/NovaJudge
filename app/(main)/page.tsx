@@ -67,8 +67,8 @@ function StatusBadge({ status }: { status: ContestStatus }) {
         status === ContestStatus.RUNNING
           ? "bg-green-50 text-green-700 border-green-200"
           : status === ContestStatus.ENDED
-          ? "bg-gray-100 text-gray-600 border-gray-200"
-          : "bg-blue-50 text-blue-700 border-blue-200"
+            ? "bg-gray-100 text-gray-600 border-gray-200"
+            : "bg-blue-50 text-blue-700 border-blue-200"
       }`}
     >
       <span
@@ -76,8 +76,8 @@ function StatusBadge({ status }: { status: ContestStatus }) {
           status === ContestStatus.RUNNING
             ? "bg-green-500 animate-pulse"
             : status === ContestStatus.ENDED
-            ? "bg-gray-400"
-            : "bg-blue-500"
+              ? "bg-gray-400"
+              : "bg-blue-500"
         }`}
       />
       {status}
@@ -120,7 +120,9 @@ export default async function ContestList() {
       {contests.length === 0 ? (
         <div className="text-center py-16 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300">
           <TrophyIcon className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-          <p className="text-lg font-medium">{dict.contestList.noContestsFound}</p>
+          <p className="text-lg font-medium">
+            {dict.contestList.noContestsFound}
+          </p>
         </div>
       ) : (
         <>
@@ -136,7 +138,7 @@ export default async function ContestList() {
                 <Link
                   key={contest.id}
                   href={`/contest/${contest.id}`}
-                  className="block bg-white rounded-xl p-5 shadow-sm border border-gray-200 active:scale-[0.98] transition-transform"
+                  className="block bg-white rounded-xl p-5 shadow-sm border border-gray-200 active:scale-1 transition-transform"
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
@@ -195,11 +197,15 @@ export default async function ContestList() {
                 <thead>
                   <tr className="bg-gray-50/50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500 font-semibold">
                     <th className="px-6 py-4 w-20 text-center">ID</th>
-                    <th className="px-6 py-4 w-1/3">{dict.contestList.title}</th>
+                    <th className="px-6 py-4 w-1/3">
+                      {dict.contestList.title}
+                    </th>
                     <th className="px-6 py-4">{dict.contestList.status}</th>
                     <th className="px-6 py-4">{dict.contestList.type}</th>
                     <th className="px-6 py-4">{dict.contestList.timeline}</th>
-                    <th className="px-6 py-4 text-center">{dict.contestList.duration}</th>
+                    <th className="px-6 py-4 text-center">
+                      {dict.contestList.duration}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -274,7 +280,7 @@ export default async function ContestList() {
                             <span className="font-mono font-medium">
                               {formatDuration(
                                 contest.startTime,
-                                contest.endTime
+                                contest.endTime,
                               )}
                             </span>
                           </div>

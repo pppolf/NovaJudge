@@ -8,7 +8,11 @@ import Link from "next/link";
 import CodeBlock from "@/components/CodeBlock";
 import ProblemInfoCard from "@/components/ProblemInfoCard";
 import { prisma } from "@/lib/prisma";
-import { ContestRole, Verdict } from "@/lib/generated/prisma/client";
+import {
+  ContestRole,
+  ContestStatus,
+  Verdict,
+} from "@/lib/generated/prisma/client";
 import { notFound } from "next/navigation";
 import { getCurrentSuper, getCurrentUser, UserJwtPayload } from "@/lib/auth";
 import { getDictionary } from "@/lib/get-dictionary";
@@ -63,7 +67,12 @@ export default async function ProblemDetail({ params }: Props) {
   });
   const problem = contestProblem?.problem;
 
-  if (!problem || !contestProblem) notFound();
+  if (
+    !problem ||
+    !contestProblem ||
+    contestProblem.contest.status === ContestStatus.PENDING
+  )
+    notFound();
 
   // 2. 封榜统计逻辑
   const config = contestProblem.contest.config as {

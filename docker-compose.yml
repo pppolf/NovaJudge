@@ -31,23 +31,23 @@ services:
       timeout: 5s
       retries: 5
 
-#  go-judge:
-#    # build:
-#    #   context: .
-#    #   dockerfile: Dockerfile
-#    image: go-judge:latest
-#    container_name: xcpc-go-judge
-#    ports:
-#      - "5050:5050"
-#      - "5051:5051"
-#    volumes:
-#      - /tmp/judge:/tmp/judge
-#    privileged: true
-#    healthcheck:
-#      test: ["CMD", "curl", "-f", "http://localhost:5050"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
+  go-judge:
+   build:
+     context: .
+     dockerfile: Dockerfile
+   image: go-judge:latest
+   container_name: xcpc-go-judge
+   ports:
+     - "5050:5050"
+     - "5051:5051"
+   volumes:
+     - /tmp/judge:/tmp/judge
+   privileged: true
+   healthcheck:
+     test: ["CMD", "curl", "-f", "http://localhost:5050"]
+     interval: 10s
+     timeout: 5s
+     retries: 5
 
 volumes:
   postgres_data:
