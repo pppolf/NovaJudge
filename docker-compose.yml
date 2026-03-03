@@ -35,7 +35,7 @@ services:
    build:
      context: .
      dockerfile: Dockerfile
-   image: go-judge:latest
+  #  image: go-judge:latest
    container_name: xcpc-go-judge
    ports:
      - "5050:5050"
