@@ -1,29 +1,61 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
+import { verifyAuth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const auth_token = cookieStore.get("auth_token");
-  const user_token = cookieStore.get("user_token");
+  try {
+    const store = await cookies();
+    const authToken = store.get("auth_token")?.value;
+    const userToken = store.get("user_token")?.value;
 
-  if (!auth_token && !user_token) {
-    return NextResponse.json({ user: null });
-  } else {
-    if (auth_token) {
+    if (authToken) {
       try {
-        const decoded = jwt.verify(auth_token.value, process.env.JWT_SECRET!);
-        return NextResponse.json({ user: decoded });
-      } catch (e) {
-        return NextResponse.json({ user: null, message: e });
-      }
-    } else if (user_token) {
-      try {
-        const decoded = jwt.verify(user_token.value, process.env.JWT_SECRET!);
-        return NextResponse.json({ user: decoded });
-      } catch (e) {
-        return NextResponse.json({ user: null, message: e });
-      }
+        const u = await verifyAuth(authToken);
+        const gu = await prisma.globalUser.findUnique({
+          where: { id: String(u.userId) },
+        });
+        if (gu) {
+          return NextResponse.json({
+            user: {
+              username: gu.username,
+              role: u.role,
+              isGlobalAdmin: !!u.isGlobalAdmin,
+              contestId: u.contestId ?? null,
+              displayName: gu.displayName,
+              studentId: gu.studentId,
+              email: gu.email,
+            },
+          });
+        } else {
+          return NextResponse.json({
+            user: {
+              username: u.username,
+              role: u.role,
+              isGlobalAdmin: !!u.isGlobalAdmin,
+              contestId: u.contestId ?? null,
+            },
+          });
+        }
+      } catch {}
     }
+
+    if (userToken) {
+      try {
+        const u = await verifyAuth(userToken);
+        return NextResponse.json({
+          user: {
+            username: u.username,
+            role: u.role,
+            isGlobalAdmin: !!u.isGlobalAdmin,
+            contestId: u.contestId ?? null,
+          },
+        });
+      } catch {}
+    }
+
+    return NextResponse.json({ user: null });
+  } catch {
+    return NextResponse.json({ user: null });
   }
 }

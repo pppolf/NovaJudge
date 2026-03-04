@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ContestStatus, Verdict } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser, UserJwtPayload } from "@/lib/auth";
+import { getCurrentSuper, getCurrentUser, UserJwtPayload } from "@/lib/auth";
 import { getDictionary } from "@/lib/get-dictionary";
 
 interface Props {
@@ -64,11 +64,13 @@ export default async function Problems({ params }: Props) {
   const totalMap = new Map(totalStats.map((s) => [s.problemId, s._count._all]));
   const acMap = new Map(acStats.map((s) => [s.problemId, s._count._all]));
   const user = await getCurrentUser();
+  const globalUser = await getCurrentSuper();
   const userStats = await prisma.submission.findMany({
     where: {
-      userId: (user as UserJwtPayload)?.userId || "-2",
+      userId: (user as UserJwtPayload)?.userId,
       contestId: contestId,
       verdict: Verdict.ACCEPTED,
+      globalUserId: (globalUser as UserJwtPayload)?.userId,
     },
   });
   const statsMap = new Map(userStats.map((s) => [s.problemId, 1]));

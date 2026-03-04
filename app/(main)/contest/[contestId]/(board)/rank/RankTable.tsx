@@ -133,12 +133,12 @@ export default function RankTable({
                     {team.category === "1"
                       ? "⭐"
                       : team.category === "2"
-                      ? "👧"
-                      : ""}
+                        ? "👧"
+                        : ""}
                     {team.displayName || team.username}
                   </div>
                   <div className="text-gray-900 truncate max-w-37.5 text-xs">
-                    {team.members}
+                    {team.members || team.username}
                   </div>
                   <div className="text-gray-900 truncate max-w-37.5 text-xs">
                     {team.school}

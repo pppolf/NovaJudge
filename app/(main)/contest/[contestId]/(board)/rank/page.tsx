@@ -22,7 +22,7 @@ function formatTime(startTime: number, submissionTime: number): string {
   const seconds = Math.floor((diffMs % 60000) / 1000);
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
     2,
-    "0"
+    "0",
   )}:${String(seconds).padStart(2, "0")}`;
 }
 
@@ -62,13 +62,14 @@ export default async function Rank({ params, searchParams }: Props) {
   const token = cookieStore.get("user_token")?.value;
   const adminToken = cookieStore.get("auth_token")?.value;
   const payload = token ? await verifyAuth(token) : null;
+  const glabelPayload = adminToken ? await verifyAuth(adminToken) : null;
 
   let currentUser = null;
   let isTeamMember = false;
   let isGlobalAdmin = false;
   let isContestAdmin = false;
 
-  if (adminToken) {
+  if (adminToken && glabelPayload?.isGlobalAdmin) {
     isGlobalAdmin = true;
   }
 
@@ -229,7 +230,7 @@ export default async function Rank({ params, searchParams }: Props) {
             (s) =>
               s.problemId === cp.problemId &&
               s.verdict !== Verdict.COMPILE_ERROR &&
-              s.verdict !== Verdict.SYSTEM_ERROR
+              s.verdict !== Verdict.SYSTEM_ERROR,
             // s.submittedAt.getTime() <= end
           );
 
@@ -239,17 +240,17 @@ export default async function Rank({ params, searchParams }: Props) {
 
           // 分离赛中提交和赛后提交
           const contestSubmissions = rawSubmissions.filter(
-            (s) => new Date(s.submittedAt).getTime() <= end
+            (s) => new Date(s.submittedAt).getTime() <= end,
           );
           const afterContestSubmissions = rawSubmissions.filter(
-            (s) => new Date(s.submittedAt).getTime() > end
+            (s) => new Date(s.submittedAt).getTime() > end,
           );
 
           // 按时间排序
           const submissions = contestSubmissions.sort(
             (a, b) =>
               new Date(a.submittedAt).getTime() -
-              new Date(b.submittedAt).getTime()
+              new Date(b.submittedAt).getTime(),
           );
 
           // === 计算逻辑开始 ===
@@ -318,7 +319,7 @@ export default async function Rank({ params, searchParams }: Props) {
               const preFreezeAC = submissions.find(
                 (s) =>
                   s.verdict === Verdict.ACCEPTED &&
-                  new Date(s.submittedAt).getTime() < freezeTimeMs
+                  new Date(s.submittedAt).getTime() < freezeTimeMs,
               );
               if (preFreezeAC) {
                 const t =
@@ -353,7 +354,7 @@ export default async function Rank({ params, searchParams }: Props) {
               ? submissions.find(
                   (s) =>
                     s.verdict === Verdict.ACCEPTED &&
-                    new Date(s.submittedAt).getTime() < freezeTimeMs
+                    new Date(s.submittedAt).getTime() < freezeTimeMs,
                 )?.displayId
               : acceptedSubId;
 
@@ -379,7 +380,7 @@ export default async function Rank({ params, searchParams }: Props) {
             if (acSub) {
               displayTime = formatTime(
                 startTimeMs,
-                new Date(acSub.submittedAt).getTime()
+                new Date(acSub.submittedAt).getTime(),
               );
             }
           }
@@ -395,7 +396,7 @@ export default async function Rank({ params, searchParams }: Props) {
           if (!finalShowAccepted) {
             // 查找赛后的第一次 AC
             const afterContestAC = afterContestSubmissions.find(
-              (s) => s.verdict === Verdict.ACCEPTED
+              (s) => s.verdict === Verdict.ACCEPTED,
             ); // 注意：afterContestSubmissions 通常没有排序，最好 sort 或者 find 之前确认顺序
             // 前面 rawSubmissions 是根据 filter 分出来的，可能顺序是对的，
             // 但为了保险，对 afterContestSubmissions 也做一次时间排序
@@ -414,7 +415,7 @@ export default async function Rank({ params, searchParams }: Props) {
               ? submissions.find(
                   (s) =>
                     s.verdict === Verdict.ACCEPTED &&
-                    new Date(s.submittedAt).getTime() < freezeTimeMs
+                    new Date(s.submittedAt).getTime() < freezeTimeMs,
                 )?.displayId
               : acceptedSubId;
           } else if (upsolved) {
@@ -437,7 +438,7 @@ export default async function Rank({ params, searchParams }: Props) {
             firstAcceptedSubmissionId: finalLinkSubmissionId,
             upsolved: upsolved, // 传递给前端
           };
-        })
+        }),
       );
 
       return {
@@ -452,7 +453,7 @@ export default async function Rank({ params, searchParams }: Props) {
         penalty: Math.floor(penalty),
         problems,
       };
-    })
+    }),
   );
 
   // 排序
@@ -483,7 +484,7 @@ export default async function Rank({ params, searchParams }: Props) {
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedTeams = allTeamRankings.slice(
     startIndex,
-    startIndex + pageSize
+    startIndex + pageSize,
   );
 
   // 获取所有的 School 和 Category 用于筛选
@@ -503,6 +504,209 @@ export default async function Rank({ params, searchParams }: Props) {
   const showUnfreezeButton = canSeeLiveBoard && isContestEnded && isFrozen;
 
   const dict = await getDictionary();
+
+  const globalRanks: TeamRankData[] = [];
+  // 收集所有在本比赛中有提交的全局用户
+  const globalUserIdsDistinct = await prisma.submission.findMany({
+    where: { contestId: cid, globalUserId: { not: null } },
+    select: { globalUserId: true },
+    distinct: ["globalUserId"],
+  });
+  const globalIds = globalUserIdsDistinct
+    .map((s) => s.globalUserId)
+    .filter((v): v is string => !!v);
+  if (globalIds.length > 0) {
+    const globalUsers = await prisma.globalUser.findMany({
+      where: { id: { in: globalIds } },
+      select: { id: true, username: true, displayName: true },
+    });
+    for (const gu of globalUsers) {
+      const globalSubs = await prisma.submission.findMany({
+        where: { contestId: cid, globalUserId: gu.id },
+        select: {
+          id: true,
+          displayId: true,
+          problemId: true,
+          verdict: true,
+          submittedAt: true,
+        },
+        orderBy: { submittedAt: "asc" },
+      });
+      let solved = 0;
+      let penalty = 0;
+      const problems = await Promise.all(
+        contestProblems.map(async (cp) => {
+          const rawSubmissions = globalSubs.filter(
+            (s) =>
+              s.problemId === cp.problemId &&
+              s.verdict !== Verdict.COMPILE_ERROR &&
+              s.verdict !== Verdict.SYSTEM_ERROR,
+          );
+          if (rawSubmissions.length === 0) return null;
+          const contestSubmissions = rawSubmissions.filter(
+            (s) => new Date(s.submittedAt).getTime() <= end,
+          );
+          const afterContestSubmissions = rawSubmissions.filter(
+            (s) => new Date(s.submittedAt).getTime() > end,
+          );
+          const submissions = contestSubmissions.sort(
+            (a, b) =>
+              new Date(a.submittedAt).getTime() -
+              new Date(b.submittedAt).getTime(),
+          );
+          let isAccepted = false;
+          let acceptedTimeMs = 0;
+          let acceptedSubId = 0;
+          let waCountBeforeAcc = 0;
+          for (const sub of submissions) {
+            if (sub.verdict === Verdict.ACCEPTED) {
+              isAccepted = true;
+              acceptedTimeMs =
+                new Date(sub.submittedAt).getTime() - startTimeMs;
+              acceptedSubId = sub.displayId;
+              break;
+            }
+            waCountBeforeAcc++;
+          }
+          let isAcceptedBeforeFreeze = false;
+          let waCountBeforeFreeze = 0;
+          let frozenTries = 0;
+          if (shouldShowFrozenState && freezeTime) {
+            for (const sub of submissions) {
+              const subTime = new Date(sub.submittedAt).getTime();
+              if (subTime < freezeTimeMs) {
+                if (sub.verdict === Verdict.ACCEPTED) {
+                  if (!isAcceptedBeforeFreeze) {
+                    isAcceptedBeforeFreeze = true;
+                  }
+                  break;
+                } else {
+                  waCountBeforeFreeze++;
+                }
+              } else {
+                if (!isAcceptedBeforeFreeze) {
+                  frozenTries++;
+                }
+              }
+            }
+          }
+          if (shouldShowFrozenState) {
+            if (isAcceptedBeforeFreeze) {
+              solved++;
+              const preFreezeAC = submissions.find(
+                (s) =>
+                  s.verdict === Verdict.ACCEPTED &&
+                  new Date(s.submittedAt).getTime() < freezeTimeMs,
+              );
+              if (preFreezeAC) {
+                const t =
+                  new Date(preFreezeAC.submittedAt).getTime() - startTimeMs;
+                penalty += Math.floor(t / 60000) + waCountBeforeFreeze * 20;
+              }
+            }
+          } else {
+            if (isAccepted) {
+              solved++;
+              penalty +=
+                Math.floor(acceptedTimeMs / 60000) + waCountBeforeAcc * 20;
+            }
+          }
+          let firstBlood = false;
+          const showAsAccepted = shouldShowFrozenState
+            ? isAcceptedBeforeFreeze
+            : isAccepted;
+          const globalFirstBloodId = firstBloodMap.get(cp.problemId);
+          if (showAsAccepted && globalFirstBloodId) {
+            const myDisplayACId = shouldShowFrozenState
+              ? submissions.find(
+                  (s) =>
+                    s.verdict === Verdict.ACCEPTED &&
+                    new Date(s.submittedAt).getTime() < freezeTimeMs,
+                )?.displayId
+              : acceptedSubId;
+            if (myDisplayACId === globalFirstBloodId) {
+              firstBlood = true;
+            }
+          }
+          let displayTime = "";
+          if (showAsAccepted) {
+            const acSub = submissions.find((s) => {
+              if (shouldShowFrozenState)
+                return (
+                  s.verdict === Verdict.ACCEPTED &&
+                  new Date(s.submittedAt).getTime() < freezeTimeMs
+                );
+              return s.displayId === acceptedSubId;
+            });
+            if (acSub) {
+              displayTime = formatTime(
+                startTimeMs,
+                new Date(acSub.submittedAt).getTime(),
+              );
+            }
+          }
+          let upsolved = false;
+          let upsolvedSubmissionId: number | undefined;
+          const finalShowAccepted = shouldShowFrozenState
+            ? isAcceptedBeforeFreeze
+            : isAccepted;
+          if (!finalShowAccepted) {
+            const afterContestAC = afterContestSubmissions.find(
+              (s) => s.verdict === Verdict.ACCEPTED,
+            );
+            if (afterContestAC) {
+              upsolved = true;
+              upsolvedSubmissionId = afterContestAC.displayId;
+            }
+          }
+          if (upsolved) {
+            solved++;
+          }
+          let finalLinkSubmissionId: number | undefined;
+          if (finalShowAccepted) {
+            finalLinkSubmissionId = shouldShowFrozenState
+              ? submissions.find(
+                  (s) =>
+                    s.verdict === Verdict.ACCEPTED &&
+                    new Date(s.submittedAt).getTime() < freezeTimeMs,
+                )?.displayId
+              : acceptedSubId;
+          } else if (upsolved) {
+            finalLinkSubmissionId = upsolvedSubmissionId;
+          }
+          return {
+            problemId: cp.problemId,
+            displayId: cp.displayId,
+            color: cp.color,
+            firstBlood,
+            accepted: finalShowAccepted,
+            time: displayTime,
+            tries: shouldShowFrozenState
+              ? waCountBeforeFreeze
+              : waCountBeforeAcc,
+            frozenTries,
+            unfrozenTries: waCountBeforeFreeze,
+            firstAcceptedSubmissionId: finalLinkSubmissionId,
+            upsolved,
+          };
+        }),
+      );
+      globalRanks.push({
+        rank: "*",
+        id: gu.id,
+        username: gu.username,
+        displayName: gu.displayName,
+        members: null,
+        school: null,
+        category: "GLOBAL",
+        solved,
+        penalty: Math.floor(penalty),
+        problems,
+      });
+    }
+    // 排序：按解决问题数量降序
+    globalRanks.sort((a, b) => b.solved - a.solved);
+  }
 
   return (
     <div className="bg-white w-full mx-auto shadow-sm border border-gray-100 rounded-sm p-6">
@@ -555,6 +759,18 @@ export default async function Rank({ params, searchParams }: Props) {
             contestProblems={contestProblems}
             isFrozen={isFrozen}
           />
+          {globalRanks.length > 0 && (
+            <div className="mt-2">
+              <RankTable
+                contestId={contestId}
+                teams={globalRanks}
+                isMyTeam={false}
+                isContestEnded={contestInfo.status === ContestStatus.ENDED}
+                contestProblems={contestProblems}
+                isFrozen={isFrozen}
+              />
+            </div>
+          )}
         </>
       )}
 

@@ -58,7 +58,12 @@ enum ClariCategory {
 model GlobalUser {
   id          String       @id @default(uuid())
   username    String       @unique
-  password    String
+  password    String?
+  role        String       @default("GLOBAL_USER")
+  externalId  String?      @unique
+  displayName String?
+  studentId   String?
+  email       String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   submissions Submission[]

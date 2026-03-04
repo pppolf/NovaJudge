@@ -116,7 +116,8 @@ export default async function ProblemDetail({ params }: Props) {
   const user = await getCurrentUser();
   const isAdmin =
     (SuperAdmin as unknown as UserJwtPayload)?.isGlobalAdmin ||
-    (user as unknown as UserJwtPayload)?.role !== ContestRole.TEAM;
+    (user as unknown as UserJwtPayload)?.role === ContestRole.ADMIN ||
+    (user as unknown as UserJwtPayload)?.role === ContestRole.JUDGE;
 
   const dict = await getDictionary();
 

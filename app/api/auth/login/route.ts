@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     }
 
     // 4. 验证密码 (假设数据库存的是 hash，如果是明文测试请直接比较)
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password!);
     if (!isPasswordValid) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }

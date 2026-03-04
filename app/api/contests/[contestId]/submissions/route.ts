@@ -1,40 +1,40 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { Verdict } from '@/lib/generated/prisma/client';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { Verdict } from "@/lib/generated/prisma/client";
 
 const verdictToHydroStatus: Record<Verdict, string> = {
-  [Verdict.PENDING]: 'Waiting',
-  [Verdict.JUDGING]: 'Running',
-  [Verdict.ACCEPTED]: 'Accepted',
-  [Verdict.WRONG_ANSWER]: 'Wrong Answer',
-  [Verdict.TIME_LIMIT_EXCEEDED]: 'Time Exceeded',
-  [Verdict.MEMORY_LIMIT_EXCEEDED]: 'Memory Exceeded',
-  [Verdict.RUNTIME_ERROR]: 'Runtime Error',
-  [Verdict.COMPILE_ERROR]: 'Compile Error',
-  [Verdict.PRESENTATION_ERROR]: 'Format Error',
-  [Verdict.SYSTEM_ERROR]: 'System Error',
+  [Verdict.PENDING]: "Waiting",
+  [Verdict.JUDGING]: "Running",
+  [Verdict.ACCEPTED]: "Accepted",
+  [Verdict.WRONG_ANSWER]: "Wrong Answer",
+  [Verdict.TIME_LIMIT_EXCEEDED]: "Time Exceeded",
+  [Verdict.MEMORY_LIMIT_EXCEEDED]: "Memory Exceeded",
+  [Verdict.RUNTIME_ERROR]: "Runtime Error",
+  [Verdict.COMPILE_ERROR]: "Compile Error",
+  [Verdict.PRESENTATION_ERROR]: "Format Error",
+  [Verdict.SYSTEM_ERROR]: "System Error",
 };
 
 function formatDate(date: Date): string {
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ contestId: string }> }
+  { params }: { params: Promise<{ contestId: string }> },
 ) {
   try {
     const { contestId } = await params;
     const contestIdNumber = parseInt(contestId, 10);
 
     if (isNaN(contestIdNumber)) {
-      return NextResponse.json({ error: 'Invalid contestId' }, { status: 400 });
+      return NextResponse.json({ error: "Invalid contestId" }, { status: 400 });
     }
 
     const submissions = await prisma.submission.findMany({
@@ -44,19 +44,20 @@ export async function GET(
       include: {
         user: true,
         problem: true,
+        globalUser: true,
       },
       orderBy: {
-        submittedAt: 'desc',
+        submittedAt: "desc",
       },
     });
 
-    const result = submissions.map(sub => {
+    const result = submissions.map((sub) => {
       let score = 0;
       if (sub.verdict === Verdict.ACCEPTED) {
         score = 100;
       }
 
-      const status = verdictToHydroStatus[sub.verdict] || 'Unknown Error';
+      const status = verdictToHydroStatus[sub.verdict] || "Unknown Error";
       const runtime = sub.timeUsed || 0;
       const memory = sub.memoryUsed ? Math.round(sub.memoryUsed / 1024) : 0;
 
@@ -64,8 +65,8 @@ export async function GET(
         rid: sub.displayId,
         status: status,
         score: score,
-        problem: sub.problem?.title || '',
-        username: sub.user?.username || '',
+        problem: sub.problem?.title || "",
+        username: sub.user?.username || sub.globalUser?.username || "",
         runtime: runtime,
         memory: memory,
         language: sub.language,
@@ -76,7 +77,10 @@ export async function GET(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Get submissions error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Get submissions error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

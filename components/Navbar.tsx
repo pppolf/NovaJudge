@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import AdminLoginModal from "./AdminLoginModal";
+import ExternalLoginModal from "./ExternalLoginModal";
 import { ContestRole } from "@/lib/generated/prisma/enums";
 import { HomeIcon, LanguageIcon } from "@heroicons/react/24/outline";
 import { useLanguage } from "@/context/LanguageContext";
@@ -12,6 +13,7 @@ import { useLanguage } from "@/context/LanguageContext";
 export default function Navbar() {
   const [clickCount, setClickCount] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showExternalLogin, setShowExternalLogin] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -38,6 +40,8 @@ export default function Navbar() {
     e.stopPropagation();
     setShowUserMenu(!showUserMenu);
   };
+
+  const handleExternalLoginOpen = () => setShowExternalLogin(true);
 
   const match = pathname.match(/^\/contest\/(\d+)/);
   const contestId = match ? match[1] : null;
@@ -249,7 +253,13 @@ export default function Navbar() {
                   )}
                 </div>
               ) : (
-                <></>
+                <button
+                  onClick={handleExternalLoginOpen}
+                  className="px-3 py-2 text-sm font-bold rounded-sm border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
+                  title="外部登录"
+                >
+                  外部登录
+                </button>
               )}
             </div>
           </div>
@@ -258,6 +268,12 @@ export default function Navbar() {
 
       {showAdminLogin && (
         <AdminLoginModal onClose={() => setShowAdminLogin(false)} />
+      )}
+      {showExternalLogin && (
+        <ExternalLoginModal
+          onClose={() => setShowExternalLogin(false)}
+          onSuccess={() => revalidate?.()}
+        />
       )}
     </>
   );

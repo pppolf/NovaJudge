@@ -40,6 +40,7 @@ export default async function ContestLogin({ params }: Props) {
   const auth_token = cookieStore.get("auth_token")?.value;
   let user;
   let super_admin;
+  let glabel_user;
   if (user_token) {
     const payload = await verifyAuth(user_token);
     if (!payload || !payload.userId) throw new Error("Invalid Token");
@@ -54,7 +55,12 @@ export default async function ContestLogin({ params }: Props) {
   if (auth_token) {
     const payload = await verifyAuth(auth_token);
     if (!payload || !payload.userId) throw new Error("Invalid Token");
-    super_admin = payload.username;
+    if (payload.isGlobalAdmin) super_admin = payload.username;
+    else glabel_user = await prisma.globalUser.findFirst({
+      where: {
+        username: payload.username
+      }
+    })
   }
 
   const dict = await getDictionary();
@@ -214,7 +220,7 @@ export default async function ContestLogin({ params }: Props) {
               </button>
             </form>
           </div>
-        ) : auth_token ? (
+        ) : super_admin ? (
           <div className="bg-linear-to-br from-purple-50 to-indigo-50 p-8 shadow-lg border border-purple-100 rounded-lg">
             <div className="text-center mb-6">
               <div className="inline-block p-3 bg-purple-100 rounded-full mb-4">
@@ -301,7 +307,7 @@ export default async function ContestLogin({ params }: Props) {
                       队伍名称
                     </p>
                     <p className="text-base font-bold text-gray-900">
-                      {user?.displayName || "未设置"}
+                      {user?.displayName || glabel_user?.displayName || "未设置"}
                     </p>
                   </div>
                 </div>
@@ -330,7 +336,7 @@ export default async function ContestLogin({ params }: Props) {
                       队员
                     </p>
                     <p className="text-sm text-gray-800">
-                      {user?.members || "未设置"}
+                      {user?.members || glabel_user?.displayName || "未设置"}
                     </p>
                   </div>
                 </div>
@@ -383,7 +389,7 @@ export default async function ContestLogin({ params }: Props) {
                       角色
                     </p>
                     <p className="text-lg font-bold text-gray-900">
-                      {user?.role || "-"}
+                      {user?.role || glabel_user?.role || "-"}
                     </p>
                   </div>
                 </div>

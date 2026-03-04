@@ -84,7 +84,7 @@ export default async function Status({ params, searchParams }: Props) {
   let superAdmin = null;
   if (superAdminToken) {
     const superAdminPayload = (await verifyAuth(superAdminToken)) || null;
-    if (superAdminPayload?.userId) {
+    if (superAdminPayload?.userId && superAdminPayload.isGlobalAdmin) {
       superAdmin = await prisma.globalUser.findUnique({
         where: { id: superAdminPayload.userId },
         select: {
@@ -170,6 +170,23 @@ export default async function Status({ params, searchParams }: Props) {
         },
       ],
     };
+
+    where.globalUser = {
+      OR: [
+        {
+          username: {
+            contains: userSearch,
+            mode: "insensitive",
+          },
+        },
+        {
+          displayName: {
+            contains: userSearch,
+            mode: "insensitive",
+          },
+        },
+      ],
+    };
   }
 
   const [totalCount, submissions, allProblems, allLanguages, allVerdicts] =
@@ -183,6 +200,13 @@ export default async function Status({ params, searchParams }: Props) {
               id: true,
               username: true,
               displayName: true,
+            },
+          },
+          globalUser: {
+            select: {
+              id: true,
+              displayName: true,
+              username: true,
             },
           },
           problem: {
@@ -243,7 +267,7 @@ export default async function Status({ params, searchParams }: Props) {
   });
 
   const problemIdMap = new Map(
-    allProblems.map((cp) => [cp.problemId, cp.displayId])
+    allProblems.map((cp) => [cp.problemId, cp.displayId]),
   );
 
   const languageRecord: Record<string, string> = {
@@ -267,8 +291,8 @@ export default async function Status({ params, searchParams }: Props) {
     !shouldViewAll && currentUser
       ? "(Your Submissions)"
       : isContestEnded
-      ? "(Contest Ended - All Submissions Visible)"
-      : "";
+        ? "(Contest Ended - All Submissions Visible)"
+        : "";
 
   const dict = await getDictionary();
 
@@ -338,7 +362,7 @@ export default async function Status({ params, searchParams }: Props) {
                 const problemDisplayId =
                   problemIdMap.get(submission.problemId) || "?";
                 const submitTime = new Date(
-                  submission.submittedAt
+                  submission.submittedAt,
                 ).toLocaleString("zh-CN");
 
                 return (
@@ -351,6 +375,7 @@ export default async function Status({ params, searchParams }: Props) {
                     <td className="px-6 py-2 text-gray-900">
                       {submission.user?.displayName ||
                         submission.user?.username ||
+                        submission.globalUser?.displayName ||
                         "Unknown"}
                     </td>
                     <td className="px-6 py-2 text-gray-900">
@@ -365,15 +390,15 @@ export default async function Status({ params, searchParams }: Props) {
                       {isGuest && !isContestEnded
                         ? "-"
                         : submission.timeUsed !== null
-                        ? `${submission.timeUsed} ms`
-                        : "-"}
+                          ? `${submission.timeUsed} ms`
+                          : "-"}
                     </td>
                     <td className="px-6 py-2">
                       {isGuest && !isContestEnded
                         ? "-"
                         : submission.memoryUsed !== null
-                        ? `${submission.memoryUsed} KB`
-                        : "-"}
+                          ? `${submission.memoryUsed} KB`
+                          : "-"}
                     </td>
                     <td className="px-6 py-2">
                       {isGuest && !isContestEnded ? (

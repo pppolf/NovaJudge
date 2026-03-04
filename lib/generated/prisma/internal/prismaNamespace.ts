@@ -1121,6 +1121,11 @@ export const GlobalUserScalarFieldEnum = {
   id: 'id',
   username: 'username',
   password: 'password',
+  role: 'role',
+  externalId: 'externalId',
+  displayName: 'displayName',
+  studentId: 'studentId',
+  email: 'email',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

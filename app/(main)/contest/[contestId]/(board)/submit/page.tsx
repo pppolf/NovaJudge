@@ -48,7 +48,8 @@ export default async function SubmitPage({ params, searchParams }: Props) {
 
   const isAdmin =
     (SuperAdmin as unknown as UserJwtPayload)?.isGlobalAdmin ||
-    (user as unknown as UserJwtPayload)?.role !== ContestRole.TEAM;
+    (user as unknown as UserJwtPayload)?.role === ContestRole.ADMIN ||
+    (user as unknown as UserJwtPayload)?.role === ContestRole.JUDGE;
   return (
     <div className="flex flex-col w-full lg:flex-row gap-6 items-start">
       <aside>

@@ -28,6 +28,11 @@ export type GlobalUserMinAggregateOutputType = {
   id: string | null
   username: string | null
   password: string | null
+  role: string | null
+  externalId: string | null
+  displayName: string | null
+  studentId: string | null
+  email: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -36,6 +41,11 @@ export type GlobalUserMaxAggregateOutputType = {
   id: string | null
   username: string | null
   password: string | null
+  role: string | null
+  externalId: string | null
+  displayName: string | null
+  studentId: string | null
+  email: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +54,11 @@ export type GlobalUserCountAggregateOutputType = {
   id: number
   username: number
   password: number
+  role: number
+  externalId: number
+  displayName: number
+  studentId: number
+  email: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -54,6 +69,11 @@ export type GlobalUserMinAggregateInputType = {
   id?: true
   username?: true
   password?: true
+  role?: true
+  externalId?: true
+  displayName?: true
+  studentId?: true
+  email?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -62,6 +82,11 @@ export type GlobalUserMaxAggregateInputType = {
   id?: true
   username?: true
   password?: true
+  role?: true
+  externalId?: true
+  displayName?: true
+  studentId?: true
+  email?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -70,6 +95,11 @@ export type GlobalUserCountAggregateInputType = {
   id?: true
   username?: true
   password?: true
+  role?: true
+  externalId?: true
+  displayName?: true
+  studentId?: true
+  email?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -150,7 +180,12 @@ export type GlobalUserGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 export type GlobalUserGroupByOutputType = {
   id: string
   username: string
-  password: string
+  password: string | null
+  role: string
+  externalId: string | null
+  displayName: string | null
+  studentId: string | null
+  email: string | null
   createdAt: Date
   updatedAt: Date
   _count: GlobalUserCountAggregateOutputType | null
@@ -179,7 +214,12 @@ export type GlobalUserWhereInput = {
   NOT?: Prisma.GlobalUserWhereInput | Prisma.GlobalUserWhereInput[]
   id?: Prisma.StringFilter<"GlobalUser"> | string
   username?: Prisma.StringFilter<"GlobalUser"> | string
-  password?: Prisma.StringFilter<"GlobalUser"> | string
+  password?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
+  role?: Prisma.StringFilter<"GlobalUser"> | string
+  externalId?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
+  displayName?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
+  studentId?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
+  email?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
   createdAt?: Prisma.DateTimeFilter<"GlobalUser"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"GlobalUser"> | Date | string
   submissions?: Prisma.SubmissionListRelationFilter
@@ -188,7 +228,12 @@ export type GlobalUserWhereInput = {
 export type GlobalUserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   username?: Prisma.SortOrder
-  password?: Prisma.SortOrder
+  password?: Prisma.SortOrderInput | Prisma.SortOrder
+  role?: Prisma.SortOrder
+  externalId?: Prisma.SortOrderInput | Prisma.SortOrder
+  displayName?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
@@ -197,19 +242,29 @@ export type GlobalUserOrderByWithRelationInput = {
 export type GlobalUserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   username?: string
+  externalId?: string
   AND?: Prisma.GlobalUserWhereInput | Prisma.GlobalUserWhereInput[]
   OR?: Prisma.GlobalUserWhereInput[]
   NOT?: Prisma.GlobalUserWhereInput | Prisma.GlobalUserWhereInput[]
-  password?: Prisma.StringFilter<"GlobalUser"> | string
+  password?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
+  role?: Prisma.StringFilter<"GlobalUser"> | string
+  displayName?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
+  studentId?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
+  email?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
   createdAt?: Prisma.DateTimeFilter<"GlobalUser"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"GlobalUser"> | Date | string
   submissions?: Prisma.SubmissionListRelationFilter
-}, "id" | "username">
+}, "id" | "username" | "externalId">
 
 export type GlobalUserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   username?: Prisma.SortOrder
-  password?: Prisma.SortOrder
+  password?: Prisma.SortOrderInput | Prisma.SortOrder
+  role?: Prisma.SortOrder
+  externalId?: Prisma.SortOrderInput | Prisma.SortOrder
+  displayName?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.GlobalUserCountOrderByAggregateInput
@@ -223,7 +278,12 @@ export type GlobalUserScalarWhereWithAggregatesInput = {
   NOT?: Prisma.GlobalUserScalarWhereWithAggregatesInput | Prisma.GlobalUserScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"GlobalUser"> | string
   username?: Prisma.StringWithAggregatesFilter<"GlobalUser"> | string
-  password?: Prisma.StringWithAggregatesFilter<"GlobalUser"> | string
+  password?: Prisma.StringNullableWithAggregatesFilter<"GlobalUser"> | string | null
+  role?: Prisma.StringWithAggregatesFilter<"GlobalUser"> | string
+  externalId?: Prisma.StringNullableWithAggregatesFilter<"GlobalUser"> | string | null
+  displayName?: Prisma.StringNullableWithAggregatesFilter<"GlobalUser"> | string | null
+  studentId?: Prisma.StringNullableWithAggregatesFilter<"GlobalUser"> | string | null
+  email?: Prisma.StringNullableWithAggregatesFilter<"GlobalUser"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"GlobalUser"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"GlobalUser"> | Date | string
 }
@@ -231,7 +291,12 @@ export type GlobalUserScalarWhereWithAggregatesInput = {
 export type GlobalUserCreateInput = {
   id?: string
   username: string
-  password: string
+  password?: string | null
+  role?: string
+  externalId?: string | null
+  displayName?: string | null
+  studentId?: string | null
+  email?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionCreateNestedManyWithoutGlobalUserInput
@@ -240,7 +305,12 @@ export type GlobalUserCreateInput = {
 export type GlobalUserUncheckedCreateInput = {
   id?: string
   username: string
-  password: string
+  password?: string | null
+  role?: string
+  externalId?: string | null
+  displayName?: string | null
+  studentId?: string | null
+  email?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutGlobalUserInput
@@ -249,7 +319,12 @@ export type GlobalUserUncheckedCreateInput = {
 export type GlobalUserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUpdateManyWithoutGlobalUserNestedInput
@@ -258,7 +333,12 @@ export type GlobalUserUpdateInput = {
 export type GlobalUserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutGlobalUserNestedInput
@@ -267,7 +347,12 @@ export type GlobalUserUncheckedUpdateInput = {
 export type GlobalUserCreateManyInput = {
   id?: string
   username: string
-  password: string
+  password?: string | null
+  role?: string
+  externalId?: string | null
+  displayName?: string | null
+  studentId?: string | null
+  email?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -275,7 +360,12 @@ export type GlobalUserCreateManyInput = {
 export type GlobalUserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -283,7 +373,12 @@ export type GlobalUserUpdateManyMutationInput = {
 export type GlobalUserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -292,6 +387,11 @@ export type GlobalUserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  externalId?: Prisma.SortOrder
+  displayName?: Prisma.SortOrder
+  studentId?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -300,6 +400,11 @@ export type GlobalUserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  externalId?: Prisma.SortOrder
+  displayName?: Prisma.SortOrder
+  studentId?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -308,6 +413,11 @@ export type GlobalUserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  externalId?: Prisma.SortOrder
+  displayName?: Prisma.SortOrder
+  studentId?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -319,6 +429,10 @@ export type GlobalUserNullableScalarRelationFilter = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -344,7 +458,12 @@ export type GlobalUserUpdateOneWithoutSubmissionsNestedInput = {
 export type GlobalUserCreateWithoutSubmissionsInput = {
   id?: string
   username: string
-  password: string
+  password?: string | null
+  role?: string
+  externalId?: string | null
+  displayName?: string | null
+  studentId?: string | null
+  email?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -352,7 +471,12 @@ export type GlobalUserCreateWithoutSubmissionsInput = {
 export type GlobalUserUncheckedCreateWithoutSubmissionsInput = {
   id?: string
   username: string
-  password: string
+  password?: string | null
+  role?: string
+  externalId?: string | null
+  displayName?: string | null
+  studentId?: string | null
+  email?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -376,7 +500,12 @@ export type GlobalUserUpdateToOneWithWhereWithoutSubmissionsInput = {
 export type GlobalUserUpdateWithoutSubmissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -384,7 +513,12 @@ export type GlobalUserUpdateWithoutSubmissionsInput = {
 export type GlobalUserUncheckedUpdateWithoutSubmissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -424,6 +558,11 @@ export type GlobalUserSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   id?: boolean
   username?: boolean
   password?: boolean
+  role?: boolean
+  externalId?: boolean
+  displayName?: boolean
+  studentId?: boolean
+  email?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   submissions?: boolean | Prisma.GlobalUser$submissionsArgs<ExtArgs>
@@ -434,6 +573,11 @@ export type GlobalUserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   id?: boolean
   username?: boolean
   password?: boolean
+  role?: boolean
+  externalId?: boolean
+  displayName?: boolean
+  studentId?: boolean
+  email?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["globalUser"]>
@@ -442,6 +586,11 @@ export type GlobalUserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   id?: boolean
   username?: boolean
   password?: boolean
+  role?: boolean
+  externalId?: boolean
+  displayName?: boolean
+  studentId?: boolean
+  email?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["globalUser"]>
@@ -450,11 +599,16 @@ export type GlobalUserSelectScalar = {
   id?: boolean
   username?: boolean
   password?: boolean
+  role?: boolean
+  externalId?: boolean
+  displayName?: boolean
+  studentId?: boolean
+  email?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type GlobalUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "password" | "createdAt" | "updatedAt", ExtArgs["result"]["globalUser"]>
+export type GlobalUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "password" | "role" | "externalId" | "displayName" | "studentId" | "email" | "createdAt" | "updatedAt", ExtArgs["result"]["globalUser"]>
 export type GlobalUserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   submissions?: boolean | Prisma.GlobalUser$submissionsArgs<ExtArgs>
   _count?: boolean | Prisma.GlobalUserCountOutputTypeDefaultArgs<ExtArgs>
@@ -470,7 +624,12 @@ export type $GlobalUserPayload<ExtArgs extends runtime.Types.Extensions.Internal
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     username: string
-    password: string
+    password: string | null
+    role: string
+    externalId: string | null
+    displayName: string | null
+    studentId: string | null
+    email: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["globalUser"]>
@@ -900,6 +1059,11 @@ export interface GlobalUserFieldRefs {
   readonly id: Prisma.FieldRef<"GlobalUser", 'String'>
   readonly username: Prisma.FieldRef<"GlobalUser", 'String'>
   readonly password: Prisma.FieldRef<"GlobalUser", 'String'>
+  readonly role: Prisma.FieldRef<"GlobalUser", 'String'>
+  readonly externalId: Prisma.FieldRef<"GlobalUser", 'String'>
+  readonly displayName: Prisma.FieldRef<"GlobalUser", 'String'>
+  readonly studentId: Prisma.FieldRef<"GlobalUser", 'String'>
+  readonly email: Prisma.FieldRef<"GlobalUser", 'String'>
   readonly createdAt: Prisma.FieldRef<"GlobalUser", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"GlobalUser", 'DateTime'>
 }
