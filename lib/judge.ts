@@ -413,7 +413,6 @@ export async function judgeSubmission(submissionId: string) {
     if (isSpj && judgeConfig.checker) {
       try {
         checkerFileId = await compileChecker(dataDir, judgeConfig.checker);
-        console.log(checkerFileId);
       } catch (e) {
         const err = e as Error;
         await prisma.submission.update({
