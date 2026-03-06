@@ -123,6 +123,7 @@ export const ContestScalarFieldEnum = {
   type: 'type',
   password: 'password',
   status: 'status',
+  visible: 'visible',
   config: 'config',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

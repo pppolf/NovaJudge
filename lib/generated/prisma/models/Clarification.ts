@@ -648,10 +648,6 @@ export type EnumClariCategoryFieldUpdateOperationsInput = {
   set?: $Enums.ClariCategory
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type ClarificationCreateNestedOneWithoutRepliesInput = {
   create?: Prisma.XOR<Prisma.ClarificationCreateWithoutRepliesInput, Prisma.ClarificationUncheckedCreateWithoutRepliesInput>
   connectOrCreate?: Prisma.ClarificationCreateOrConnectWithoutRepliesInput

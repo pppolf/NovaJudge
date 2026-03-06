@@ -51,6 +51,7 @@ export async function GET(
   const { contestId } = await params;
   const id = parseInt(contestId, 10);
   const isStatic = req.nextUrl.searchParams.get("stream") === "false";
+  const includeRuns = req.nextUrl.searchParams.get("runs") !== "false";
 
   if (isNaN(id)) {
     return NextResponse.json({ error: "Invalid contest ID" }, { status: 400 });
@@ -178,7 +179,7 @@ export async function GET(
       }
 
       // 11. Runs
-      if (runs) {
+      if (runs && includeRuns) {
         runs.forEach((r) => {
           enqueue(createEvent("runs", r.id, r));
         });

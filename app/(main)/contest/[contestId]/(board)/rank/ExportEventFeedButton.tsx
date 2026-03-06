@@ -15,8 +15,10 @@ export default function ExportEventFeedButton({ contestId }: Props) {
       setLoading(true);
 
       // 1. 尝试直接使用 Cookie 下载
+      // static=true: 不流式传输
+      // runs=false: 不包含 runs 数据
       let response = await fetch(
-        `/api/ccs/contests/${contestId}/event-feed?stream=false`,
+        `/api/ccs/contests/${contestId}/event-feed?stream=false&runs=false`,
       );
 
       // 2. 如果 Cookie 验证失败 (401)，则弹出提示输入 CCS 账号密码
@@ -26,7 +28,8 @@ export default function ExportEventFeedButton({ contestId }: Props) {
         await new Promise((resolve) => setTimeout(resolve, 0));
 
         const username = prompt(
-          "Authentication required. Please enter CCS username:",
+          "Authentication required. Please enter CCS username (admin):",
+          "admin",
         );
         if (!username) return;
         const password = prompt("Please enter CCS password:");
@@ -35,7 +38,7 @@ export default function ExportEventFeedButton({ contestId }: Props) {
         setLoading(true);
         const credentials = btoa(`${username}:${password}`);
         response = await fetch(
-          `/api/ccs/contests/${contestId}/event-feed?stream=false`,
+          `/api/ccs/contests/${contestId}/event-feed?stream=false&runs=false`,
           {
             headers: {
               Authorization: `Basic ${credentials}`,

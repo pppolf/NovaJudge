@@ -1162,6 +1162,7 @@ export const ContestScalarFieldEnum = {
   type: 'type',
   password: 'password',
   status: 'status',
+  visible: 'visible',
   config: 'config',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1402,6 +1403,13 @@ export type ListEnumContestStatusFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -1440,13 +1448,6 @@ export type EnumClariCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'ClariCategory[]'
  */
 export type ListEnumClariCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ClariCategory[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 

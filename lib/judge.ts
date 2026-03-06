@@ -440,11 +440,17 @@ export async function judgeSubmission(submissionId: string) {
     }
 
     // D. 运行阶段
-    const time_limit_rate =
+    let time_limit_rate =
       judgeConfig.time_limit_rate?.[language as keyof LanguageJudgeConfig] || 1;
-    const memory_limit_rate =
+    let memory_limit_rate =
       judgeConfig.memory_limit_rate?.[language as keyof LanguageJudgeConfig] ||
       1;
+
+    // 如果是 Java 语言，时限和内存限制翻倍
+    if (language === "java") {
+      time_limit_rate *= 2;
+      memory_limit_rate *= 2;
+    }
 
     let finalVerdict: Verdict = Verdict.ACCEPTED;
     let maxTime = 0;

@@ -43,6 +43,7 @@ export type ContestMinAggregateOutputType = {
   type: $Enums.ContestType | null
   password: string | null
   status: $Enums.ContestStatus | null
+  visible: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -56,6 +57,7 @@ export type ContestMaxAggregateOutputType = {
   type: $Enums.ContestType | null
   password: string | null
   status: $Enums.ContestStatus | null
+  visible: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -69,6 +71,7 @@ export type ContestCountAggregateOutputType = {
   type: number
   password: number
   status: number
+  visible: number
   config: number
   createdAt: number
   updatedAt: number
@@ -93,6 +96,7 @@ export type ContestMinAggregateInputType = {
   type?: true
   password?: true
   status?: true
+  visible?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -106,6 +110,7 @@ export type ContestMaxAggregateInputType = {
   type?: true
   password?: true
   status?: true
+  visible?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -119,6 +124,7 @@ export type ContestCountAggregateInputType = {
   type?: true
   password?: true
   status?: true
+  visible?: true
   config?: true
   createdAt?: true
   updatedAt?: true
@@ -220,6 +226,7 @@ export type ContestGroupByOutputType = {
   type: $Enums.ContestType
   password: string | null
   status: $Enums.ContestStatus
+  visible: boolean
   config: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
@@ -257,6 +264,7 @@ export type ContestWhereInput = {
   type?: Prisma.EnumContestTypeFilter<"Contest"> | $Enums.ContestType
   password?: Prisma.StringNullableFilter<"Contest"> | string | null
   status?: Prisma.EnumContestStatusFilter<"Contest"> | $Enums.ContestStatus
+  visible?: Prisma.BoolFilter<"Contest"> | boolean
   config?: Prisma.JsonNullableFilter<"Contest">
   createdAt?: Prisma.DateTimeFilter<"Contest"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Contest"> | Date | string
@@ -276,6 +284,7 @@ export type ContestOrderByWithRelationInput = {
   type?: Prisma.SortOrder
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  visible?: Prisma.SortOrder
   config?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -298,6 +307,7 @@ export type ContestWhereUniqueInput = Prisma.AtLeast<{
   type?: Prisma.EnumContestTypeFilter<"Contest"> | $Enums.ContestType
   password?: Prisma.StringNullableFilter<"Contest"> | string | null
   status?: Prisma.EnumContestStatusFilter<"Contest"> | $Enums.ContestStatus
+  visible?: Prisma.BoolFilter<"Contest"> | boolean
   config?: Prisma.JsonNullableFilter<"Contest">
   createdAt?: Prisma.DateTimeFilter<"Contest"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Contest"> | Date | string
@@ -317,6 +327,7 @@ export type ContestOrderByWithAggregationInput = {
   type?: Prisma.SortOrder
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  visible?: Prisma.SortOrder
   config?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -339,6 +350,7 @@ export type ContestScalarWhereWithAggregatesInput = {
   type?: Prisma.EnumContestTypeWithAggregatesFilter<"Contest"> | $Enums.ContestType
   password?: Prisma.StringNullableWithAggregatesFilter<"Contest"> | string | null
   status?: Prisma.EnumContestStatusWithAggregatesFilter<"Contest"> | $Enums.ContestStatus
+  visible?: Prisma.BoolWithAggregatesFilter<"Contest"> | boolean
   config?: Prisma.JsonNullableWithAggregatesFilter<"Contest">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Contest"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Contest"> | Date | string
@@ -352,6 +364,7 @@ export type ContestCreateInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -371,6 +384,7 @@ export type ContestUncheckedCreateInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -389,6 +403,7 @@ export type ContestUpdateInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -408,6 +423,7 @@ export type ContestUncheckedUpdateInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -427,6 +443,7 @@ export type ContestCreateManyInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -440,6 +457,7 @@ export type ContestUpdateManyMutationInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -454,6 +472,7 @@ export type ContestUncheckedUpdateManyInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -473,6 +492,7 @@ export type ContestCountOrderByAggregateInput = {
   type?: Prisma.SortOrder
   password?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  visible?: Prisma.SortOrder
   config?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -491,6 +511,7 @@ export type ContestMaxOrderByAggregateInput = {
   type?: Prisma.SortOrder
   password?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  visible?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -504,6 +525,7 @@ export type ContestMinOrderByAggregateInput = {
   type?: Prisma.SortOrder
   password?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  visible?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -537,6 +559,10 @@ export type EnumContestTypeFieldUpdateOperationsInput = {
 
 export type EnumContestStatusFieldUpdateOperationsInput = {
   set?: $Enums.ContestStatus
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type ContestCreateNestedOneWithoutBalloonsInput = {
@@ -605,6 +631,7 @@ export type ContestCreateWithoutUsersInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -623,6 +650,7 @@ export type ContestUncheckedCreateWithoutUsersInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -656,6 +684,7 @@ export type ContestUpdateWithoutUsersInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -674,6 +703,7 @@ export type ContestUncheckedUpdateWithoutUsersInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -691,6 +721,7 @@ export type ContestCreateWithoutBalloonsInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -709,6 +740,7 @@ export type ContestUncheckedCreateWithoutBalloonsInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -742,6 +774,7 @@ export type ContestUpdateWithoutBalloonsInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -760,6 +793,7 @@ export type ContestUncheckedUpdateWithoutBalloonsInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -777,6 +811,7 @@ export type ContestCreateWithoutProblemsInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -795,6 +830,7 @@ export type ContestUncheckedCreateWithoutProblemsInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -828,6 +864,7 @@ export type ContestUpdateWithoutProblemsInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -846,6 +883,7 @@ export type ContestUncheckedUpdateWithoutProblemsInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -863,6 +901,7 @@ export type ContestCreateWithoutSubmissionsInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -881,6 +920,7 @@ export type ContestUncheckedCreateWithoutSubmissionsInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -914,6 +954,7 @@ export type ContestUpdateWithoutSubmissionsInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -932,6 +973,7 @@ export type ContestUncheckedUpdateWithoutSubmissionsInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -949,6 +991,7 @@ export type ContestCreateWithoutClarificationsInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -967,6 +1010,7 @@ export type ContestUncheckedCreateWithoutClarificationsInput = {
   type?: $Enums.ContestType
   password?: string | null
   status?: $Enums.ContestStatus
+  visible?: boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1000,6 +1044,7 @@ export type ContestUpdateWithoutClarificationsInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1018,6 +1063,7 @@ export type ContestUncheckedUpdateWithoutClarificationsInput = {
   type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1103,6 +1149,7 @@ export type ContestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   type?: boolean
   password?: boolean
   status?: boolean
+  visible?: boolean
   config?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1123,6 +1170,7 @@ export type ContestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   type?: boolean
   password?: boolean
   status?: boolean
+  visible?: boolean
   config?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1137,6 +1185,7 @@ export type ContestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   type?: boolean
   password?: boolean
   status?: boolean
+  visible?: boolean
   config?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1151,12 +1200,13 @@ export type ContestSelectScalar = {
   type?: boolean
   password?: boolean
   status?: boolean
+  visible?: boolean
   config?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ContestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "startTime" | "endTime" | "type" | "password" | "status" | "config" | "createdAt" | "updatedAt", ExtArgs["result"]["contest"]>
+export type ContestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "startTime" | "endTime" | "type" | "password" | "status" | "visible" | "config" | "createdAt" | "updatedAt", ExtArgs["result"]["contest"]>
 export type ContestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.Contest$usersArgs<ExtArgs>
   problems?: boolean | Prisma.Contest$problemsArgs<ExtArgs>
@@ -1186,6 +1236,7 @@ export type $ContestPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     type: $Enums.ContestType
     password: string | null
     status: $Enums.ContestStatus
+    visible: boolean
     config: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -1625,6 +1676,7 @@ export interface ContestFieldRefs {
   readonly type: Prisma.FieldRef<"Contest", 'ContestType'>
   readonly password: Prisma.FieldRef<"Contest", 'String'>
   readonly status: Prisma.FieldRef<"Contest", 'ContestStatus'>
+  readonly visible: Prisma.FieldRef<"Contest", 'Boolean'>
   readonly config: Prisma.FieldRef<"Contest", 'Json'>
   readonly createdAt: Prisma.FieldRef<"Contest", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Contest", 'DateTime'>

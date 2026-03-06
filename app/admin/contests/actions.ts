@@ -87,3 +87,12 @@ export async function getContests(page = 1, pageSize = 20) {
   ]);
   return { contests, total };
 }
+
+export async function toggleContestVisibility(id: number, visible: boolean) {
+  await prisma.contest.update({
+    where: { id },
+    data: { visible },
+  });
+  revalidatePath("/admin/contests");
+  revalidatePath("/");
+}

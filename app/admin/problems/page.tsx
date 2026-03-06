@@ -40,7 +40,7 @@ export default function ProblemsPage({
   useEffect(() => {
     loadProblems();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchParams]);
 
   function toggleProblemSelection(problemId: number) {
     const newSelected = new Set(selectedProblemIds);

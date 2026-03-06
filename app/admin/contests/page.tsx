@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getContests } from "./actions";
+import { getContests, toggleContestVisibility } from "./actions";
 import Pagination from "@/components/Pagination";
 import {
   PlusIcon,
@@ -10,6 +10,8 @@ import {
   DocumentTextIcon,
   PlusCircleIcon,
   PlayIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 import { ContestStatus, ContestType } from "@/lib/generated/prisma/enums";
 import { toast } from "sonner";
@@ -21,6 +23,7 @@ interface Contest {
   type: string;
   startTime: Date;
   endTime: Date;
+  visible: boolean;
   _count: {
     problems: number;
     users: number;
@@ -34,7 +37,9 @@ export default function AdminContestsPage({
 }) {
   const [contests, setContests] = useState<Contest[]>([]);
   const [total, setTotal] = useState(0);
-  const [selectedContestIds, setSelectedContestIds] = useState<Set<number>>(new Set());
+  const [selectedContestIds, setSelectedContestIds] = useState<Set<number>>(
+    new Set(),
+  );
   const [isLoading, setIsLoading] = useState(false);
   const pageSize = 15;
 
@@ -42,11 +47,12 @@ export default function AdminContestsPage({
     const loadContests = async () => {
       const { page } = await searchParams;
       const pageNum = Number(page) || 1;
-      const { contests: loadedContests, total: loadedTotal } = await getContests(pageNum, pageSize);
+      const { contests: loadedContests, total: loadedTotal } =
+        await getContests(pageNum, pageSize);
       setContests(loadedContests);
       setTotal(loadedTotal);
     };
-    
+
     loadContests();
   }, [searchParams]);
 
@@ -64,7 +70,7 @@ export default function AdminContestsPage({
     if (selectedContestIds.size === contests.length) {
       setSelectedContestIds(new Set());
     } else {
-      setSelectedContestIds(new Set(contests.map(c => c.id)));
+      setSelectedContestIds(new Set(contests.map((c) => c.id)));
     }
   }
 
@@ -76,21 +82,21 @@ export default function AdminContestsPage({
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/contests/export', {
-        method: 'POST',
+      const response = await fetch("/api/contests/export", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ contestIds: Array.from(selectedContestIds) }),
       });
 
       if (!response.ok) {
-        throw new Error('Export failed');
+        throw new Error("Export failed");
       }
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `contests_${Date.now()}.zip`;
       document.body.appendChild(a);
@@ -98,11 +104,27 @@ export default function AdminContestsPage({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      toast.success(`Successfully exported ${selectedContestIds.size} contests`);
+      toast.success(
+        `Successfully exported ${selectedContestIds.size} contests`,
+      );
     } catch {
-      toast.error('Export failed. Please try again.');
+      toast.error("Export failed. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleVisibilityToggle(id: number, currentVisible: boolean) {
+    try {
+      await toggleContestVisibility(id, !currentVisible);
+      setContests(
+        contests.map((c) =>
+          c.id === id ? { ...c, visible: !currentVisible } : c,
+        ),
+      );
+      toast.success(`Contest is now ${!currentVisible ? "visible" : "hidden"}`);
+    } catch {
+      toast.error("Failed to update visibility");
     }
   }
 
@@ -144,7 +166,10 @@ export default function AdminContestsPage({
                 <th className="px-4 py-3 w-12">
                   <input
                     type="checkbox"
-                    checked={contests.length > 0 && selectedContestIds.size === contests.length}
+                    checked={
+                      contests.length > 0 &&
+                      selectedContestIds.size === contests.length
+                    }
                     onChange={selectAllContests}
                     className="rounded text-blue-600 focus:ring-blue-500"
                   />
@@ -153,6 +178,7 @@ export default function AdminContestsPage({
                 <th className="px-6 py-3">Title</th>
                 <th className="px-6 py-3">Status</th>
                 <th className="px-6 py-3">Type</th>
+                <th className="px-6 py-3">Visibility</th>
                 <th className="px-6 py-3">Start Time</th>
                 <th className="px-6 py-3">Duration</th>
                 <th className="px-6 py-3">Stats</th>
@@ -207,6 +233,25 @@ export default function AdminContestsPage({
                       >
                         {contest.type}
                       </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        className="cursor-pointer"
+                        onClick={() =>
+                          handleVisibilityToggle(contest.id, contest.visible)
+                        }
+                        title={
+                          contest.visible
+                            ? "Hide from homepage"
+                            : "Show on homepage"
+                        }
+                      >
+                        {contest.visible ? (
+                          <EyeIcon className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <EyeSlashIcon className="w-5 h-5 text-gray-400" />
+                        )}
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       {new Date(contest.startTime).toLocaleString()}

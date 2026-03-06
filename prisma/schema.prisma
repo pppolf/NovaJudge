@@ -116,6 +116,7 @@ model Contest {
   type     ContestType   @default(PUBLIC)
   password String? // 私有赛密码
   status   ContestStatus @default(PENDING)
+  visible  Boolean       @default(true) // 是否在首页展示
 
   config Json? // 封榜配置等
 

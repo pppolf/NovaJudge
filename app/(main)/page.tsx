@@ -95,6 +95,7 @@ export default async function ContestList() {
   }
 
   const contests = await prisma.contest.findMany({
+    where: { visible: true },
     orderBy: { id: "desc" },
   });
 
