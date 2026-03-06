@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { updateContest } from "./actions";
 import MarkdownEditor from "@/components/MarkdownEditor";
+import { toast } from "sonner";
 import {
   TrophyIcon,
   LockClosedIcon,
@@ -21,7 +22,7 @@ const formatDate = (date: Date) => {
   const d = new Date(date);
   const pad = (n: number) => n.toString().padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-    d.getHours()
+    d.getHours(),
   )}:${pad(d.getMinutes())}`;
 };
 
@@ -38,7 +39,7 @@ export default function EditForm({ contest }: Props) {
   // States
   const [isPrivate, setIsPrivate] = useState(contest.type === "PRIVATE");
   const [medalMode, setMedalMode] = useState<"ratio" | "fixed">(
-    initialMedal.mode
+    initialMedal.mode,
   );
   const [description, setDescription] = useState(contest.description || "");
   const [isSaving, setIsSaving] = useState(false);
@@ -54,7 +55,7 @@ export default function EditForm({ contest }: Props) {
       }
 
       // 其他真正的错误才弹窗
-      alert("Update failed: " + e.message);
+      toast.error("Update failed: " + e.message);
       setIsSaving(false);
     }
   };

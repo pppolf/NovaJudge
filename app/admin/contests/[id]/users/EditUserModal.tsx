@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { updateUser } from "./actions";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -45,7 +46,7 @@ export default function EditUserModal({
       await updateUser(user.id, contestId, formData);
       onClose(); // 关闭弹窗
     } catch (error) {
-      alert("Failed to update: " + error);
+      toast.error("Failed to update: " + error);
     } finally {
       setIsSubmitting(false);
     }

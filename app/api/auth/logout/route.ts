@@ -4,7 +4,7 @@ import { serialize } from "cookie";
 export async function POST() {
   const serializedCookie = serialize("auth_token", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" && process.env.ENABLE_SECURE_COOKIE === "true",
     sameSite: "strict",
     maxAge: -1, // 立即过期
     path: "/",
@@ -12,7 +12,7 @@ export async function POST() {
 
   const serializedCookieUser = serialize("user_token", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" && process.env.ENABLE_SECURE_COOKIE === "true",
     sameSite: "strict",
     maxAge: -1, // 立即过期
     path: "/",

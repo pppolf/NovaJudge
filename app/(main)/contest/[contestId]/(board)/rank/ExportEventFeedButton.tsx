@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { toast } from "sonner";
 
 interface Props {
   contestId: number;
@@ -65,7 +66,7 @@ export default function ExportEventFeedButton({ contestId }: Props) {
       document.body.removeChild(a);
     } catch (error) {
       console.error("Export failed:", error);
-      alert(
+      toast.error(
         `Export failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     } finally {

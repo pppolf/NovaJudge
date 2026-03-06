@@ -12,6 +12,7 @@ import { PlayIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
 import CodeBlock from "@/components/CodeBlock";
 import CodeEditor from "@/components/CodeEditor";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // 提取公共样式：标题样式 (蓝色竖线)
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
@@ -73,17 +74,20 @@ export default function TestInterface({ problem }: { problem: ProblemDetail }) {
   }, [code, language, problem.id, isLoaded]);
 
   const handleSubmit = async () => {
-    if (!code.trim()) return alert("Code cannot be empty");
+    if (!code.trim()) {
+      toast.error("Code cannot be empty");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const res = await adminSubmit(problem.id, code, language);
       if (res.success) {
         setLastId(res.submissionId);
-        // alert("Submitted successfully! ID: " + res.submissionId);
+        toast.success("Submitted successfully!");
         router.push("/admin/submissions");
       }
     } catch (e) {
-      alert("Submission failed: " + e);
+      toast.error("Submission failed: " + e);
     } finally {
       setIsSubmitting(false);
     }

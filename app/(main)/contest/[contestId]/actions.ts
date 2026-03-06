@@ -37,7 +37,7 @@ export async function loginContestUser(contestId: number, formData: FormData) {
     httpOnly: true,
     path: "/",
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" && process.env.ENABLE_SECURE_COOKIE === "true",
   });
 
   // 5. 重定向到比赛主页

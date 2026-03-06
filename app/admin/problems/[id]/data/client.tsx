@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import YamlEditor from "@/components/admin/YamlEditor";
 import FileModal from "@/components/admin/FileModal";
+import { toast } from "sonner";
 import {
   ArrowLeftIcon,
   DocumentIcon,
@@ -20,6 +21,7 @@ import {
   getFileContent,
   saveFileContent,
 } from "./actions";
+import ConfirmModal from "@/components/admin/ConfirmModal";
 
 // 辅助函数：格式化大小
 const formatSize = (bytes: number) => {
@@ -56,6 +58,8 @@ export default function DataManagementClient({
   const [yamlContent, setYamlContent] = useState(initialYaml);
   const [isUploading, setIsUploading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null);
   const [activeFile, setActiveFile] = useState<{
     name: string;
     content: string;
@@ -74,7 +78,7 @@ export default function DataManagementClient({
       setIsModalOpen(true);
     } catch (e) {
       console.log(e);
-      alert("Failed to load file content.");
+      toast.error("Failed to load file content.");
     }
   };
 
@@ -83,11 +87,11 @@ export default function DataManagementClient({
     if (!activeFile) return;
     try {
       await saveFileContent(problemId, activeFile.name, newContent);
-      alert("File saved successfully!");
+      toast.success("File saved successfully!");
       router.refresh(); // 刷新数据
     } catch (e) {
       console.log(e);
-      alert("Failed to save file.");
+      toast.error("Failed to save file.");
     }
   };
 
@@ -107,35 +111,58 @@ export default function DataManagementClient({
       formRef.current?.reset();
     } catch (error) {
       console.error("Upload failed", error);
-      alert("Upload failed");
+      toast.error("Upload failed");
     } finally {
       setIsUploading(false);
     }
   };
 
   // 处理删除
-  const handleDelete = async (fileName: string) => {
-    if (!confirm(`Delete ${fileName}?`)) return;
+  const handleDelete = (fileName: string) => {
+    setFileToDelete(fileName);
+    setIsConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!fileToDelete) return;
+
+    setIsConfirmOpen(false);
 
     // 乐观更新：先在界面上删掉，让用户感觉很快
-    setFiles((prev) => prev.filter((f) => f.name !== fileName));
+    setFiles((prev) => prev.filter((f) => f.name !== fileToDelete));
 
-    // 后台真实删除
-    await deleteFile(problemId, fileName);
-
-    // 再次刷新以确保数据一致
-    router.refresh();
+    try {
+      // 后台真实删除
+      await deleteFile(problemId, fileToDelete);
+      toast.success("File deleted successfully");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to delete file");
+      // 如果失败，应该重新加载文件列表以保持一致
+      router.refresh();
+    } finally {
+      setFileToDelete(null);
+    }
   };
 
   // 处理保存 YAML
   const handleSaveYaml = async (content: string) => {
     await saveYamlConfig(problemId, content);
-    alert("Configuration saved!");
+    toast.success("Configuration saved!");
     router.refresh();
   };
 
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col">
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Delete File"
+        message={`Are you sure you want to delete ${fileToDelete}?`}
+        confirmText="Delete"
+        onConfirm={confirmDelete}
+        onCancel={() => setIsConfirmOpen(false)}
+        isDestructive
+      />
       {/* 【插入弹窗组件】 */}
       <FileModal
         isOpen={isModalOpen}

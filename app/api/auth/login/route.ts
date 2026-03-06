@@ -67,7 +67,7 @@ export async function POST(req: Request) {
     // 6. 设置 HTTP-Only Cookie
     const serializedCookie = serialize("auth_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production" && process.env.ENABLE_SECURE_COOKIE === "true",
       sameSite: "strict",
       maxAge: 60 * 60 * 24, // 1 day
       path: "/",

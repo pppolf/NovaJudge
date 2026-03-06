@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { importUsers } from "./actions";
 import { ArrowDownTrayIcon, TableCellsIcon } from "@heroicons/react/24/outline";
+import { toast } from "sonner";
+import ConfirmModal from "@/components/admin/ConfirmModal";
 
 interface ImportFormProps {
   contestId: number;
@@ -25,6 +27,7 @@ export default function ImportForm({ contestId, type }: ImportFormProps) {
   const [text, setText] = useState("");
   const [preview, setPreview] = useState<PreviewRow[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   // 解析 Excel 粘贴的数据 (Tab 分隔)
   const handleParse = (input: string) => {
@@ -64,16 +67,19 @@ export default function ImportForm({ contestId, type }: ImportFormProps) {
 
   const handleSubmit = async () => {
     if (preview.length === 0) return;
-    if (!confirm(`Confirm to import ${preview.length} users?`)) return;
+    setIsConfirmOpen(true);
+  };
 
+  const handleConfirmImport = async () => {
     setIsSubmitting(true);
+    setIsConfirmOpen(false);
     try {
       await importUsers(contestId, preview, type);
       setText("");
       setPreview([]);
-      alert("Import successful!");
+      toast.success("Import successful!");
     } catch (e) {
-      alert("Import failed: " + e);
+      toast.error("Import failed: " + e);
     } finally {
       setIsSubmitting(false);
     }
@@ -89,6 +95,14 @@ export default function ImportForm({ contestId, type }: ImportFormProps) {
 
   return (
     <div className="space-y-4">
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Confirm Import"
+        message={`Are you sure you want to import ${preview.length} users? This action cannot be undone.`}
+        confirmText="Import"
+        onConfirm={handleConfirmImport}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
         <p className="font-bold flex items-center gap-2">
           <TableCellsIcon className="w-5 h-5" />

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { deleteUser } from "./actions";
 import EditUserModal from "./EditUserModal";
+import ConfirmModal from "@/components/admin/ConfirmModal";
 import {
   TrashIcon,
   PencilSquareIcon,
@@ -11,6 +12,7 @@ import {
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@/lib/generated/prisma/client";
+import { toast } from "sonner";
 
 // 辅助组件：显示队伍类型
 function TeamCategoryBadge({ category }: { category: string | null }) {
@@ -44,6 +46,19 @@ export default function ClientUserTable({
 }) {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showPasswords, setShowPasswords] = useState(false); // 控制是否显示密码
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
+
+  // 删除用户操作
+  const handleDelete = async () => {
+    if (!deletingUser) return;
+    try {
+      await deleteUser(deletingUser.id, contestId);
+      setDeletingUser(null);
+      toast.success("User deleted successfully!");
+    } catch (error) {
+      toast.error("Failed to delete user: " + error);
+    }
+  };
 
   // 导出 CSV 功能
   const handleExport = () => {
@@ -82,7 +97,7 @@ export default function ClientUserTable({
         return row
           .map(
             (cell: string | null) =>
-              `"${(cell || "").toString().replace(/"/g, '""')}"`
+              `"${(cell || "").toString().replace(/"/g, '""')}"`,
           )
           .join(",");
       }),
@@ -99,6 +114,15 @@ export default function ClientUserTable({
 
   return (
     <div className="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
+      <ConfirmModal
+        isOpen={!!deletingUser}
+        title="Delete User"
+        message={`Are you sure you want to delete user ${deletingUser?.username}?`}
+        confirmText="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setDeletingUser(null)}
+        isDestructive
+      />
       <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <h3 className="font-bold text-gray-700">User List</h3>
@@ -208,24 +232,13 @@ export default function ClientUserTable({
                     <PencilSquareIcon className="w-4 h-4" />
                   </button>
 
-                  <form
-                    action={async () => {
-                      if (
-                        confirm(
-                          `Are you sure you want to delete user ${user.username}?`
-                        )
-                      ) {
-                        await deleteUser(user.id, contestId);
-                      }
-                    }}
+                  <button
+                    onClick={() => setDeletingUser(user)}
+                    className="text-gray-400 hover:text-red-600 p-1.5 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                    title="Delete User"
                   >
-                    <button
-                      className="text-gray-400 hover:text-red-600 p-1.5 rounded hover:bg-red-50 transition-colors cursor-pointer"
-                      title="Delete User"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </form>
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
                 </td>
               </tr>
             ))}
