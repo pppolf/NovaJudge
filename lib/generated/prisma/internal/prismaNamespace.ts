@@ -391,6 +391,7 @@ export const ModelName = {
   Problem: 'Problem',
   ContestProblem: 'ContestProblem',
   Submission: 'Submission',
+  VirtualContest: 'VirtualContest',
   Clarification: 'Clarification',
   Reply: 'Reply'
 } as const
@@ -408,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "globalUser" | "user" | "contest" | "balloon" | "problem" | "contestProblem" | "submission" | "clarification" | "reply"
+    modelProps: "globalUser" | "user" | "contest" | "balloon" | "problem" | "contestProblem" | "submission" | "virtualContest" | "clarification" | "reply"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -930,6 +931,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    VirtualContest: {
+      payload: Prisma.$VirtualContestPayload<ExtArgs>
+      fields: Prisma.VirtualContestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VirtualContestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualContestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VirtualContestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualContestPayload>
+        }
+        findFirst: {
+          args: Prisma.VirtualContestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualContestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VirtualContestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualContestPayload>
+        }
+        findMany: {
+          args: Prisma.VirtualContestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualContestPayload>[]
+        }
+        create: {
+          args: Prisma.VirtualContestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualContestPayload>
+        }
+        createMany: {
+          args: Prisma.VirtualContestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VirtualContestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualContestPayload>[]
+        }
+        delete: {
+          args: Prisma.VirtualContestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualContestPayload>
+        }
+        update: {
+          args: Prisma.VirtualContestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualContestPayload>
+        }
+        deleteMany: {
+          args: Prisma.VirtualContestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VirtualContestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VirtualContestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualContestPayload>[]
+        }
+        upsert: {
+          args: Prisma.VirtualContestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VirtualContestPayload>
+        }
+        aggregate: {
+          args: Prisma.VirtualContestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVirtualContest>
+        }
+        groupBy: {
+          args: Prisma.VirtualContestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VirtualContestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VirtualContestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VirtualContestCountAggregateOutputType> | number
+        }
+      }
+    }
     Clarification: {
       payload: Prisma.$ClarificationPayload<ExtArgs>
       fields: Prisma.ClarificationFieldRefs
@@ -1230,10 +1305,21 @@ export const SubmissionScalarFieldEnum = {
   errorMessage: 'errorMessage',
   passedTests: 'passedTests',
   totalTests: 'totalTests',
-  submittedAt: 'submittedAt'
+  submittedAt: 'submittedAt',
+  virtualContestId: 'virtualContestId'
 } as const
 
 export type SubmissionScalarFieldEnum = (typeof SubmissionScalarFieldEnum)[keyof typeof SubmissionScalarFieldEnum]
+
+
+export const VirtualContestScalarFieldEnum = {
+  id: 'id',
+  globalUserId: 'globalUserId',
+  contestId: 'contestId',
+  startedAt: 'startedAt'
+} as const
+
+export type VirtualContestScalarFieldEnum = (typeof VirtualContestScalarFieldEnum)[keyof typeof VirtualContestScalarFieldEnum]
 
 
 export const ClarificationScalarFieldEnum = {
@@ -1566,6 +1652,7 @@ export type GlobalOmitConfig = {
   problem?: Prisma.ProblemOmit
   contestProblem?: Prisma.ContestProblemOmit
   submission?: Prisma.SubmissionOmit
+  virtualContest?: Prisma.VirtualContestOmit
   clarification?: Prisma.ClarificationOmit
   reply?: Prisma.ReplyOmit
 }

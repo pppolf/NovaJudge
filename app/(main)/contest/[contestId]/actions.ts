@@ -1,6 +1,7 @@
 "use server";
 
-import { signAuth } from "@/lib/auth";
+import { signAuth, verifyAuth } from "@/lib/auth";
+import { ContestStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
@@ -43,3 +44,55 @@ export async function loginContestUser(contestId: number, formData: FormData) {
   // 5. 重定向到比赛主页
   redirect(`/contest/${contestId}?login=true`);
 }
+
+// 开始虚拟参赛
+export async function startVirtualContest(contestId: number) {
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("auth_token")?.value;
+
+  if (!authToken) {
+    throw new Error("请先登录外部账号才能进行虚拟参赛");
+  }
+
+  const payload = await verifyAuth(authToken);
+
+  // 仅限外部登录用户（非超级管理员）
+  if (!payload?.userId || payload.isGlobalAdmin) {
+    throw new Error("只有外部登录用户可以进行虚拟参赛");
+  }
+
+  const contest = await prisma.contest.findUnique({
+    where: { id: contestId },
+    select: { status: true },
+  });
+
+  if (!contest) throw new Error("比赛不存在");
+
+  if (contest.status !== ContestStatus.ENDED) {
+    throw new Error("只能对已结束的比赛进行虚拟参赛");
+  }
+
+  // 检查是否已有 VP 会话
+  const existing = await prisma.virtualContest.findUnique({
+    where: {
+      globalUserId_contestId: {
+        globalUserId: payload.userId,
+        contestId,
+      },
+    },
+  });
+
+  if (existing) {
+    throw new Error("你已经参加过此比赛的虚拟参赛");
+  }
+
+  await prisma.virtualContest.create({
+    data: {
+      globalUserId: payload.userId,
+      contestId,
+    },
+  });
+
+  redirect(`/contest/${contestId}?vp=started`);
+}
+

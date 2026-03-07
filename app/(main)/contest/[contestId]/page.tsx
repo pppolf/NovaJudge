@@ -17,6 +17,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { ContestStatus, ContestType } from "@/lib/generated/prisma/client";
 import { getDictionary } from "@/lib/get-dictionary";
+import VPStartButton from "./VPStartButton";
+import VPTimer from "@/components/VPTimer";
 
 interface Props {
   params: Promise<{
@@ -41,6 +43,7 @@ export default async function ContestLogin({ params }: Props) {
   let user;
   let super_admin;
   let glabel_user;
+  let globalUserId: string | null = null;
   if (user_token) {
     const payload = await verifyAuth(user_token);
     if (!payload || !payload.userId) throw new Error("Invalid Token");
@@ -56,11 +59,44 @@ export default async function ContestLogin({ params }: Props) {
     const payload = await verifyAuth(auth_token);
     if (!payload || !payload.userId) throw new Error("Invalid Token");
     if (payload.isGlobalAdmin) super_admin = payload.username;
-    else glabel_user = await prisma.globalUser.findFirst({
+    else {
+      glabel_user = await prisma.globalUser.findFirst({
+        where: {
+          username: payload.username
+        }
+      });
+      globalUserId = payload.userId;
+    }
+  }
+
+  // VP 会话状态：仅对外部登录用户（非管理员）且比赛已结束时有效
+  let vpSession: {
+    id: string;
+    startedAt: Date;
+    vpEndTime: Date;
+  } | null = null;
+
+  const isExternalUser = !!glabel_user && !super_admin;
+  const isContestEnded = contest.status === ContestStatus.ENDED;
+
+  if (isExternalUser && globalUserId && isContestEnded) {
+    const existing = await prisma.virtualContest.findUnique({
       where: {
-        username: payload.username
-      }
-    })
+        globalUserId_contestId: {
+          globalUserId,
+          contestId: id,
+        },
+      },
+    });
+    if (existing) {
+      const contestDurationMs =
+        contest.endTime.getTime() - contest.startTime.getTime();
+      vpSession = {
+        id: existing.id,
+        startedAt: existing.startedAt,
+        vpEndTime: new Date(existing.startedAt.getTime() + contestDurationMs),
+      };
+    }
   }
 
   const dict = await getDictionary();
@@ -423,6 +459,32 @@ export default async function ContestLogin({ params }: Props) {
                       </p>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* VP 区域：仅对外部登录用户且比赛已结束时显示 */}
+              {isExternalUser && isContestEnded && (
+                <div className="border-t border-gray-100 pt-4 mt-2">
+                  <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                    <span className="w-1 h-4 bg-green-500 rounded-full"></span>
+                    虚拟参赛 (Virtual Participation)
+                  </h3>
+                  {vpSession ? (
+                    <div className="space-y-3">
+                      <VPTimer
+                        vpStartTime={vpSession.startedAt}
+                        vpEndTime={vpSession.vpEndTime}
+                      />
+                      <p className="text-xs text-gray-500 text-center">
+                        VP 开始时间:{" "}
+                        {vpSession.startedAt.toLocaleString("zh-CN", {
+                          hour12: false,
+                        })}
+                      </p>
+                    </div>
+                  ) : (
+                    <VPStartButton contestId={id} />
+                  )}
                 </div>
               )}
             </div>

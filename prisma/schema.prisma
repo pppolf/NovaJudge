@@ -56,17 +56,18 @@ enum ClariCategory {
 
 // 全局管理员
 model GlobalUser {
-  id          String       @id @default(uuid())
-  username    String       @unique
-  password    String?
-  role        String       @default("GLOBAL_USER")
-  externalId  String?      @unique
-  displayName String?
-  studentId   String?
-  email       String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  submissions Submission[]
+  id               String           @id @default(uuid())
+  username         String           @unique
+  password         String?
+  role             String           @default("GLOBAL_USER")
+  externalId       String?          @unique
+  displayName      String?
+  studentId        String?
+  email            String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  submissions      Submission[]
+  virtualContests  VirtualContest[]
 
   @@map("global_users")
 }
@@ -124,6 +125,7 @@ model Contest {
   problems       ContestProblem[]
   submissions    Submission[]
   clarifications Clarification[]
+  virtualContests VirtualContest[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -240,12 +242,34 @@ model Submission {
   passedTests Int @default(0)
   totalTests  Int @default(0)
 
-  submittedAt DateTime @default(now())
-  balloon     Balloon?
+  submittedAt      DateTime        @default(now())
+  balloon          Balloon?
+  virtualContestId String?
+  virtualContest   VirtualContest? @relation(fields: [virtualContestId], references: [id])
 
   @@index([contestId, userId])
   @@index([contestId, problemId])
   @@map("submissions")
+}
+
+// ================= 虚拟参赛模块 =================
+
+// VirtualContest: 记录外部用户对已结束比赛的虚拟参赛会话
+model VirtualContest {
+  id           String     @id @default(uuid())
+  globalUserId String
+  globalUser   GlobalUser @relation(fields: [globalUserId], references: [id])
+
+  contestId Int
+  contest   Contest @relation(fields: [contestId], references: [id])
+
+  startedAt DateTime @default(now())
+
+  submissions Submission[]
+
+  // 每个用户对每场比赛只能 VP 一次
+  @@unique([globalUserId, contestId])
+  @@map("virtual_contests")
 }
 
 // ================= 答疑模块 =================

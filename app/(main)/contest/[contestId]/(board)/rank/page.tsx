@@ -509,7 +509,12 @@ export default async function Rank({ params, searchParams }: Props) {
   const globalRanks: TeamRankData[] = [];
   // 收集所有在本比赛中有提交的全局用户
   const globalUserIdsDistinct = await prisma.submission.findMany({
-    where: { contestId: cid, globalUserId: { not: null } },
+    where: {
+      contestId: cid,
+      globalUserId: { not: null },
+      // 只统计非 VP 提交，有 VP 的用户单独在 vpRanks 展示
+      virtualContestId: null,
+    },
     select: { globalUserId: true },
     distinct: ["globalUserId"],
   });
@@ -523,7 +528,12 @@ export default async function Rank({ params, searchParams }: Props) {
     });
     for (const gu of globalUsers) {
       const globalSubs = await prisma.submission.findMany({
-        where: { contestId: cid, globalUserId: gu.id },
+        where: {
+          contestId: cid,
+          globalUserId: gu.id,
+          // 排除 VP 提交，VP 提交在 vpRanks 中单独显示
+          virtualContestId: null,
+        },
         select: {
           id: true,
           displayId: true,
@@ -709,6 +719,120 @@ export default async function Rank({ params, searchParams }: Props) {
     globalRanks.sort((a, b) => b.solved - a.solved);
   }
 
+  // 9. VP 排名：获取所有 VP 会话并计算排名
+  const vpRanks: TeamRankData[] = [];
+  const vpSessions = await prisma.virtualContest.findMany({
+    where: { contestId: cid },
+    include: {
+      globalUser: {
+        select: { id: true, username: true, displayName: true },
+      },
+    },
+    orderBy: { startedAt: "asc" },
+  });
+
+  const contestDurationMs =
+    contestInfo.endTime.getTime() - contestInfo.startTime.getTime();
+
+  for (const vpSession of vpSessions) {
+    const vpStartMs = vpSession.startedAt.getTime();
+    const vpEndMs = vpStartMs + contestDurationMs;
+
+    // 获取此 VP 会话的所有提交
+    const vpSubs = await prisma.submission.findMany({
+      where: { virtualContestId: vpSession.id },
+      select: {
+        id: true,
+        displayId: true,
+        problemId: true,
+        verdict: true,
+        submittedAt: true,
+      },
+      orderBy: { submittedAt: "asc" },
+    });
+
+    let solved = 0;
+    let penalty = 0;
+
+    const problems = await Promise.all(
+      contestProblems.map(async (cp) => {
+        const rawSubs = vpSubs.filter(
+          (s) =>
+            s.problemId === cp.problemId &&
+            s.verdict !== Verdict.COMPILE_ERROR &&
+            s.verdict !== Verdict.SYSTEM_ERROR,
+        );
+        if (rawSubs.length === 0) return null;
+
+        // 只计算 VP 窗口内的提交
+        const submissions = rawSubs.filter(
+          (s) => new Date(s.submittedAt).getTime() <= vpEndMs,
+        );
+
+        let isAccepted = false;
+        let acceptedTimeMs = 0;
+        let acceptedSubId = 0;
+        let waCountBeforeAcc = 0;
+
+        for (const sub of submissions) {
+          if (sub.verdict === Verdict.ACCEPTED) {
+            isAccepted = true;
+            // VP 时间：相对于 VP 开始时间计算
+            acceptedTimeMs = new Date(sub.submittedAt).getTime() - vpStartMs;
+            acceptedSubId = sub.displayId;
+            break;
+          }
+          waCountBeforeAcc++;
+        }
+
+        if (isAccepted) {
+          solved++;
+          penalty += Math.floor(acceptedTimeMs / 60000) + waCountBeforeAcc * 20;
+        }
+
+        let displayTime = "";
+        if (isAccepted) {
+          const rHours = Math.floor(acceptedTimeMs / 3600000);
+          const rMinutes = Math.floor((acceptedTimeMs % 3600000) / 60000);
+          const rSeconds = Math.floor((acceptedTimeMs % 60000) / 1000);
+          displayTime = `${String(rHours).padStart(2, "0")}:${String(rMinutes).padStart(2, "0")}:${String(rSeconds).padStart(2, "0")}`;
+        }
+
+        return {
+          problemId: cp.problemId,
+          displayId: cp.displayId,
+          color: cp.color,
+          firstBlood: false,
+          accepted: isAccepted,
+          time: displayTime,
+          tries: waCountBeforeAcc,
+          frozenTries: 0,
+          unfrozenTries: waCountBeforeAcc,
+          firstAcceptedSubmissionId: isAccepted ? acceptedSubId : undefined,
+          upsolved: false,
+        };
+      }),
+    );
+
+    vpRanks.push({
+      rank: "*",
+      id: vpSession.globalUser.id,
+      username: vpSession.globalUser.username,
+      displayName: vpSession.globalUser.displayName,
+      members: null,
+      school: null,
+      category: "VP",
+      solved,
+      penalty: Math.floor(penalty),
+      problems,
+    });
+  }
+  // 按解题数排序，相同则按罚时排
+  vpRanks.sort((a, b) => {
+    if (a.solved !== b.solved) return b.solved - a.solved;
+    return (a.penalty as number) - (b.penalty as number);
+  });
+
   return (
     <div className="bg-white w-full mx-auto shadow-sm border border-gray-100 rounded-sm p-6">
       <div className="flex justify-between items-center border-b mb-4 pb-4">
@@ -770,6 +894,22 @@ export default async function Rank({ params, searchParams }: Props) {
                 isContestEnded={contestInfo.status === ContestStatus.ENDED}
                 contestProblems={contestProblems}
                 isFrozen={isFrozen}
+              />
+            </div>
+          )}
+          {vpRanks.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2 border-t pt-4">
+                <span className="w-1 h-5 bg-green-500 rounded-full"></span>
+                虚拟参赛排名 (Virtual Participation)
+              </h3>
+              <RankTable
+                contestId={contestId}
+                teams={vpRanks}
+                isMyTeam={false}
+                isContestEnded={true}
+                contestProblems={contestProblems}
+                isFrozen={false}
               />
             </div>
           )}

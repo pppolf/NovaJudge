@@ -68,7 +68,41 @@ export async function submitCode(
     teamPayload?.isGlobalAdmin ||
     globalPayload?.isGlobalAdmin;
   // console.log(isEnded, isFrozen, isAdmin);
-  // 团队选手：沿用封榜限制；全局普通用户：仅允许比赛结束后提交（不受封榜限制）
+
+  // 检查是否有活跃的 VP 会话（仅对外部登录的非管理员用户）
+  let virtualContestId: string | null = null;
+  if (globalUserId && !globalPayload?.isGlobalAdmin) {
+    const vpSession = await prisma.virtualContest.findUnique({
+      where: {
+        globalUserId_contestId: {
+          globalUserId,
+          contestId,
+        },
+      },
+      include: {
+        contest: {
+          select: { startTime: true, endTime: true },
+        },
+      },
+    });
+
+    if (vpSession) {
+      const contestDurationMs =
+        vpSession.contest.endTime.getTime() -
+        vpSession.contest.startTime.getTime();
+      const vpEndTime = new Date(
+        vpSession.startedAt.getTime() + contestDurationMs,
+      );
+
+      if (now <= vpEndTime) {
+        // VP 会话仍在进行中，允许提交并标记为 VP 提交
+        virtualContestId = vpSession.id;
+      }
+      // VP 已结束：回落到普通赛后提交逻辑（isEnded 检查）
+    }
+  }
+
+  // 团队选手：沿用封榜限制；全局普通用户：根据 VP 状态或赛后提交逻辑处理
   if (userId) {
     if (isEnded && isFrozen && !isAdmin) {
       throw new Error(
@@ -76,9 +110,13 @@ export async function submitCode(
       );
     }
   } else if (globalUserId) {
-    if (!isEnded) {
-      throw new Error("仅支持比赛结束后的赛后提交");
+    if (virtualContestId === null) {
+      // 没有活跃 VP：仅允许比赛结束后的赛后提交
+      if (!isEnded) {
+        throw new Error("仅支持比赛结束后的赛后提交");
+      }
     }
+    // 有活跃 VP：已在上面的 VP 检查中通过
   } else {
     throw new Error("Invalid submitter");
   }
@@ -104,6 +142,7 @@ export async function submitCode(
         problemId: contestProblem.problemId,
         userId: userId || null,
         globalUserId: globalUserId || null,
+        virtualContestId: virtualContestId || null,
         verdict: Verdict.PENDING,
         codeLength: code.length,
       },
@@ -115,3 +154,4 @@ export async function submitCode(
 
   redirect(`/contest/${contestId}/status`);
 }
+

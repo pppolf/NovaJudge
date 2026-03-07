@@ -272,6 +272,7 @@ export type ContestWhereInput = {
   problems?: Prisma.ContestProblemListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
   clarifications?: Prisma.ClarificationListRelationFilter
+  virtualContests?: Prisma.VirtualContestListRelationFilter
   balloons?: Prisma.BalloonListRelationFilter
 }
 
@@ -292,6 +293,7 @@ export type ContestOrderByWithRelationInput = {
   problems?: Prisma.ContestProblemOrderByRelationAggregateInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
   clarifications?: Prisma.ClarificationOrderByRelationAggregateInput
+  virtualContests?: Prisma.VirtualContestOrderByRelationAggregateInput
   balloons?: Prisma.BalloonOrderByRelationAggregateInput
 }
 
@@ -315,6 +317,7 @@ export type ContestWhereUniqueInput = Prisma.AtLeast<{
   problems?: Prisma.ContestProblemListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
   clarifications?: Prisma.ClarificationListRelationFilter
+  virtualContests?: Prisma.VirtualContestListRelationFilter
   balloons?: Prisma.BalloonListRelationFilter
 }, "id">
 
@@ -372,6 +375,7 @@ export type ContestCreateInput = {
   problems?: Prisma.ContestProblemCreateNestedManyWithoutContestInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutContestInput
   clarifications?: Prisma.ClarificationCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestCreateNestedManyWithoutContestInput
   balloons?: Prisma.BalloonCreateNestedManyWithoutContestInput
 }
 
@@ -392,6 +396,7 @@ export type ContestUncheckedCreateInput = {
   problems?: Prisma.ContestProblemUncheckedCreateNestedManyWithoutContestInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutContestInput
   clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestUncheckedCreateNestedManyWithoutContestInput
   balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutContestInput
 }
 
@@ -411,6 +416,7 @@ export type ContestUpdateInput = {
   problems?: Prisma.ContestProblemUpdateManyWithoutContestNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutContestNestedInput
   clarifications?: Prisma.ClarificationUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUpdateManyWithoutContestNestedInput
   balloons?: Prisma.BalloonUpdateManyWithoutContestNestedInput
 }
 
@@ -431,6 +437,7 @@ export type ContestUncheckedUpdateInput = {
   problems?: Prisma.ContestProblemUncheckedUpdateManyWithoutContestNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutContestNestedInput
   clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUncheckedUpdateManyWithoutContestNestedInput
   balloons?: Prisma.BalloonUncheckedUpdateManyWithoutContestNestedInput
 }
 
@@ -609,6 +616,20 @@ export type ContestUpdateOneWithoutSubmissionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ContestUpdateToOneWithWhereWithoutSubmissionsInput, Prisma.ContestUpdateWithoutSubmissionsInput>, Prisma.ContestUncheckedUpdateWithoutSubmissionsInput>
 }
 
+export type ContestCreateNestedOneWithoutVirtualContestsInput = {
+  create?: Prisma.XOR<Prisma.ContestCreateWithoutVirtualContestsInput, Prisma.ContestUncheckedCreateWithoutVirtualContestsInput>
+  connectOrCreate?: Prisma.ContestCreateOrConnectWithoutVirtualContestsInput
+  connect?: Prisma.ContestWhereUniqueInput
+}
+
+export type ContestUpdateOneRequiredWithoutVirtualContestsNestedInput = {
+  create?: Prisma.XOR<Prisma.ContestCreateWithoutVirtualContestsInput, Prisma.ContestUncheckedCreateWithoutVirtualContestsInput>
+  connectOrCreate?: Prisma.ContestCreateOrConnectWithoutVirtualContestsInput
+  upsert?: Prisma.ContestUpsertWithoutVirtualContestsInput
+  connect?: Prisma.ContestWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ContestUpdateToOneWithWhereWithoutVirtualContestsInput, Prisma.ContestUpdateWithoutVirtualContestsInput>, Prisma.ContestUncheckedUpdateWithoutVirtualContestsInput>
+}
+
 export type ContestCreateNestedOneWithoutClarificationsInput = {
   create?: Prisma.XOR<Prisma.ContestCreateWithoutClarificationsInput, Prisma.ContestUncheckedCreateWithoutClarificationsInput>
   connectOrCreate?: Prisma.ContestCreateOrConnectWithoutClarificationsInput
@@ -638,6 +659,7 @@ export type ContestCreateWithoutUsersInput = {
   problems?: Prisma.ContestProblemCreateNestedManyWithoutContestInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutContestInput
   clarifications?: Prisma.ClarificationCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestCreateNestedManyWithoutContestInput
   balloons?: Prisma.BalloonCreateNestedManyWithoutContestInput
 }
 
@@ -657,6 +679,7 @@ export type ContestUncheckedCreateWithoutUsersInput = {
   problems?: Prisma.ContestProblemUncheckedCreateNestedManyWithoutContestInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutContestInput
   clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestUncheckedCreateNestedManyWithoutContestInput
   balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutContestInput
 }
 
@@ -691,6 +714,7 @@ export type ContestUpdateWithoutUsersInput = {
   problems?: Prisma.ContestProblemUpdateManyWithoutContestNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutContestNestedInput
   clarifications?: Prisma.ClarificationUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUpdateManyWithoutContestNestedInput
   balloons?: Prisma.BalloonUpdateManyWithoutContestNestedInput
 }
 
@@ -710,6 +734,7 @@ export type ContestUncheckedUpdateWithoutUsersInput = {
   problems?: Prisma.ContestProblemUncheckedUpdateManyWithoutContestNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutContestNestedInput
   clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUncheckedUpdateManyWithoutContestNestedInput
   balloons?: Prisma.BalloonUncheckedUpdateManyWithoutContestNestedInput
 }
 
@@ -729,6 +754,7 @@ export type ContestCreateWithoutBalloonsInput = {
   problems?: Prisma.ContestProblemCreateNestedManyWithoutContestInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutContestInput
   clarifications?: Prisma.ClarificationCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestCreateNestedManyWithoutContestInput
 }
 
 export type ContestUncheckedCreateWithoutBalloonsInput = {
@@ -748,6 +774,7 @@ export type ContestUncheckedCreateWithoutBalloonsInput = {
   problems?: Prisma.ContestProblemUncheckedCreateNestedManyWithoutContestInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutContestInput
   clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestUncheckedCreateNestedManyWithoutContestInput
 }
 
 export type ContestCreateOrConnectWithoutBalloonsInput = {
@@ -782,6 +809,7 @@ export type ContestUpdateWithoutBalloonsInput = {
   problems?: Prisma.ContestProblemUpdateManyWithoutContestNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutContestNestedInput
   clarifications?: Prisma.ClarificationUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUpdateManyWithoutContestNestedInput
 }
 
 export type ContestUncheckedUpdateWithoutBalloonsInput = {
@@ -801,6 +829,7 @@ export type ContestUncheckedUpdateWithoutBalloonsInput = {
   problems?: Prisma.ContestProblemUncheckedUpdateManyWithoutContestNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutContestNestedInput
   clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUncheckedUpdateManyWithoutContestNestedInput
 }
 
 export type ContestCreateWithoutProblemsInput = {
@@ -818,6 +847,7 @@ export type ContestCreateWithoutProblemsInput = {
   users?: Prisma.UserCreateNestedManyWithoutContestInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutContestInput
   clarifications?: Prisma.ClarificationCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestCreateNestedManyWithoutContestInput
   balloons?: Prisma.BalloonCreateNestedManyWithoutContestInput
 }
 
@@ -837,6 +867,7 @@ export type ContestUncheckedCreateWithoutProblemsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutContestInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutContestInput
   clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestUncheckedCreateNestedManyWithoutContestInput
   balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutContestInput
 }
 
@@ -871,6 +902,7 @@ export type ContestUpdateWithoutProblemsInput = {
   users?: Prisma.UserUpdateManyWithoutContestNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutContestNestedInput
   clarifications?: Prisma.ClarificationUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUpdateManyWithoutContestNestedInput
   balloons?: Prisma.BalloonUpdateManyWithoutContestNestedInput
 }
 
@@ -890,6 +922,7 @@ export type ContestUncheckedUpdateWithoutProblemsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutContestNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutContestNestedInput
   clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUncheckedUpdateManyWithoutContestNestedInput
   balloons?: Prisma.BalloonUncheckedUpdateManyWithoutContestNestedInput
 }
 
@@ -908,6 +941,7 @@ export type ContestCreateWithoutSubmissionsInput = {
   users?: Prisma.UserCreateNestedManyWithoutContestInput
   problems?: Prisma.ContestProblemCreateNestedManyWithoutContestInput
   clarifications?: Prisma.ClarificationCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestCreateNestedManyWithoutContestInput
   balloons?: Prisma.BalloonCreateNestedManyWithoutContestInput
 }
 
@@ -927,6 +961,7 @@ export type ContestUncheckedCreateWithoutSubmissionsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutContestInput
   problems?: Prisma.ContestProblemUncheckedCreateNestedManyWithoutContestInput
   clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestUncheckedCreateNestedManyWithoutContestInput
   balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutContestInput
 }
 
@@ -961,6 +996,7 @@ export type ContestUpdateWithoutSubmissionsInput = {
   users?: Prisma.UserUpdateManyWithoutContestNestedInput
   problems?: Prisma.ContestProblemUpdateManyWithoutContestNestedInput
   clarifications?: Prisma.ClarificationUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUpdateManyWithoutContestNestedInput
   balloons?: Prisma.BalloonUpdateManyWithoutContestNestedInput
 }
 
@@ -980,6 +1016,101 @@ export type ContestUncheckedUpdateWithoutSubmissionsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutContestNestedInput
   problems?: Prisma.ContestProblemUncheckedUpdateManyWithoutContestNestedInput
   clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUncheckedUpdateManyWithoutContestNestedInput
+  balloons?: Prisma.BalloonUncheckedUpdateManyWithoutContestNestedInput
+}
+
+export type ContestCreateWithoutVirtualContestsInput = {
+  title: string
+  description?: string | null
+  startTime: Date | string
+  endTime: Date | string
+  type?: $Enums.ContestType
+  password?: string | null
+  status?: $Enums.ContestStatus
+  visible?: boolean
+  config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserCreateNestedManyWithoutContestInput
+  problems?: Prisma.ContestProblemCreateNestedManyWithoutContestInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutContestInput
+  clarifications?: Prisma.ClarificationCreateNestedManyWithoutContestInput
+  balloons?: Prisma.BalloonCreateNestedManyWithoutContestInput
+}
+
+export type ContestUncheckedCreateWithoutVirtualContestsInput = {
+  id?: number
+  title: string
+  description?: string | null
+  startTime: Date | string
+  endTime: Date | string
+  type?: $Enums.ContestType
+  password?: string | null
+  status?: $Enums.ContestStatus
+  visible?: boolean
+  config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutContestInput
+  problems?: Prisma.ContestProblemUncheckedCreateNestedManyWithoutContestInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutContestInput
+  clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutContestInput
+  balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutContestInput
+}
+
+export type ContestCreateOrConnectWithoutVirtualContestsInput = {
+  where: Prisma.ContestWhereUniqueInput
+  create: Prisma.XOR<Prisma.ContestCreateWithoutVirtualContestsInput, Prisma.ContestUncheckedCreateWithoutVirtualContestsInput>
+}
+
+export type ContestUpsertWithoutVirtualContestsInput = {
+  update: Prisma.XOR<Prisma.ContestUpdateWithoutVirtualContestsInput, Prisma.ContestUncheckedUpdateWithoutVirtualContestsInput>
+  create: Prisma.XOR<Prisma.ContestCreateWithoutVirtualContestsInput, Prisma.ContestUncheckedCreateWithoutVirtualContestsInput>
+  where?: Prisma.ContestWhereInput
+}
+
+export type ContestUpdateToOneWithWhereWithoutVirtualContestsInput = {
+  where?: Prisma.ContestWhereInput
+  data: Prisma.XOR<Prisma.ContestUpdateWithoutVirtualContestsInput, Prisma.ContestUncheckedUpdateWithoutVirtualContestsInput>
+}
+
+export type ContestUpdateWithoutVirtualContestsInput = {
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUpdateManyWithoutContestNestedInput
+  problems?: Prisma.ContestProblemUpdateManyWithoutContestNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutContestNestedInput
+  clarifications?: Prisma.ClarificationUpdateManyWithoutContestNestedInput
+  balloons?: Prisma.BalloonUpdateManyWithoutContestNestedInput
+}
+
+export type ContestUncheckedUpdateWithoutVirtualContestsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  type?: Prisma.EnumContestTypeFieldUpdateOperationsInput | $Enums.ContestType
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumContestStatusFieldUpdateOperationsInput | $Enums.ContestStatus
+  visible?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  config?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutContestNestedInput
+  problems?: Prisma.ContestProblemUncheckedUpdateManyWithoutContestNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutContestNestedInput
+  clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutContestNestedInput
   balloons?: Prisma.BalloonUncheckedUpdateManyWithoutContestNestedInput
 }
 
@@ -998,6 +1129,7 @@ export type ContestCreateWithoutClarificationsInput = {
   users?: Prisma.UserCreateNestedManyWithoutContestInput
   problems?: Prisma.ContestProblemCreateNestedManyWithoutContestInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestCreateNestedManyWithoutContestInput
   balloons?: Prisma.BalloonCreateNestedManyWithoutContestInput
 }
 
@@ -1017,6 +1149,7 @@ export type ContestUncheckedCreateWithoutClarificationsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutContestInput
   problems?: Prisma.ContestProblemUncheckedCreateNestedManyWithoutContestInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutContestInput
+  virtualContests?: Prisma.VirtualContestUncheckedCreateNestedManyWithoutContestInput
   balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutContestInput
 }
 
@@ -1051,6 +1184,7 @@ export type ContestUpdateWithoutClarificationsInput = {
   users?: Prisma.UserUpdateManyWithoutContestNestedInput
   problems?: Prisma.ContestProblemUpdateManyWithoutContestNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUpdateManyWithoutContestNestedInput
   balloons?: Prisma.BalloonUpdateManyWithoutContestNestedInput
 }
 
@@ -1070,6 +1204,7 @@ export type ContestUncheckedUpdateWithoutClarificationsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutContestNestedInput
   problems?: Prisma.ContestProblemUncheckedUpdateManyWithoutContestNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutContestNestedInput
+  virtualContests?: Prisma.VirtualContestUncheckedUpdateManyWithoutContestNestedInput
   balloons?: Prisma.BalloonUncheckedUpdateManyWithoutContestNestedInput
 }
 
@@ -1083,6 +1218,7 @@ export type ContestCountOutputType = {
   problems: number
   submissions: number
   clarifications: number
+  virtualContests: number
   balloons: number
 }
 
@@ -1091,6 +1227,7 @@ export type ContestCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   problems?: boolean | ContestCountOutputTypeCountProblemsArgs
   submissions?: boolean | ContestCountOutputTypeCountSubmissionsArgs
   clarifications?: boolean | ContestCountOutputTypeCountClarificationsArgs
+  virtualContests?: boolean | ContestCountOutputTypeCountVirtualContestsArgs
   balloons?: boolean | ContestCountOutputTypeCountBalloonsArgs
 }
 
@@ -1135,6 +1272,13 @@ export type ContestCountOutputTypeCountClarificationsArgs<ExtArgs extends runtim
 /**
  * ContestCountOutputType without action
  */
+export type ContestCountOutputTypeCountVirtualContestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.VirtualContestWhereInput
+}
+
+/**
+ * ContestCountOutputType without action
+ */
 export type ContestCountOutputTypeCountBalloonsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.BalloonWhereInput
 }
@@ -1157,6 +1301,7 @@ export type ContestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   problems?: boolean | Prisma.Contest$problemsArgs<ExtArgs>
   submissions?: boolean | Prisma.Contest$submissionsArgs<ExtArgs>
   clarifications?: boolean | Prisma.Contest$clarificationsArgs<ExtArgs>
+  virtualContests?: boolean | Prisma.Contest$virtualContestsArgs<ExtArgs>
   balloons?: boolean | Prisma.Contest$balloonsArgs<ExtArgs>
   _count?: boolean | Prisma.ContestCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["contest"]>
@@ -1212,6 +1357,7 @@ export type ContestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   problems?: boolean | Prisma.Contest$problemsArgs<ExtArgs>
   submissions?: boolean | Prisma.Contest$submissionsArgs<ExtArgs>
   clarifications?: boolean | Prisma.Contest$clarificationsArgs<ExtArgs>
+  virtualContests?: boolean | Prisma.Contest$virtualContestsArgs<ExtArgs>
   balloons?: boolean | Prisma.Contest$balloonsArgs<ExtArgs>
   _count?: boolean | Prisma.ContestCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1225,6 +1371,7 @@ export type $ContestPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     problems: Prisma.$ContestProblemPayload<ExtArgs>[]
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
     clarifications: Prisma.$ClarificationPayload<ExtArgs>[]
+    virtualContests: Prisma.$VirtualContestPayload<ExtArgs>[]
     balloons: Prisma.$BalloonPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1638,6 +1785,7 @@ export interface Prisma__ContestClient<T, Null = never, ExtArgs extends runtime.
   problems<T extends Prisma.Contest$problemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Contest$problemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContestProblemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   submissions<T extends Prisma.Contest$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Contest$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   clarifications<T extends Prisma.Contest$clarificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Contest$clarificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClarificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  virtualContests<T extends Prisma.Contest$virtualContestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Contest$virtualContestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VirtualContestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   balloons<T extends Prisma.Contest$balloonsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Contest$balloonsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BalloonPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2161,6 +2309,30 @@ export type Contest$clarificationsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.ClarificationScalarFieldEnum | Prisma.ClarificationScalarFieldEnum[]
+}
+
+/**
+ * Contest.virtualContests
+ */
+export type Contest$virtualContestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the VirtualContest
+   */
+  select?: Prisma.VirtualContestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the VirtualContest
+   */
+  omit?: Prisma.VirtualContestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VirtualContestInclude<ExtArgs> | null
+  where?: Prisma.VirtualContestWhereInput
+  orderBy?: Prisma.VirtualContestOrderByWithRelationInput | Prisma.VirtualContestOrderByWithRelationInput[]
+  cursor?: Prisma.VirtualContestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.VirtualContestScalarFieldEnum | Prisma.VirtualContestScalarFieldEnum[]
 }
 
 /**

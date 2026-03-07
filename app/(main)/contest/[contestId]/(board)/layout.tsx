@@ -1,6 +1,9 @@
 import { Contest, ContestConfig } from "@/app/(main)/page";
 import ContestTimer from "@/components/ContestTimer";
+import VPTimer from "@/components/VPTimer";
 import { prisma } from "@/lib/prisma";
+import { verifyAuth } from "@/lib/auth";
+import { cookies } from "next/headers";
 
 interface Props {
   children: React.ReactNode;
@@ -20,6 +23,40 @@ export default async function ContestLayout({ children, params }: Props) {
   const frozenDuration = Number(
     (contest.config as ContestConfig)?.frozenDuration || 0,
   );
+
+  // 检查当前用户是否有活跃的 VP 会话
+  let vpSession: { startedAt: Date; vpEndTime: Date } | null = null;
+
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("auth_token")?.value;
+  if (authToken) {
+    try {
+      const payload = await verifyAuth(authToken);
+      if (payload?.userId && !payload.isGlobalAdmin) {
+        const existing = await prisma.virtualContest.findUnique({
+          where: {
+            globalUserId_contestId: {
+              globalUserId: payload.userId,
+              contestId: Number(contestId),
+            },
+          },
+        });
+        if (existing) {
+          const contestDurationMs =
+            contest.endTime.getTime() - contest.startTime.getTime();
+          const vpEndTime = new Date(
+            existing.startedAt.getTime() + contestDurationMs,
+          );
+          // 只在 VP 仍在进行中时显示 VP 计时器
+          if (vpEndTime.getTime() > Date.now()) {
+            vpSession = { startedAt: existing.startedAt, vpEndTime };
+          }
+        }
+      }
+    } catch {
+      // 忽略 token 验证错误
+    }
+  }
 
   return (
     <div className="w-full overflow-x-hidden">
@@ -58,12 +95,18 @@ export default async function ContestLayout({ children, params }: Props) {
             </div>
           </div>
 
-          <div className="mt-6 w-full">
+          <div className="mt-6 w-full space-y-3">
             <ContestTimer
               startTime={contest.startTime}
               endTime={contest.endTime}
               frozenDuration={frozenDuration}
             />
+            {vpSession && (
+              <VPTimer
+                vpStartTime={vpSession.startedAt}
+                vpEndTime={vpSession.vpEndTime}
+              />
+            )}
           </div>
         </div>
         <div className="w-full">{children}</div>
