@@ -6,6 +6,8 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { headers } from "next/headers";
+
 // 比赛用户登录
 export async function loginContestUser(contestId: number, formData: FormData) {
   const username = formData.get("username") as string;
@@ -22,6 +24,19 @@ export async function loginContestUser(contestId: number, formData: FormData) {
   if (!user || !(await bcrypt.compare(password, user.password))) {
     throw new Error("Invalid credentials");
   }
+
+  // 记录登录 IP 和时间
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for") || "unknown";
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      lastLoginIp: ip,
+      lastLoginAt: new Date(),
+    },
+  });
+
   // 3. 生成 Token
   const token = await signAuth({
     userId: user.id,
@@ -37,7 +52,9 @@ export async function loginContestUser(contestId: number, formData: FormData) {
     httpOnly: true,
     path: "/",
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production" && process.env.ENABLE_SECURE_COOKIE === "true",
+    secure:
+      process.env.NODE_ENV === "production" &&
+      process.env.ENABLE_SECURE_COOKIE === "true",
   });
 
   // 5. 重定向到比赛主页

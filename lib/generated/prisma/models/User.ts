@@ -47,6 +47,8 @@ export type UserMinAggregateOutputType = {
   coach: string | null
   category: string | null
   role: $Enums.ContestRole | null
+  lastLoginIp: string | null
+  lastLoginAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -64,6 +66,8 @@ export type UserMaxAggregateOutputType = {
   coach: string | null
   category: string | null
   role: $Enums.ContestRole | null
+  lastLoginIp: string | null
+  lastLoginAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -81,6 +85,8 @@ export type UserCountAggregateOutputType = {
   coach: number
   category: number
   role: number
+  lastLoginIp: number
+  lastLoginAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -108,6 +114,8 @@ export type UserMinAggregateInputType = {
   coach?: true
   category?: true
   role?: true
+  lastLoginIp?: true
+  lastLoginAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -125,6 +133,8 @@ export type UserMaxAggregateInputType = {
   coach?: true
   category?: true
   role?: true
+  lastLoginIp?: true
+  lastLoginAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -142,6 +152,8 @@ export type UserCountAggregateInputType = {
   coach?: true
   category?: true
   role?: true
+  lastLoginIp?: true
+  lastLoginAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -246,6 +258,8 @@ export type UserGroupByOutputType = {
   coach: string | null
   category: string | null
   role: $Enums.ContestRole
+  lastLoginIp: string | null
+  lastLoginAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -286,6 +300,8 @@ export type UserWhereInput = {
   coach?: Prisma.StringNullableFilter<"User"> | string | null
   category?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumContestRoleFilter<"User"> | $Enums.ContestRole
+  lastLoginIp?: Prisma.StringNullableFilter<"User"> | string | null
+  lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   contest?: Prisma.XOR<Prisma.ContestScalarRelationFilter, Prisma.ContestWhereInput>
@@ -308,6 +324,8 @@ export type UserOrderByWithRelationInput = {
   coach?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
+  lastLoginIp?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   contest?: Prisma.ContestOrderByWithRelationInput
@@ -334,6 +352,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   coach?: Prisma.StringNullableFilter<"User"> | string | null
   category?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumContestRoleFilter<"User"> | $Enums.ContestRole
+  lastLoginIp?: Prisma.StringNullableFilter<"User"> | string | null
+  lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   contest?: Prisma.XOR<Prisma.ContestScalarRelationFilter, Prisma.ContestWhereInput>
@@ -356,6 +376,8 @@ export type UserOrderByWithAggregationInput = {
   coach?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
+  lastLoginIp?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -381,6 +403,8 @@ export type UserScalarWhereWithAggregatesInput = {
   coach?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   category?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   role?: Prisma.EnumContestRoleWithAggregatesFilter<"User"> | $Enums.ContestRole
+  lastLoginIp?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  lastLoginAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -397,6 +421,8 @@ export type UserCreateInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contest: Prisma.ContestCreateNestedOneWithoutUsersInput
@@ -419,6 +445,8 @@ export type UserUncheckedCreateInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
@@ -439,6 +467,8 @@ export type UserUpdateInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contest?: Prisma.ContestUpdateOneRequiredWithoutUsersNestedInput
@@ -461,6 +491,8 @@ export type UserUncheckedUpdateInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
@@ -482,6 +514,8 @@ export type UserCreateManyInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -498,6 +532,8 @@ export type UserUpdateManyMutationInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -515,6 +551,8 @@ export type UserUncheckedUpdateManyInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -537,6 +575,8 @@ export type UserCountOrderByAggregateInput = {
   coach?: Prisma.SortOrder
   category?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  lastLoginIp?: Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -558,6 +598,8 @@ export type UserMaxOrderByAggregateInput = {
   coach?: Prisma.SortOrder
   category?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  lastLoginIp?: Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -575,6 +617,8 @@ export type UserMinOrderByAggregateInput = {
   coach?: Prisma.SortOrder
   category?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  lastLoginIp?: Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -731,6 +775,8 @@ export type UserCreateWithoutContestInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionCreateNestedManyWithoutUserInput
@@ -751,6 +797,8 @@ export type UserUncheckedCreateWithoutContestInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
@@ -801,6 +849,8 @@ export type UserScalarWhereInput = {
   coach?: Prisma.StringNullableFilter<"User"> | string | null
   category?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumContestRoleFilter<"User"> | $Enums.ContestRole
+  lastLoginIp?: Prisma.StringNullableFilter<"User"> | string | null
+  lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
 }
@@ -817,6 +867,8 @@ export type UserCreateWithoutBalloonsInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contest: Prisma.ContestCreateNestedOneWithoutUsersInput
@@ -838,6 +890,8 @@ export type UserUncheckedCreateWithoutBalloonsInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
@@ -873,6 +927,8 @@ export type UserUpdateWithoutBalloonsInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contest?: Prisma.ContestUpdateOneRequiredWithoutUsersNestedInput
@@ -894,6 +950,8 @@ export type UserUncheckedUpdateWithoutBalloonsInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
@@ -913,6 +971,8 @@ export type UserCreateWithoutSubmissionsInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contest: Prisma.ContestCreateNestedOneWithoutUsersInput
@@ -934,6 +994,8 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutUserInput
@@ -969,6 +1031,8 @@ export type UserUpdateWithoutSubmissionsInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contest?: Prisma.ContestUpdateOneRequiredWithoutUsersNestedInput
@@ -990,6 +1054,8 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutUserNestedInput
@@ -1009,6 +1075,8 @@ export type UserCreateWithoutClarificationsInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contest: Prisma.ContestCreateNestedOneWithoutUsersInput
@@ -1030,6 +1098,8 @@ export type UserUncheckedCreateWithoutClarificationsInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
@@ -1065,6 +1135,8 @@ export type UserUpdateWithoutClarificationsInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contest?: Prisma.ContestUpdateOneRequiredWithoutUsersNestedInput
@@ -1086,6 +1158,8 @@ export type UserUncheckedUpdateWithoutClarificationsInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
@@ -1105,6 +1179,8 @@ export type UserCreateWithoutRepliesInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contest: Prisma.ContestCreateNestedOneWithoutUsersInput
@@ -1126,6 +1202,8 @@ export type UserUncheckedCreateWithoutRepliesInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
@@ -1161,6 +1239,8 @@ export type UserUpdateWithoutRepliesInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contest?: Prisma.ContestUpdateOneRequiredWithoutUsersNestedInput
@@ -1182,6 +1262,8 @@ export type UserUncheckedUpdateWithoutRepliesInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
@@ -1201,6 +1283,8 @@ export type UserCreateManyContestInput = {
   coach?: string | null
   category?: string | null
   role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1217,6 +1301,8 @@ export type UserUpdateWithoutContestInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUpdateManyWithoutUserNestedInput
@@ -1237,6 +1323,8 @@ export type UserUncheckedUpdateWithoutContestInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
@@ -1257,6 +1345,8 @@ export type UserUncheckedUpdateManyWithoutContestInput = {
   coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1332,6 +1422,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   coach?: boolean
   category?: boolean
   role?: boolean
+  lastLoginIp?: boolean
+  lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   contest?: boolean | Prisma.ContestDefaultArgs<ExtArgs>
@@ -1355,6 +1447,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   coach?: boolean
   category?: boolean
   role?: boolean
+  lastLoginIp?: boolean
+  lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   contest?: boolean | Prisma.ContestDefaultArgs<ExtArgs>
@@ -1373,6 +1467,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   coach?: boolean
   category?: boolean
   role?: boolean
+  lastLoginIp?: boolean
+  lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   contest?: boolean | Prisma.ContestDefaultArgs<ExtArgs>
@@ -1391,11 +1487,13 @@ export type UserSelectScalar = {
   coach?: boolean
   category?: boolean
   role?: boolean
+  lastLoginIp?: boolean
+  lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "password" | "plainPassword" | "contestId" | "displayName" | "members" | "school" | "seat" | "coach" | "category" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "password" | "plainPassword" | "contestId" | "displayName" | "members" | "school" | "seat" | "coach" | "category" | "role" | "lastLoginIp" | "lastLoginAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   contest?: boolean | Prisma.ContestDefaultArgs<ExtArgs>
   submissions?: boolean | Prisma.User$submissionsArgs<ExtArgs>
@@ -1433,6 +1531,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     coach: string | null
     category: string | null
     role: $Enums.ContestRole
+    lastLoginIp: string | null
+    lastLoginAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1875,6 +1975,8 @@ export interface UserFieldRefs {
   readonly coach: Prisma.FieldRef<"User", 'String'>
   readonly category: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'ContestRole'>
+  readonly lastLoginIp: Prisma.FieldRef<"User", 'String'>
+  readonly lastLoginAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }

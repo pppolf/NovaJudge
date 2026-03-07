@@ -243,9 +243,13 @@ export default function ClientUserTable({
                   <th className="px-6 py-3">School</th>
                   <th className="px-6 py-3">Coach</th>
                   <th className="px-6 py-3">Seat</th>
+                  <th className="px-6 py-3">Last Login IP</th>
                 </>
               ) : (
-                <th className="px-6 py-3">Role</th>
+                <>
+                  <th className="px-6 py-3">Role</th>
+                  <th className="px-6 py-3">Last Login IP</th>
+                </>
               )}
               <th className="px-6 py-3 text-right">Action</th>
             </tr>
@@ -295,13 +299,45 @@ export default function ClientUserTable({
                     <td className="px-6 py-3 font-mono text-gray-500">
                       {user.seat || "-"}
                     </td>
+                    <td className="px-6 py-3 font-mono text-xs text-gray-500">
+                      {user.lastLoginIp ? (
+                        <div
+                          title={
+                            user.lastLoginAt
+                              ? new Date(user.lastLoginAt).toLocaleString()
+                              : ""
+                          }
+                        >
+                          {user.lastLoginIp}
+                        </div>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
                   </>
                 ) : (
-                  <td className="px-6 py-3">
-                    <span className="bg-gray-100 px-1.5 py-0.5 rounded text-xs border">
-                      {user.role}
-                    </span>
-                  </td>
+                  <>
+                    <td className="px-6 py-3">
+                      <span className="bg-gray-100 px-1.5 py-0.5 rounded text-xs border">
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3 font-mono text-xs text-gray-500">
+                      {user.lastLoginIp ? (
+                        <div
+                          title={
+                            user.lastLoginAt
+                              ? new Date(user.lastLoginAt).toLocaleString()
+                              : ""
+                          }
+                        >
+                          {user.lastLoginIp}
+                        </div>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                  </>
                 )}
 
                 <td className="px-6 py-3 text-right flex justify-end gap-2">

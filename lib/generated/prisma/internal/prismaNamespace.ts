@@ -1234,6 +1234,8 @@ export const UserScalarFieldEnum = {
   coach: 'coach',
   category: 'category',
   role: 'role',
+  lastLoginIp: 'lastLoginIp',
+  lastLoginAt: 'lastLoginAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

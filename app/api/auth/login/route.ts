@@ -37,6 +37,16 @@ export async function POST(req: Request) {
       if (user) {
         role = user.role;
         effectiveContestId = user.contestId;
+
+        // 记录登录 IP 和时间
+        const ip = req.headers.get("x-forwarded-for") || "unknown";
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            lastLoginIp: ip,
+            lastLoginAt: new Date(),
+          },
+        });
       }
     }
 

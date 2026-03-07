@@ -43,7 +43,7 @@ interface JudgeProgress {
 }
 
 // --- 语言配置 ---
-const LANGUAGES: Record<string, LanguageConfig> = {
+export const LANGUAGES: Record<string, LanguageConfig> = {
   c: {
     srcName: "main.c",
     exeName: "main",

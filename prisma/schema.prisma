@@ -103,6 +103,9 @@ model User {
   category    String? // 队伍类别
 
   role ContestRole @default(TEAM)
+  
+  lastLoginIp String? // 最近登录 IP
+  lastLoginAt DateTime? // 最近登录时间
 
   submissions    Submission[]
   clarifications Clarification[]
