@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Verdict } from "@/lib/generated/prisma/client";
+import { validateApiKey } from "@/lib/auth";
 
 const verdictToHydroStatus: Record<Verdict, string> = {
   [Verdict.PENDING]: "Waiting",
@@ -30,6 +31,14 @@ export async function GET(
   { params }: { params: Promise<{ contestId: string }> },
 ) {
   try {
+    const apiKey = request.headers.get("x-api-key");
+    if (apiKey) {
+      const user = await validateApiKey(apiKey);
+      if (!user) {
+        return NextResponse.json({ error: "Invalid API Key" }, { status: 403 });
+      }
+    }
+
     const { contestId } = await params;
     const contestIdNumber = parseInt(contestId, 10);
 

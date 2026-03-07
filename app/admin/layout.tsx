@@ -9,6 +9,7 @@ import {
   ArrowRightOnRectangleIcon,
   GlobeAltIcon, // [新增] 用于表示前台/网站的图标
   ChartBarIcon,
+  KeyIcon,
 } from "@heroicons/react/24/outline";
 
 const MENU_ITEMS = [
@@ -17,6 +18,7 @@ const MENU_ITEMS = [
   { name: "Problem Bank", href: "/admin/problems", icon: ArchiveBoxIcon },
   { name: "Admin Accounts", href: "/admin/accounts", icon: UserGroupIcon },
   { name: "Submissions", href: "/admin/submissions", icon: ChartBarIcon },
+  { name: "API Keys", href: "/admin/api-keys", icon: KeyIcon },
 ];
 
 export default function AdminLayout({

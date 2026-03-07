@@ -67,8 +67,22 @@ model GlobalUser {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   submissions Submission[]
+  apiKeys     ApiKey[]
 
   @@map("global_users")
+}
+
+model ApiKey {
+  id         String     @id @default(uuid())
+  key        String     @unique
+  name       String?
+  userId     String
+  user       GlobalUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isEnabled  Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  lastUsedAt DateTime?
+
+  @@map("api_keys")
 }
 
 // 比赛用户 (User)

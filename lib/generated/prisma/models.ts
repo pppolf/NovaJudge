@@ -9,6 +9,7 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/GlobalUser'
+export type * from './models/ApiKey'
 export type * from './models/User'
 export type * from './models/Contest'
 export type * from './models/Balloon'

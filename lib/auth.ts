@@ -1,5 +1,6 @@
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
 
 // 定义 Token 中包含的数据类型，与你在登录接口生成的保持一致
 export interface UserJwtPayload {
@@ -54,6 +55,28 @@ export async function getCurrentUser() {
     console.log(error);
     return new Error("Your token has expired or is invalid.");
   }
+}
+
+// 验证 API Key 并返回关联的用户 (GlobalUser)
+export async function validateApiKey(apiKey: string) {
+  if (!apiKey) return null;
+
+  const keyRecord = await prisma.apiKey.findUnique({
+    where: { key: apiKey },
+    include: { user: true },
+  });
+
+  if (!keyRecord || !keyRecord.isEnabled) return null;
+
+  // 异步更新最后使用时间，不阻塞主流程
+  prisma.apiKey
+    .update({
+      where: { id: keyRecord.id },
+      data: { lastUsedAt: new Date() },
+    })
+    .catch((err) => console.error("Failed to update API key usage:", err));
+
+  return keyRecord.user;
 }
 
 export async function getCurrentSuper() {

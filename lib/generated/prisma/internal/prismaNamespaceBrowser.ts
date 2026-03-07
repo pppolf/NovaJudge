@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   GlobalUser: 'GlobalUser',
+  ApiKey: 'ApiKey',
   User: 'User',
   Contest: 'Contest',
   Balloon: 'Balloon',
@@ -92,6 +93,19 @@ export const GlobalUserScalarFieldEnum = {
 } as const
 
 export type GlobalUserScalarFieldEnum = (typeof GlobalUserScalarFieldEnum)[keyof typeof GlobalUserScalarFieldEnum]
+
+
+export const ApiKeyScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  name: 'name',
+  userId: 'userId',
+  isEnabled: 'isEnabled',
+  createdAt: 'createdAt',
+  lastUsedAt: 'lastUsedAt'
+} as const
+
+export type ApiKeyScalarFieldEnum = (typeof ApiKeyScalarFieldEnum)[keyof typeof ApiKeyScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {

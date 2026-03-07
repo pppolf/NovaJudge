@@ -223,6 +223,7 @@ export type GlobalUserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"GlobalUser"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"GlobalUser"> | Date | string
   submissions?: Prisma.SubmissionListRelationFilter
+  apiKeys?: Prisma.ApiKeyListRelationFilter
 }
 
 export type GlobalUserOrderByWithRelationInput = {
@@ -237,6 +238,7 @@ export type GlobalUserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
+  apiKeys?: Prisma.ApiKeyOrderByRelationAggregateInput
 }
 
 export type GlobalUserWhereUniqueInput = Prisma.AtLeast<{
@@ -254,6 +256,7 @@ export type GlobalUserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"GlobalUser"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"GlobalUser"> | Date | string
   submissions?: Prisma.SubmissionListRelationFilter
+  apiKeys?: Prisma.ApiKeyListRelationFilter
 }, "id" | "username" | "externalId">
 
 export type GlobalUserOrderByWithAggregationInput = {
@@ -300,6 +303,7 @@ export type GlobalUserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionCreateNestedManyWithoutGlobalUserInput
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
 }
 
 export type GlobalUserUncheckedCreateInput = {
@@ -314,6 +318,7 @@ export type GlobalUserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutGlobalUserInput
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type GlobalUserUpdateInput = {
@@ -328,6 +333,7 @@ export type GlobalUserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUpdateManyWithoutGlobalUserNestedInput
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
 }
 
 export type GlobalUserUncheckedUpdateInput = {
@@ -342,6 +348,7 @@ export type GlobalUserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutGlobalUserNestedInput
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type GlobalUserCreateManyInput = {
@@ -422,6 +429,11 @@ export type GlobalUserMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type GlobalUserScalarRelationFilter = {
+  is?: Prisma.GlobalUserWhereInput
+  isNot?: Prisma.GlobalUserWhereInput
+}
+
 export type GlobalUserNullableScalarRelationFilter = {
   is?: Prisma.GlobalUserWhereInput | null
   isNot?: Prisma.GlobalUserWhereInput | null
@@ -437,6 +449,20 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type GlobalUserCreateNestedOneWithoutApiKeysInput = {
+  create?: Prisma.XOR<Prisma.GlobalUserCreateWithoutApiKeysInput, Prisma.GlobalUserUncheckedCreateWithoutApiKeysInput>
+  connectOrCreate?: Prisma.GlobalUserCreateOrConnectWithoutApiKeysInput
+  connect?: Prisma.GlobalUserWhereUniqueInput
+}
+
+export type GlobalUserUpdateOneRequiredWithoutApiKeysNestedInput = {
+  create?: Prisma.XOR<Prisma.GlobalUserCreateWithoutApiKeysInput, Prisma.GlobalUserUncheckedCreateWithoutApiKeysInput>
+  connectOrCreate?: Prisma.GlobalUserCreateOrConnectWithoutApiKeysInput
+  upsert?: Prisma.GlobalUserUpsertWithoutApiKeysInput
+  connect?: Prisma.GlobalUserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.GlobalUserUpdateToOneWithWhereWithoutApiKeysInput, Prisma.GlobalUserUpdateWithoutApiKeysInput>, Prisma.GlobalUserUncheckedUpdateWithoutApiKeysInput>
 }
 
 export type GlobalUserCreateNestedOneWithoutSubmissionsInput = {
@@ -455,6 +481,78 @@ export type GlobalUserUpdateOneWithoutSubmissionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.GlobalUserUpdateToOneWithWhereWithoutSubmissionsInput, Prisma.GlobalUserUpdateWithoutSubmissionsInput>, Prisma.GlobalUserUncheckedUpdateWithoutSubmissionsInput>
 }
 
+export type GlobalUserCreateWithoutApiKeysInput = {
+  id?: string
+  username: string
+  password?: string | null
+  role?: string
+  externalId?: string | null
+  displayName?: string | null
+  studentId?: string | null
+  email?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutGlobalUserInput
+}
+
+export type GlobalUserUncheckedCreateWithoutApiKeysInput = {
+  id?: string
+  username: string
+  password?: string | null
+  role?: string
+  externalId?: string | null
+  displayName?: string | null
+  studentId?: string | null
+  email?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutGlobalUserInput
+}
+
+export type GlobalUserCreateOrConnectWithoutApiKeysInput = {
+  where: Prisma.GlobalUserWhereUniqueInput
+  create: Prisma.XOR<Prisma.GlobalUserCreateWithoutApiKeysInput, Prisma.GlobalUserUncheckedCreateWithoutApiKeysInput>
+}
+
+export type GlobalUserUpsertWithoutApiKeysInput = {
+  update: Prisma.XOR<Prisma.GlobalUserUpdateWithoutApiKeysInput, Prisma.GlobalUserUncheckedUpdateWithoutApiKeysInput>
+  create: Prisma.XOR<Prisma.GlobalUserCreateWithoutApiKeysInput, Prisma.GlobalUserUncheckedCreateWithoutApiKeysInput>
+  where?: Prisma.GlobalUserWhereInput
+}
+
+export type GlobalUserUpdateToOneWithWhereWithoutApiKeysInput = {
+  where?: Prisma.GlobalUserWhereInput
+  data: Prisma.XOR<Prisma.GlobalUserUpdateWithoutApiKeysInput, Prisma.GlobalUserUncheckedUpdateWithoutApiKeysInput>
+}
+
+export type GlobalUserUpdateWithoutApiKeysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.SubmissionUpdateManyWithoutGlobalUserNestedInput
+}
+
+export type GlobalUserUncheckedUpdateWithoutApiKeysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutGlobalUserNestedInput
+}
+
 export type GlobalUserCreateWithoutSubmissionsInput = {
   id?: string
   username: string
@@ -466,6 +564,7 @@ export type GlobalUserCreateWithoutSubmissionsInput = {
   email?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
 }
 
 export type GlobalUserUncheckedCreateWithoutSubmissionsInput = {
@@ -479,6 +578,7 @@ export type GlobalUserUncheckedCreateWithoutSubmissionsInput = {
   email?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type GlobalUserCreateOrConnectWithoutSubmissionsInput = {
@@ -508,6 +608,7 @@ export type GlobalUserUpdateWithoutSubmissionsInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
 }
 
 export type GlobalUserUncheckedUpdateWithoutSubmissionsInput = {
@@ -521,6 +622,7 @@ export type GlobalUserUncheckedUpdateWithoutSubmissionsInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -530,10 +632,12 @@ export type GlobalUserUncheckedUpdateWithoutSubmissionsInput = {
 
 export type GlobalUserCountOutputType = {
   submissions: number
+  apiKeys: number
 }
 
 export type GlobalUserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   submissions?: boolean | GlobalUserCountOutputTypeCountSubmissionsArgs
+  apiKeys?: boolean | GlobalUserCountOutputTypeCountApiKeysArgs
 }
 
 /**
@@ -553,6 +657,13 @@ export type GlobalUserCountOutputTypeCountSubmissionsArgs<ExtArgs extends runtim
   where?: Prisma.SubmissionWhereInput
 }
 
+/**
+ * GlobalUserCountOutputType without action
+ */
+export type GlobalUserCountOutputTypeCountApiKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ApiKeyWhereInput
+}
+
 
 export type GlobalUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -566,6 +677,7 @@ export type GlobalUserSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   createdAt?: boolean
   updatedAt?: boolean
   submissions?: boolean | Prisma.GlobalUser$submissionsArgs<ExtArgs>
+  apiKeys?: boolean | Prisma.GlobalUser$apiKeysArgs<ExtArgs>
   _count?: boolean | Prisma.GlobalUserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["globalUser"]>
 
@@ -611,6 +723,7 @@ export type GlobalUserSelectScalar = {
 export type GlobalUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "password" | "role" | "externalId" | "displayName" | "studentId" | "email" | "createdAt" | "updatedAt", ExtArgs["result"]["globalUser"]>
 export type GlobalUserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   submissions?: boolean | Prisma.GlobalUser$submissionsArgs<ExtArgs>
+  apiKeys?: boolean | Prisma.GlobalUser$apiKeysArgs<ExtArgs>
   _count?: boolean | Prisma.GlobalUserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type GlobalUserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -620,6 +733,7 @@ export type $GlobalUserPayload<ExtArgs extends runtime.Types.Extensions.Internal
   name: "GlobalUser"
   objects: {
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
+    apiKeys: Prisma.$ApiKeyPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1027,6 +1141,7 @@ readonly fields: GlobalUserFieldRefs;
 export interface Prisma__GlobalUserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   submissions<T extends Prisma.GlobalUser$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GlobalUser$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  apiKeys<T extends Prisma.GlobalUser$apiKeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GlobalUser$apiKeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApiKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1475,6 +1590,30 @@ export type GlobalUser$submissionsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.SubmissionScalarFieldEnum | Prisma.SubmissionScalarFieldEnum[]
+}
+
+/**
+ * GlobalUser.apiKeys
+ */
+export type GlobalUser$apiKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ApiKey
+   */
+  select?: Prisma.ApiKeySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ApiKey
+   */
+  omit?: Prisma.ApiKeyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ApiKeyInclude<ExtArgs> | null
+  where?: Prisma.ApiKeyWhereInput
+  orderBy?: Prisma.ApiKeyOrderByWithRelationInput | Prisma.ApiKeyOrderByWithRelationInput[]
+  cursor?: Prisma.ApiKeyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ApiKeyScalarFieldEnum | Prisma.ApiKeyScalarFieldEnum[]
 }
 
 /**

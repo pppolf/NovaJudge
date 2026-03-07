@@ -561,10 +561,6 @@ export type EnumContestStatusFieldUpdateOperationsInput = {
   set?: $Enums.ContestStatus
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type ContestCreateNestedOneWithoutBalloonsInput = {
   create?: Prisma.XOR<Prisma.ContestCreateWithoutBalloonsInput, Prisma.ContestUncheckedCreateWithoutBalloonsInput>
   connectOrCreate?: Prisma.ContestCreateOrConnectWithoutBalloonsInput
