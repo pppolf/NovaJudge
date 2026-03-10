@@ -13,7 +13,17 @@ datasource db {
   provider = "postgresql"
 }
 
-// ================= 枚举定义 =================
+// ================= 系统配置 =================
+model SystemSetting {
+  id String @id @default("default") // 单例模式，固定为 "default"
+
+  allowExternalLogin Boolean @default(true) // 是否允许外部登录
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
 
 enum ContestStatus {
   PENDING
@@ -103,7 +113,7 @@ model User {
   category    String? // 队伍类别
 
   role ContestRole @default(TEAM)
-  
+
   lastLoginIp String? // 最近登录 IP
   lastLoginAt DateTime? // 最近登录时间
 
@@ -145,6 +155,9 @@ model Contest {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   balloons  Balloon[]
+
+  // 训练中心节点
+  trainingNodes TrainingNode[]
 
   @@map("contests")
 }
@@ -307,4 +320,29 @@ model Reply {
   createdAt DateTime @default(now())
 
   @@map("replies")
+}
+
+// ================= 训练中心模块 =================
+
+// 训练目录节点 (可以是文件夹，也可以是关联的比赛)
+model TrainingNode {
+  id   String  @id @default(uuid())
+  name String // 节点名称 (文件夹名 或 比赛显示名)
+  slug String? // URL 路径别名 (仅对文件夹有效)
+  type String // "FOLDER" | "CONTEST"
+
+  parentId String? // 父节点 ID (为空则为根节点)
+  parent   TrainingNode?  @relation("Tree", fields: [parentId], references: [id], onDelete: Cascade)
+  children TrainingNode[] @relation("Tree")
+
+  // 如果是比赛节点，关联一个 Contest
+  contestId Int?
+  contest   Contest? @relation(fields: [contestId], references: [id])
+
+  rank Int @default(0) // 排序权重
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("training_nodes")
 }

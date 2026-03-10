@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownTrayIcon,
+  CodeBracketIcon,
+} from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 
 interface Props {
@@ -9,18 +12,19 @@ interface Props {
 }
 
 export default function ExportEventFeedButton({ contestId }: Props) {
-  const [loading, setLoading] = useState(false);
+  const [loadingFeed, setLoadingFeed] = useState(false);
+  const [loadingGhost, setLoadingGhost] = useState(false);
 
-  const handleDownload = async () => {
+  const download = async (
+    url: string,
+    filename: string,
+    setLoading: (v: boolean) => void,
+  ) => {
     try {
       setLoading(true);
 
       // 1. 尝试直接使用 Cookie 下载
-      // static=true: 不流式传输
-      // runs=false: 不包含 runs 数据
-      let response = await fetch(
-        `/api/ccs/contests/${contestId}/event-feed?stream=false&runs=false`,
-      );
+      let response = await fetch(url);
 
       // 2. 如果 Cookie 验证失败 (401)，则弹出提示输入 CCS 账号密码
       if (response.status === 401) {
@@ -38,31 +42,28 @@ export default function ExportEventFeedButton({ contestId }: Props) {
 
         setLoading(true);
         const credentials = btoa(`${username}:${password}`);
-        response = await fetch(
-          `/api/ccs/contests/${contestId}/event-feed?stream=false&runs=false`,
-          {
-            headers: {
-              Authorization: `Basic ${credentials}`,
-            },
+        response = await fetch(url, {
+          headers: {
+            Authorization: `Basic ${credentials}`,
           },
-        );
+        });
       }
 
       if (!response.ok) {
         if (response.status === 401) {
           throw new Error("Unauthorized: Invalid credentials");
         }
-        throw new Error(`Failed to fetch event feed: ${response.statusText}`);
+        throw new Error(`Failed to fetch: ${response.statusText}`);
       }
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = `event-feed.ndjson`;
+      a.href = blobUrl;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
     } catch (error) {
       console.error("Export failed:", error);
@@ -75,14 +76,38 @@ export default function ExportEventFeedButton({ contestId }: Props) {
   };
 
   return (
-    <button
-      onClick={handleDownload}
-      disabled={loading}
-      className="ml-2 flex items-center gap-1 px-3 py-1 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm"
-      title="Export Event Feed JSON"
-    >
-      <ArrowDownTrayIcon className="w-4 h-4" />
-      {loading ? "Exporting..." : "Event Feed"}
-    </button>
+    <div className="flex gap-2 ml-2">
+      <button
+        onClick={() =>
+          download(
+            `/api/ccs/contests/${contestId}/event-feed?stream=false&runs=false`,
+            `event-feed.ndjson`,
+            setLoadingFeed,
+          )
+        }
+        disabled={loadingFeed}
+        className="flex items-center gap-1 px-3 py-1 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm"
+        title="Export Event Feed JSON"
+      >
+        <ArrowDownTrayIcon className="w-4 h-4" />
+        {loadingFeed ? "Exporting..." : "Event Feed"}
+      </button>
+
+      <button
+        onClick={() =>
+          download(
+            `/api/ccs/contests/${contestId}/ghost`,
+            `contest-${contestId}-ghost.dat`,
+            setLoadingGhost,
+          )
+        }
+        disabled={loadingGhost}
+        className="flex items-center gap-1 px-3 py-1 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm"
+        title="Export Codeforces Gym Ghost File"
+      >
+        <CodeBracketIcon className="w-4 h-4" />
+        {loadingGhost ? "Exporting..." : "Ghost DAT"}
+      </button>
+    </div>
   );
 }

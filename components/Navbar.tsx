@@ -41,6 +41,18 @@ export default function Navbar() {
     setShowUserMenu(!showUserMenu);
   };
 
+  const [allowExternalLogin, setAllowExternalLogin] = useState(true);
+
+  useEffect(() => {
+    // 获取系统配置 (使用公开接口)
+    fetch("/api/public/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        setAllowExternalLogin(data.allowExternalLogin);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   const handleExternalLoginOpen = () => setShowExternalLogin(true);
 
   const match = pathname.match(/^\/contest\/(\d+)/);
@@ -101,7 +113,7 @@ export default function Navbar() {
               {/* 1. 全局导航 (移动端隐藏文字Home，或者只留图标，这里暂时先留着但设为 hidden sm:block 如果太挤的话，或者保持原样) */}
               <Link
                 href="/"
-                className="text-gray-900 font-bold px-3 py-2 shrink-0"
+                className="text-gray-900 font-bold px-3 py-2 shrink-0 flex items-center gap-1"
               >
                 {/* 移动端显示图标 (md:hidden 表示在中等屏幕以上隐藏) */}
                 <HomeIcon className="w-6 h-6 md:hidden" />
@@ -109,6 +121,16 @@ export default function Navbar() {
                 {/* 桌面端显示文字 (hidden md:block 表示默认隐藏，中等屏幕以上显示) */}
                 <span className="hidden md:block">{dict.nav.home}</span>
               </Link>
+
+              {/* 训练中心入口 - 仅对全局登录用户可见 */}
+              {user && !user.contestId && (
+                <Link
+                  href="/train"
+                  className={linkClass("/train", "hidden md:block")}
+                >
+                  训练中心
+                </Link>
+              )}
 
               {/* 2. 比赛上下文导航 */}
               {contestId && (
@@ -252,7 +274,7 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-              ) : (
+              ) : allowExternalLogin ? (
                 <button
                   onClick={handleExternalLoginOpen}
                   className="px-3 py-2 text-sm font-bold rounded-sm border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
@@ -260,7 +282,7 @@ export default function Navbar() {
                 >
                   外部登录
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

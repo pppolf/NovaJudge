@@ -12,6 +12,7 @@
     "worker:dev": "tsx watch -r dotenv/config worker.ts"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@monaco-editor/react": "^4.7.0",
     "@prisma/adapter-pg": "^7.2.0",

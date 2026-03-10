@@ -8,6 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/SystemSetting'
 export type * from './models/GlobalUser'
 export type * from './models/ApiKey'
 export type * from './models/User'
@@ -18,4 +19,5 @@ export type * from './models/ContestProblem'
 export type * from './models/Submission'
 export type * from './models/Clarification'
 export type * from './models/Reply'
+export type * from './models/TrainingNode'
 export type * from './commonInputTypes'

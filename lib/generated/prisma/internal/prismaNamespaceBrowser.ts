@@ -51,6 +51,7 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  SystemSetting: 'SystemSetting',
   GlobalUser: 'GlobalUser',
   ApiKey: 'ApiKey',
   User: 'User',
@@ -60,7 +61,8 @@ export const ModelName = {
   ContestProblem: 'ContestProblem',
   Submission: 'Submission',
   Clarification: 'Clarification',
-  Reply: 'Reply'
+  Reply: 'Reply',
+  TrainingNode: 'TrainingNode'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -77,6 +79,16 @@ export const TransactionIsolationLevel = {
 } as const
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const SystemSettingScalarFieldEnum = {
+  id: 'id',
+  allowExternalLogin: 'allowExternalLogin',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
 
 
 export const GlobalUserScalarFieldEnum = {
@@ -239,6 +251,21 @@ export const ReplyScalarFieldEnum = {
 } as const
 
 export type ReplyScalarFieldEnum = (typeof ReplyScalarFieldEnum)[keyof typeof ReplyScalarFieldEnum]
+
+
+export const TrainingNodeScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  type: 'type',
+  parentId: 'parentId',
+  contestId: 'contestId',
+  rank: 'rank',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TrainingNodeScalarFieldEnum = (typeof TrainingNodeScalarFieldEnum)[keyof typeof TrainingNodeScalarFieldEnum]
 
 
 export const SortOrder = {

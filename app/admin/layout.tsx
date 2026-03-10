@@ -20,6 +20,8 @@ const MENU_ITEMS = [
   { name: "Submissions", href: "/admin/submissions", icon: ChartBarIcon },
   { name: "API Keys", href: "/admin/api-keys", icon: KeyIcon },
   { name: "Monitor", href: "/admin/monitor", icon: GlobeAltIcon },
+  { name: "Training", href: "/admin/training", icon: ArchiveBoxIcon },
+  { name: "Settings", href: "/admin/settings", icon: GlobeAltIcon },
 ];
 
 export default function AdminLayout({
