@@ -222,6 +222,7 @@ export async function POST(request: Request) {
         // 4.2.3 导入题目数据
         const problemsDir = `${contestDir}problems/`;
         const problemDirs = new Set<string>();
+        const problemIdMap = new Map<number, number>(); // Old -> New
 
         for (const entry of zipEntries) {
           if (entry.startsWith(problemsDir) && entry.endsWith('/') && entry !== problemsDir) {
@@ -236,41 +237,55 @@ export async function POST(request: Request) {
           const problemJsonContent = await problemJsonEntry.async('text');
           const problemData = JSON.parse(problemJsonContent) as ProblemData;
 
-          // 检查题目是否已存在
-          let problem = await prisma.problem.findUnique({
-            where: { id: problemData.id },
+          // 创建新题目（自增ID）
+          let problem = await prisma.problem.create({
+            data: {
+              title: problemData.title,
+              type: problemData.type,
+              defaultTimeLimit: problemData.defaultTimeLimit,
+              defaultMemoryLimit: problemData.defaultMemoryLimit,
+              sections: problemData.sections,
+              samples: problemData.samples,
+              hint: problemData.hint,
+              judgeConfig: problemData.judgeConfig,
+            },
           });
 
-          if (!problem) {
-            // 创建新题目
-            problem = await prisma.problem.create({
-              data: {
-                id: problemData.id,
-                title: problemData.title,
-                type: problemData.type,
-                defaultTimeLimit: problemData.defaultTimeLimit,
-                defaultMemoryLimit: problemData.defaultMemoryLimit,
-                sections: problemData.sections,
-                samples: problemData.samples,
-                hint: problemData.hint,
-                judgeConfig: problemData.judgeConfig,
-              },
-            });
-          } else {
-            // 更新现有题目
-            problem = await prisma.problem.update({
-              where: { id: problemData.id },
-              data: {
-                title: problemData.title,
-                type: problemData.type,
-                defaultTimeLimit: problemData.defaultTimeLimit,
-                defaultMemoryLimit: problemData.defaultMemoryLimit,
-                sections: problemData.sections,
-                samples: problemData.samples,
-                hint: problemData.hint,
-                judgeConfig: problemData.judgeConfig,
-              },
-            });
+          // 记录ID映射
+          if (problemData.id) {
+            problemIdMap.set(problemData.id, problem.id);
+            
+            // 替换题面引用
+            const oldIdStr = problemData.id.toString();
+            const newIdStr = problem.id.toString();
+            let contentChanged = false;
+            let sections = problemData.sections;
+            let hint = problemData.hint;
+
+            // 替换 sections 中的图片路径
+            const sectionsStr = JSON.stringify(sections);
+            if (sectionsStr.includes(`/api/problems/${oldIdStr}/`)) {
+              const newSectionsStr = sectionsStr.replaceAll(`/api/problems/${oldIdStr}/`, `/api/problems/${newIdStr}/`);
+              sections = JSON.parse(newSectionsStr);
+              contentChanged = true;
+            }
+
+            // 替换 hint 中的图片路径
+            if (hint && hint.includes(`/api/problems/${oldIdStr}/`)) {
+              hint = hint.replaceAll(`/api/problems/${oldIdStr}/`, `/api/problems/${newIdStr}/`);
+              contentChanged = true;
+            }
+
+            // 如果有内容变更，更新题目
+            if (contentChanged) {
+              problem = await prisma.problem.update({
+                where: { id: problem.id },
+                data: {
+                  sections,
+                  hint,
+                },
+              });
+            }
           }
 
           // 导入题目数据文件
@@ -308,76 +323,30 @@ export async function POST(request: Request) {
           }
         }
 
-        // 4.2.4 创建或更新比赛
-        let contest = await prisma.contest.findUnique({
-          where: { id: contestData.id },
+        // 4.2.4 创建新比赛（自增ID）
+        const contest = await prisma.contest.create({
+          data: {
+            // id: contestData.id, // 不使用原ID
+            title: contestData.title,
+            description: contestData.description,
+            startTime: new Date(contestData.startTime),
+            endTime: new Date(contestData.endTime),
+            type: contestData.type,
+            password: contestData.password,
+            status: contestData.status,
+            config: contestData.config ? JSON.parse(JSON.stringify(contestData.config)) : undefined,
+          },
         });
-
-        if (contest) {
-          // 更新现有比赛
-          contest = await prisma.contest.update({
-            where: { id: contestData.id },
-            data: {
-              title: contestData.title,
-              description: contestData.description,
-              startTime: new Date(contestData.startTime),
-              endTime: new Date(contestData.endTime),
-              type: contestData.type,
-              password: contestData.password,
-              status: contestData.status,
-              config: contestData.config ? JSON.parse(JSON.stringify(contestData.config)) : undefined,
-            },
-          });
-        } else {
-          // 创建新比赛
-          contest = await prisma.contest.create({
-            data: {
-              id: contestData.id,
-              title: contestData.title,
-              description: contestData.description,
-              startTime: new Date(contestData.startTime),
-              endTime: new Date(contestData.endTime),
-              type: contestData.type,
-              password: contestData.password,
-              status: contestData.status,
-              config: contestData.config ? JSON.parse(JSON.stringify(contestData.config)) : undefined,
-            },
-          });
-        }
 
         importedContests.push({ id: contest.id, title: contest.title });
 
         // 4.2.5 导入用户
-        for (const userData of usersData) {
-          // 检查用户是否已存在
-          const existingUser = await prisma.user.findFirst({
-            where: {
-              contestId: contest.id,
-              username: userData.username,
-            },
-          });
+        const userIdMap = new Map<string, string>(); // Old -> New (如果是UUID，其实可以保留，但为了安全重新生成)
 
-          if (existingUser) {
-            // 更新现有用户
-            await prisma.user.update({
-              where: { id: existingUser.id },
+        for (const userData of usersData) {
+            // 创建新用户，ID自动生成
+            const newUser = await prisma.user.create({
               data: {
-                password: userData.password,
-                plainPassword: userData.plainPassword,
-                displayName: userData.displayName,
-                members: userData.members,
-                school: userData.school,
-                seat: userData.seat,
-                coach: userData.coach,
-                category: userData.category,
-                role: userData.role,
-              },
-            });
-          } else {
-            // 创建新用户
-            await prisma.user.create({
-              data: {
-                id: userData.id,
                 username: userData.username,
                 password: userData.password,
                 plainPassword: userData.plainPassword,
@@ -391,106 +360,47 @@ export async function POST(request: Request) {
                 role: userData.role,
               },
             });
-          }
+            userIdMap.set(userData.id, newUser.id);
         }
 
         // 4.2.6 导入比赛题目关联
         for (const cpData of contestProblemsData) {
-          // 检查题目是否存在
-          const problem = await prisma.problem.findUnique({
-            where: { id: cpData.problemId },
-          });
-
-          if (!problem) {
-            errors.push(`Problem ${cpData.problemId} not found for contest ${contest.id}`);
-            continue;
+          // 映射 problemId
+          const newProblemId = problemIdMap.get(cpData.problemId);
+          if (!newProblemId) {
+             // 如果找不到映射，可能是题目导入失败，跳过
+             continue;
           }
 
-          // 检查关联是否已存在
-          const existingContestProblem = await prisma.contestProblem.findFirst({
-            where: {
-              contestId: contest.id,
-              problemId: cpData.problemId,
-            },
-          });
-
-          if (existingContestProblem) {
-            // 更新现有关联
-            await prisma.contestProblem.update({
-              where: { id: existingContestProblem.id },
+          // 创建新关联
+          await prisma.contestProblem.create({
               data: {
-                displayId: cpData.displayId,
-                realTimeLimit: cpData.realTimeLimit,
-                realMemoryLimit: cpData.realMemoryLimit,
-                color: cpData.color,
-              },
-            });
-          } else {
-            // 创建新关联
-            await prisma.contestProblem.create({
-              data: {
-                id: cpData.id,
                 contestId: contest.id,
-                problemId: cpData.problemId,
+                problemId: newProblemId,
                 displayId: cpData.displayId,
                 realTimeLimit: cpData.realTimeLimit,
                 realMemoryLimit: cpData.realMemoryLimit,
                 color: cpData.color,
               },
-            });
-          }
+          });
         }
 
         // 4.2.7 导入提交记录
+        const submissionIdMap = new Map<string, string>(); // Old -> New
+
         for (const submissionData of submissionsData) {
-          // 检查用户是否存在
-          const user = await prisma.user.findFirst({
-            where: {
-              id: submissionData.userId,
-              contestId: contest.id,
-            },
-          });
+          const newUserId = userIdMap.get(submissionData.userId);
+          const newProblemId = problemIdMap.get(submissionData.problemId);
 
-          if (!user) {
+          if (!newUserId || !newProblemId) {
             continue;
           }
 
-          // 检查题目是否存在
-          const problem = await prisma.problem.findUnique({
-            where: { id: submissionData.problemId },
-          });
-
-          if (!problem) {
-            continue;
-          }
-
-          // 检查提交是否已存在
-          const existingSubmission = await prisma.submission.findUnique({
-            where: { id: submissionData.id },
-          });
-
-          if (existingSubmission) {
-            // 更新现有提交
-            await prisma.submission.update({
-              where: { id: existingSubmission.id },
+          const newSubmission = await prisma.submission.create({
               data: {
                 displayId: submissionData.displayId,
-                verdict: submissionData.verdict,
-                timeUsed: submissionData.timeUsed,
-                memoryUsed: submissionData.memoryUsed,
-                errorMessage: submissionData.errorMessage,
-                passedTests: submissionData.passedTests,
-                totalTests: submissionData.totalTests,
-              },
-            });
-          } else {
-            // 创建新提交
-            await prisma.submission.create({
-              data: {
-                id: submissionData.id,
-                displayId: submissionData.displayId,
-                userId: submissionData.userId,
-                problemId: submissionData.problemId,
+                userId: newUserId,
+                problemId: newProblemId,
                 contestId: contest.id,
                 language: submissionData.language,
                 code: submissionData.code,
@@ -504,109 +414,66 @@ export async function POST(request: Request) {
                 submittedAt: new Date(submissionData.submittedAt),
               },
             });
-          }
+            
+          submissionIdMap.set(submissionData.id, newSubmission.id);
         }
 
         // 4.2.8 导入答疑
-        for (const clariData of clarificationsData) {
-          // 检查答疑是否已存在
-          const existingClari = await prisma.clarification.findUnique({
-            where: { id: clariData.id },
-          });
+        const clarificationIdMap = new Map<number, number>();
 
-          let clarification;
-          if (existingClari) {
-            // 更新现有答疑
-            clarification = await prisma.clarification.update({
-              where: { id: clariData.id },
+        for (const clariData of clarificationsData) {
+           const newUserId = clariData.userId ? userIdMap.get(clariData.userId) : null;
+           // 如果有userId但映射失败，可能需要注意，但如果是Admin发的公告，userId可能为空
+           // problemId 也需要映射
+           const newProblemId = clariData.problemId ? problemIdMap.get(clariData.problemId) : null;
+
+           const newClari = await prisma.clarification.create({
               data: {
-                displayId: clariData.displayId,
-                problemId: clariData.problemId,
-                userId: clariData.userId,
-                title: clariData.title,
-                content: clariData.content,
-                category: clariData.category,
-                isPublic: clariData.isPublic,
-              },
-            });
-          } else {
-            // 创建新答疑
-            clarification = await prisma.clarification.create({
-              data: {
-                id: clariData.id,
                 contestId: contest.id,
                 displayId: clariData.displayId,
-                problemId: clariData.problemId,
-                userId: clariData.userId,
+                problemId: newProblemId,
+                userId: newUserId,
                 title: clariData.title,
                 content: clariData.content,
                 category: clariData.category,
                 isPublic: clariData.isPublic,
               },
             });
-          }
+            clarificationIdMap.set(clariData.id, newClari.id);
 
           // 导入回复
           for (const replyData of clariData.replies) {
-            // 检查回复是否已存在
-            const existingReply = await prisma.reply.findUnique({
-              where: { id: replyData.id },
-            });
+             const replyUserId = userIdMap.get(replyData.userId);
+             if (!replyUserId) continue;
 
-            if (!existingReply) {
-              // 创建新回复
-              await prisma.reply.create({
+             await prisma.reply.create({
                 data: {
-                  id: replyData.id,
-                  clarificationId: clarification.id,
-                  userId: replyData.userId,
+                  clarificationId: newClari.id,
+                  userId: replyUserId,
                   content: replyData.content,
                   createdAt: new Date(replyData.createdAt),
                 },
               });
-            }
           }
         }
 
         // 4.2.9 导入气球
         for (const balloonData of balloonsData) {
-          // 检查提交是否存在
-          const submission = await prisma.submission.findUnique({
-            where: { id: balloonData.submissionId },
-          });
+          const newSubmissionId = submissionIdMap.get(balloonData.submissionId);
+          if (!newSubmissionId) continue;
+          
+          const assignedToId = balloonData.assignedToId ? userIdMap.get(balloonData.assignedToId) : null;
 
-          if (!submission) {
-            continue;
-          }
-
-          // 检查气球是否已存在
-          const existingBalloon = await prisma.balloon.findUnique({
-            where: { id: balloonData.id },
-          });
-
-          if (existingBalloon) {
-            // 更新现有气球
-            await prisma.balloon.update({
-              where: { id: existingBalloon.id },
+          await prisma.balloon.create({
               data: {
-                status: balloonData.status,
-                assignedToId: balloonData.assignedToId,
-              },
-            });
-          } else {
-            // 创建新气球
-            await prisma.balloon.create({
-              data: {
-                id: balloonData.id,
-                submissionId: balloonData.submissionId,
+                submissionId: newSubmissionId,
                 contestId: contest.id,
                 status: balloonData.status,
-                assignedToId: balloonData.assignedToId,
+                assignedToId: assignedToId,
                 createdAt: new Date(balloonData.createdAt),
                 updatedAt: new Date(balloonData.updatedAt),
               },
             });
-          }
         }
 
       } catch (error) {

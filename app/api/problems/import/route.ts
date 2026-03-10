@@ -89,61 +89,60 @@ export async function POST(request: Request) {
           continue;
         }
 
-        // 4.2.3 创建或更新题目（保持ID一致）
+        // 4.2.3 创建新题目（ID自增）
         let problem;
         const exportedId = (problemData as ProblemData).id;
         
+        // 准备题目数据
+        let sections = problemData.sections;
+        let hint = problemData.hint;
+
+        // 创建题目，让数据库生成新ID
+        problem = await prisma.problem.create({
+          data: {
+            // 不指定id，使用自增
+            title: problemData.title,
+            type: problemData.type,
+            defaultTimeLimit: problemData.defaultTimeLimit,
+            defaultMemoryLimit: problemData.defaultMemoryLimit,
+            sections: sections, // 暂时使用原始数据
+            samples: problemData.samples,
+            hint: hint,
+            judgeConfig: problemData.judgeConfig,
+          },
+        });
+
+        // 如果存在导出ID，且新ID与旧ID不同（肯定不同或者是巧合），需要替换题面中的资源引用
         if (exportedId) {
-          // 检查导出的ID是否已存在
-          const existingProblem = await prisma.problem.findUnique({
-            where: { id: exportedId },
-          });
-          
-          if (existingProblem) {
-            // 更新现有题目
+          const oldIdStr = exportedId.toString();
+          const newIdStr = problem.id.toString();
+
+          let contentChanged = false;
+
+          // 替换 sections 中的图片路径
+          const sectionsStr = JSON.stringify(sections);
+          if (sectionsStr.includes(`/api/problems/${oldIdStr}/`)) {
+            const newSectionsStr = sectionsStr.replaceAll(`/api/problems/${oldIdStr}/`, `/api/problems/${newIdStr}/`);
+            sections = JSON.parse(newSectionsStr);
+            contentChanged = true;
+          }
+
+          // 替换 hint 中的图片路径
+          if (hint && hint.includes(`/api/problems/${oldIdStr}/`)) {
+            hint = hint.replaceAll(`/api/problems/${oldIdStr}/`, `/api/problems/${newIdStr}/`);
+            contentChanged = true;
+          }
+
+          // 如果有内容变更，更新题目
+          if (contentChanged) {
             problem = await prisma.problem.update({
-              where: { id: exportedId },
+              where: { id: problem.id },
               data: {
-                title: problemData.title,
-                type: problemData.type,
-                defaultTimeLimit: problemData.defaultTimeLimit,
-                defaultMemoryLimit: problemData.defaultMemoryLimit,
-                sections: problemData.sections,
-                samples: problemData.samples,
-                hint: problemData.hint,
-                judgeConfig: problemData.judgeConfig,
-              },
-            });
-          } else {
-            // 使用导出的ID创建新题目
-            problem = await prisma.problem.create({
-              data: {
-                id: exportedId,
-                title: problemData.title,
-                type: problemData.type,
-                defaultTimeLimit: problemData.defaultTimeLimit,
-                defaultMemoryLimit: problemData.defaultMemoryLimit,
-                sections: problemData.sections,
-                samples: problemData.samples,
-                hint: problemData.hint,
-                judgeConfig: problemData.judgeConfig,
+                sections,
+                hint,
               },
             });
           }
-        } else {
-          // 没有导出ID，创建新题目
-          problem = await prisma.problem.create({
-            data: {
-              title: problemData.title,
-              type: problemData.type,
-              defaultTimeLimit: problemData.defaultTimeLimit,
-              defaultMemoryLimit: problemData.defaultMemoryLimit,
-              sections: problemData.sections,
-              samples: problemData.samples,
-              hint: problemData.hint,
-              judgeConfig: problemData.judgeConfig,
-            },
-          });
         }
 
         importedProblems.push({ id: problem.id, title: problem.title });
