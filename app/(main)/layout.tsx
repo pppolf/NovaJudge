@@ -20,7 +20,7 @@ export default function RootLayout({
           <p className="text-gray-500 text-xs">
             China West Normal University
             <br />
-            XCPC Contest Online Judge © {new Date().getFullYear()} All rights
+            NovaJudge © {new Date().getFullYear()} All rights
             reserved.
           </p>
         </div>

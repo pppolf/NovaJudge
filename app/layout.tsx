@@ -21,8 +21,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "XCPC Contest Platform",
-  description: "Next Contest Platform for XCPC",
+  title: "NovaJudge",
+  description: "High-performance Online Judge system",
 };
 
 export default function RootLayout({

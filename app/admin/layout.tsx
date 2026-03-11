@@ -36,7 +36,7 @@ export default function AdminLayout({
       <aside className="w-64 bg-slate-900 text-white flex flex-col shrink-0 fixed h-full z-10">
         {/* 1. 顶部标题区域 */}
         <div className="h-16 flex items-center justify-center font-bold text-xl border-b border-slate-700 bg-slate-950">
-          XCPC Admin
+          NovaJudge Admin
         </div>
 
         {/* 2. 菜单导航区域 */}

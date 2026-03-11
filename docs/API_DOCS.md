@@ -1,4 +1,4 @@
-# XCPC Next API 文档
+# NovaJudge API 文档
 
 基础路径: `/api`
 
