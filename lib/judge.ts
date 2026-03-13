@@ -58,7 +58,7 @@ export const LANGUAGES: Record<string, LanguageConfig> = {
       "-static",
       "-std=c11",
     ],
-    runCmd: ["/usr/bin/bash", "-c", `ulimit -s ${STACK_SIZE_KB}; ./main`],
+    runCmd: ["./main"],
   },
   cpp: {
     srcName: "main.cpp",
@@ -74,7 +74,7 @@ export const LANGUAGES: Record<string, LanguageConfig> = {
       "-static",
       "-std=c++23",
     ],
-    runCmd: ["/usr/bin/bash", "-c", `ulimit -s ${STACK_SIZE_KB}; ./main`],
+    runCmd: ["./main"],
   },
   java: {
     srcName: "Main.java",
@@ -483,6 +483,7 @@ export async function judgeSubmission(submissionId: string) {
               cpuLimit: timeLimit,
               memoryLimit: memoryLimit,
               procLimit: 50,
+              stackLimit: STACK_SIZE_KB * 1024,
               copyIn: executableFileId
                 ? { [langConfig.exeName]: { fileId: executableFileId } }
                 : { [langConfig.srcName]: { content: code } },
@@ -564,6 +565,7 @@ export async function judgeSubmission(submissionId: string) {
           cpuLimit: timeLimit,
           memoryLimit: memoryLimit,
           procLimit: 50,
+          stackLimit: STACK_SIZE_KB * 1024,
         };
 
         if (executableFileId) {
