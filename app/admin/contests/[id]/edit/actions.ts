@@ -12,6 +12,7 @@ export async function updateContest(contestId: number, formData: FormData) {
   const endTimeStr = formData.get("endTime") as string;
   const type = formData.get("type") as ContestType;
   const password = formData.get("password") as string;
+  const visible = formData.get("visible") === "true";
 
   // --- 解析 Config 配置 ---
   const frozenDuration = Number(formData.get("frozenDuration") || 0);
@@ -65,6 +66,7 @@ export async function updateContest(contestId: number, formData: FormData) {
       endTime,
       type,
       password: password || null,
+      visible,
       config: config,
       status: newStatus,
     },

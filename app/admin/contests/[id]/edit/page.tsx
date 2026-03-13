@@ -23,6 +23,7 @@ export interface Contest {
   endTime: Date;
   type: string;
   password: string | null;
+  visible: boolean;
   config: ContestConfig; // Prisma Json
 }
 

@@ -232,6 +232,29 @@ export default function EditForm({ contest }: Props) {
             <h2 className="font-semibold text-gray-800">Access Control</h2>
           </div>
           <div className="p-6 space-y-6">
+            {/* Visibility Toggle */}
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-3">
+                Visibility
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="visible"
+                  value="true"
+                  defaultChecked={contest.visible}
+                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded"
+                />
+                <span className="text-sm text-gray-700 font-medium">
+                  Show in Contest List (Publicly Visible)
+                </span>
+              </label>
+              <p className="text-xs text-gray-500 mt-1 ml-6">
+                Uncheck to create a hidden contest (accessible only via direct
+                link).
+              </p>
+            </div>
+
             <div className="space-y-3">
               <label
                 className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer transition-all ${

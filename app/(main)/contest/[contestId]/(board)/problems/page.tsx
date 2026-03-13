@@ -3,6 +3,7 @@ import { ContestStatus, Verdict } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentSuper, getCurrentUser, UserJwtPayload } from "@/lib/auth";
 import { getDictionary } from "@/lib/get-dictionary";
+import { redirect } from "next/navigation";
 
 interface Props {
   params: Promise<{
@@ -12,12 +13,32 @@ interface Props {
 
 export default async function Problems({ params }: Props) {
   const contestId = Number((await params).contestId);
+
   // const contestInfo = await getContestData(contestId);
   const contestInfo = await prisma.contest.findUnique({
     where: {
       id: contestId,
     },
   });
+
+  if (!contestInfo) {
+    return <div>Contest not found</div>;
+  }
+
+  // 1. 鉴权逻辑：必须登录比赛账号或全局管理员
+  const user = await getCurrentUser();
+  const globalUser = await getCurrentSuper();
+  const userPayload = user as UserJwtPayload | null;
+
+  // 如果是私有比赛，且未登录比赛账号且不是超管，则重定向
+  if (
+    contestInfo.type === "PRIVATE" &&
+    !(globalUser as unknown as UserJwtPayload)?.isGlobalAdmin &&
+    (!userPayload || userPayload.contestId !== contestId)
+  ) {
+    redirect(`/contest/${contestId}`);
+  }
+
   const contestProblem = await prisma.contestProblem.findMany({
     where: {
       contestId: contestId,
@@ -63,11 +84,9 @@ export default async function Problems({ params }: Props) {
   });
   const totalMap = new Map(totalStats.map((s) => [s.problemId, s._count._all]));
   const acMap = new Map(acStats.map((s) => [s.problemId, s._count._all]));
-  const user = await getCurrentUser();
-  const globalUser = await getCurrentSuper();
   const userStats = await prisma.submission.findMany({
     where: {
-      userId: (user as UserJwtPayload)?.userId,
+      userId: userPayload?.userId,
       contestId: contestId,
       verdict: Verdict.ACCEPTED,
       globalUserId: (globalUser as UserJwtPayload)?.userId,

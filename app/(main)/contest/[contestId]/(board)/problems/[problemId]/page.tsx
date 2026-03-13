@@ -17,6 +17,7 @@ import {
 import { notFound } from "next/navigation";
 import { getCurrentSuper, getCurrentUser, UserJwtPayload } from "@/lib/auth";
 import { getDictionary } from "@/lib/get-dictionary";
+import { redirect } from "next/navigation";
 
 type Problem = {
   id: number;
@@ -66,13 +67,26 @@ export default async function ProblemDetail({ params }: Props) {
       contest: true,
     },
   });
-  const problem = contestProblem?.problem;
 
+  if (!contestProblem) notFound();
+
+  // 1. 鉴权逻辑：必须登录比赛账号或全局管理员
+  const user = await getCurrentUser();
+  const globalUser = await getCurrentSuper();
+  const userPayload = user as UserJwtPayload | null;
+
+  // 如果是私有比赛，且未登录比赛账号且不是超管，则重定向
   if (
-    !problem ||
-    !contestProblem ||
-    contestProblem.contest.status === ContestStatus.PENDING
-  )
+    contestProblem.contest.type === "PRIVATE" &&
+    !(globalUser as unknown as UserJwtPayload)?.isGlobalAdmin &&
+    (!userPayload || userPayload.contestId !== cid)
+  ) {
+    redirect(`/contest/${contestId}`);
+  }
+
+  const problem = contestProblem.problem;
+
+  if (!problem || contestProblem.contest.status === ContestStatus.PENDING)
     notFound();
 
   // 2. 封榜统计逻辑
@@ -114,7 +128,6 @@ export default async function ProblemDetail({ params }: Props) {
   // const problem = mockProblem;
 
   const SuperAdmin = await getCurrentSuper();
-  const user = await getCurrentUser();
   const isAdmin =
     (SuperAdmin as unknown as UserJwtPayload)?.isGlobalAdmin ||
     (user as unknown as UserJwtPayload)?.role === ContestRole.ADMIN ||

@@ -14,6 +14,7 @@ export async function createContest(formData: FormData) {
   const endTimeStr = formData.get("endTime") as string;
   const type = formData.get("type") as ContestType;
   const password = formData.get("password") as string;
+  const visible = formData.get("visible") === "true";
 
   // --- 获取 Config 配置字段 ---
   // 封榜/解榜
@@ -28,13 +29,13 @@ export async function createContest(formData: FormData) {
 
   const config = {
     frozenDuration, // 封榜时长 (分钟)，0 表示不封榜
-    unfreezeDelay,  // 多少小时后自动解榜
+    unfreezeDelay, // 多少小时后自动解榜
     medal: {
       mode: medalMode, // 'ratio' | 'fixed'
       gold,
       silver,
       bronze,
-    }
+    },
   };
 
   // 简单的校验
@@ -58,6 +59,7 @@ export async function createContest(formData: FormData) {
       type,
       password: password || null,
       status: ContestStatus.PENDING,
+      visible,
       config: config,
     },
   });
