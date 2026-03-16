@@ -14,6 +14,28 @@ import {
 import { ContestRole } from "@/lib/generated/prisma/enums";
 import { getDictionary } from "@/lib/get-dictionary";
 
+import { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const contestId = parseInt((await params).contestId);
+
+  const contest = await prisma.contest.findFirst({
+    where: {
+      id: contestId,
+    },
+  });
+
+  if (!contest) {
+    return {
+      title: "比赛未找到",
+    };
+  }
+  return {
+    title: `Q&A - ${contest.title}`,
+  };
+}
+
 interface Props {
   params: Promise<{
     contestId: string;

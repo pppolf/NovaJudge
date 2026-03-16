@@ -4,7 +4,26 @@ import { prisma } from "@/lib/prisma";
 import SubmitForm from "./client";
 import { getCurrentSuper, getCurrentUser, UserJwtPayload } from "@/lib/auth";
 import { ContestRole, Verdict } from "@/lib/generated/prisma/client";
+import { Metadata } from "next";
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const contestId = parseInt((await params).contestId);
+
+  const contest = await prisma.contest.findFirst({
+    where: {
+      id: contestId,
+    },
+  });
+
+  if (!contest) {
+    return {
+      title: "比赛未找到",
+    };
+  }
+  return {
+    title: `提交 - ${contest.title}`,
+  };
+}
 interface Props {
   searchParams: Promise<{ problem?: string }>;
   params: Promise<{ contestId: string }>;

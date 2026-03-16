@@ -11,7 +11,6 @@ const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 // 定义数学公式插件 (为了在编辑器预览里也能看到公式)
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
-import "katex/dist/katex.min.css"; 
 
 interface MarkdownEditorProps {
   value: string;
@@ -24,7 +23,6 @@ export default function MarkdownEditor({
   onChange,
   height = 300,
 }: MarkdownEditorProps) {
-  // 解决 Next.js 初始渲染 hydration 不匹配的问题
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -38,8 +36,6 @@ export default function MarkdownEditor({
 
   return (
     <div data-color-mode="light">
-      {" "}
-      {/* 强制使用亮色模式，配合你的系统风格 */}
       <MDEditor
         value={value}
         onChange={(val) => onChange(val || "")}

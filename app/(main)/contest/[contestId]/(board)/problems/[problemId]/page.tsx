@@ -18,6 +18,7 @@ import { notFound } from "next/navigation";
 import { getCurrentSuper, getCurrentUser, UserJwtPayload } from "@/lib/auth";
 import { getDictionary } from "@/lib/get-dictionary";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
 
 type Problem = {
   id: number;
@@ -50,6 +51,31 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
     {children}
   </h3>
 );
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const contestId = parseInt((await params).contestId);
+  const displayId = (await params).problemId; // 比如 "A"
+
+  // 1. 去数据库查这道题叫什么名字
+  const contestProblem = await prisma.contestProblem.findFirst({
+    where: {
+      contestId: contestId,
+      displayId: displayId,
+    },
+    include: {
+      problem: true,
+    },
+  });
+
+  if (!contestProblem) {
+    return {
+      title: "题目未找到",
+    };
+  }
+  return {
+    title: `${displayId} - ${contestProblem.problem.title}`,
+  };
+}
 
 export default async function ProblemDetail({ params }: Props) {
   const { contestId, problemId } = await params;

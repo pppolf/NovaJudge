@@ -1,4 +1,4 @@
-"use client"; // 必须标记为客户端组件
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -7,7 +7,12 @@ import { useAuth } from "@/context/AuthContext";
 import AdminLoginModal from "./AdminLoginModal";
 import ExternalLoginModal from "./ExternalLoginModal";
 import { ContestRole } from "@/lib/generated/prisma/enums";
-import { HomeIcon, LanguageIcon } from "@heroicons/react/24/outline";
+import { 
+  HomeIcon, 
+  LanguageIcon, 
+  Bars3Icon, 
+  XMarkIcon 
+} from "@heroicons/react/24/outline";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function Navbar() {
@@ -15,6 +20,10 @@ export default function Navbar() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showExternalLogin, setShowExternalLogin] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  
+  // 新增：移动端侧边栏状态
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -22,12 +31,20 @@ export default function Navbar() {
   const { dict, toggleLanguage, lang } = useLanguage();
   const isAdmin = user?.isGlobalAdmin;
 
+  // 路由变化时，自动关闭移动端侧边栏
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  // 处理登录回调
   useEffect(() => {
     if (searchParams.get("login") === "true") {
       revalidate?.();
     }
   }, [searchParams, revalidate]);
 
+  // 处理点击外部关闭用户菜单
   useEffect(() => {
     const closeMenu = () => setShowUserMenu(false);
     if (showUserMenu) {
@@ -35,6 +52,16 @@ export default function Navbar() {
     }
     return () => document.removeEventListener("click", closeMenu);
   }, [showUserMenu]);
+
+  // 锁定侧边栏打开时的底层滚动
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => { document.body.style.overflow = "unset"; };
+  }, [isMobileMenuOpen]);
 
   const handleUserMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -44,7 +71,6 @@ export default function Navbar() {
   const [allowExternalLogin, setAllowExternalLogin] = useState(true);
 
   useEffect(() => {
-    // 获取系统配置 (使用公开接口)
     fetch("/api/public/settings")
       .then((res) => res.json())
       .then((data) => {
@@ -68,10 +94,16 @@ export default function Navbar() {
     return pathname.startsWith(path + "/");
   };
 
-  // 修改 linkClass，允许传入额外的 className
-  const linkClass = (path: string, extraClass: string = "") =>
-    `px-3 py-2 font-bold transition-colors whitespace-nowrap ${
+  // 桌面端链接样式
+  const desktopLinkClass = (path: string, extraClass: string = "") =>
+    `px-3 py-2 font-bold transition-colors whitespace-nowrap hidden md:block ${
       isActive(path) ? "text-blue-700" : "text-gray-900 hover:text-blue-700"
+    } ${extraClass}`;
+
+  // 移动端侧边栏链接样式
+  const mobileLinkClass = (path: string, extraClass: string = "") =>
+    `block px-4 py-4 text-lg font-bold border-b border-gray-100 transition-colors ${
+      isActive(path) ? "text-blue-700 bg-blue-50" : "text-gray-900 active:bg-gray-50"
     } ${extraClass}`;
 
   useEffect(() => {
@@ -83,8 +115,7 @@ export default function Navbar() {
   const handleNavClick = (e: React.MouseEvent) => {
     if (user) return;
     const target = e.target as HTMLElement;
-    // console.log(target);
-    if (target.tagName === "NAV" || target?.className?.includes("max-w-7xl")) {
+    if (target.tagName === "NAV" || target?.className?.includes("max-w-7xl") || target?.className?.includes("nav-trigger")) {
       const newCount = clickCount + 1;
       setClickCount(newCount);
       if (newCount === 3) {
@@ -106,126 +137,79 @@ export default function Navbar() {
         onClick={handleNavClick}
         className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-14 font-serif text-xl">
-            {/* 左侧导航区：使用 overflow-x-auto 防止小屏幕溢出难看，隐藏滚动条 */}
-            <div className="flex items-center overflow-x-auto no-scrollbar mask-gradient-right">
-              {/* 1. 全局导航 (移动端隐藏文字Home，或者只留图标，这里暂时先留着但设为 hidden sm:block 如果太挤的话，或者保持原样) */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 nav-trigger">
+          <div className="flex justify-between items-center h-14 font-serif text-xl nav-trigger">
+            
+            {/* 左侧：移动端汉堡菜单按钮 & 桌面端导航 */}
+            <div className="flex items-center">
+              
+              {/* 移动端汉堡菜单按钮 */}
+              <button 
+                className="md:hidden mr-2 p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                onClick={() => setIsMobileMenuOpen(true)}
+              >
+                <Bars3Icon className="w-6 h-6" />
+              </button>
+
               <Link
                 href="/"
-                className="text-gray-900 font-bold px-3 py-2 shrink-0 flex items-center gap-1"
+                className="text-gray-900 font-bold px-2 py-2 shrink-0 flex items-center gap-1"
               >
-                {/* 移动端显示图标 (md:hidden 表示在中等屏幕以上隐藏) */}
                 <HomeIcon className="w-6 h-6 md:hidden" />
-
-                {/* 桌面端显示文字 (hidden md:block 表示默认隐藏，中等屏幕以上显示) */}
                 <span className="hidden md:block">{dict.nav.home}</span>
               </Link>
 
-              {/* 训练中心入口 - 仅对全局登录用户可见 */}
-              {user && !user.contestId && (
-                <Link
-                  href="/train"
-                  className={linkClass("/train", "hidden md:block")}
-                >
-                  训练中心
-                </Link>
-              )}
+              {/* ================= 桌面端导航项 (移动端隐藏) ================= */}
+              <div className="hidden md:flex items-center">
+                {user && !user.contestId && (
+                  <Link href="/train" className={desktopLinkClass("/train")}>
+                    训练中心
+                  </Link>
+                )}
 
-              {/* 2. 比赛上下文导航 */}
-              {contestId && (
-                <>
-                  <span className="text-gray-300 shrink-0">|</span>
+                {contestId && (
+                  <>
+                    <span className="text-gray-300 shrink-0 mx-1">|</span>
+                    <Link href={getContestLink("")} className={desktopLinkClass(`/contest/${contestId}`)}>
+                      {dict.nav.contest}
+                    </Link>
+                    <Link href={getContestLink("/problems")} className={desktopLinkClass(`/contest/${contestId}/problems`)}>
+                      {dict.nav.problems}
+                    </Link>
+                    <Link href={getContestLink("/status")} className={desktopLinkClass(`/contest/${contestId}/status`)}>
+                      {dict.nav.status}
+                    </Link>
+                    <Link href={getContestLink("/rank")} className={desktopLinkClass(`/contest/${contestId}/rank`)}>
+                      {dict.nav.rank}
+                    </Link>
+                    <Link href={getContestLink("/clarifications")} className={desktopLinkClass(`/contest/${contestId}/clarifications`)}>
+                      {dict.nav.clarifications}
+                    </Link>
+                  </>
+                )}
 
-                  {/* Contest Home: 始终显示 */}
-                  <Link
-                    href={getContestLink("")}
-                    className={linkClass(`/contest/${contestId}`, "shrink-0")}
-                  >
-                    {dict.nav.contest}
-                  </Link>
+                {contestId && isContestAdmin && (
+                  <>
+                    <span className="text-gray-300 shrink-0 mx-1">|</span>
+                    <Link href={getContestLink("/balloon")} className={desktopLinkClass(`/contest/${contestId}/balloon`, "text-orange-600 hover:text-orange-800")}>
+                      🎈 {dict.nav.balloon}
+                    </Link>
+                  </>
+                )}
 
-                  {/* 常规比赛功能：移动端隐藏 (hidden)，桌面端显示 (md:block) */}
-                  <Link
-                    href={getContestLink("/problems")}
-                    className={linkClass(
-                      `/contest/${contestId}/problems`,
-                      "hidden md:block",
-                    )}
-                  >
-                    {dict.nav.problems}
-                  </Link>
-                  <Link
-                    href={getContestLink("/status")}
-                    className={linkClass(
-                      `/contest/${contestId}/status`,
-                      "hidden md:block",
-                    )}
-                  >
-                    {dict.nav.status}
-                  </Link>
-                  <Link
-                    href={getContestLink("/rank")}
-                    className={linkClass(
-                      `/contest/${contestId}/rank`,
-                      "hidden md:block",
-                    )}
-                  >
-                    {dict.nav.rank}
-                  </Link>
-                  <Link
-                    href={getContestLink("/clarifications")}
-                    className={linkClass(
-                      `/contest/${contestId}/clarifications`,
-                      "hidden md:block",
-                    )}
-                  >
-                    {dict.nav.clarifications}
-                  </Link>
-                </>
-              )}
-
-              {/* 2.5 气球管理：始终显示 (如果是管理员) */}
-              {contestId && isContestAdmin && (
-                <>
-                  {/* 在移动端，如果中间隐藏了，这里加个竖线分隔符更好看 */}
-                  <span className="text-gray-300 shrink-0 hidden md:inline">
-                    |
-                  </span>
-                  {/* 移动端直接紧跟 Contest Home，或者加个小分隔 */}
-                  <span className="text-gray-300 shrink-0 md:hidden">|</span>
-
-                  <Link
-                    href={getContestLink("/balloon")}
-                    className={linkClass(
-                      `/contest/${contestId}/balloon`,
-                      "text-orange-600 hover:text-orange-800 shrink-0", // 给气球一个醒目的颜色
-                    )}
-                  >
-                    🎈 {dict.nav.balloon}
-                  </Link>
-                </>
-              )}
-
-              {/* 3. 后台 Panel：仅桌面显示 */}
-              {isAdmin && (
-                <>
-                  <span className="text-gray-300 shrink-0 hidden md:inline">
-                    |
-                  </span>
-                  <Link
-                    href="/admin"
-                    className="text-red-600 hover:text-red-800 px-3 py-2 text-xl font-bold gap-1 hidden md:flex items-center shrink-0"
-                  >
-                    {dict.nav.adminPanel}
-                  </Link>
-                </>
-              )}
+                {isAdmin && (
+                  <>
+                    <span className="text-gray-300 shrink-0 mx-1">|</span>
+                    <Link href="/admin" className="text-red-600 hover:text-red-800 px-3 py-2 text-xl font-bold flex items-center shrink-0">
+                      {dict.nav.adminPanel}
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
 
-            {/* 右侧用户区 */}
-            <div className="flex space-x-4 text-lg items-center gap-4 shrink-0 pl-2 bg-linear-to-l from-white via-white to-transparent">
-              {/* 切换语言按钮 */}
+            {/* 右侧：用户菜单与多语言 (始终在顶部显示) */}
+            <div className="flex space-x-4 text-lg items-center gap-2 sm:gap-4 shrink-0">
               <button
                 onClick={toggleLanguage}
                 className="p-2 text-gray-500 hover:text-blue-600 transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
@@ -236,33 +220,25 @@ export default function Navbar() {
                   <span>{lang === "zh" ? "中" : "EN"}</span>
                 </div>
               </button>
+              
               {user ? (
-                // 登录后显示
                 <div className="relative">
                   <button
-                    onClick={handleUserMenuClick} // 改为点击触发
+                    onClick={handleUserMenuClick}
                     className="text-gray-700 font-bold flex items-center gap-1 max-w-30 sm:max-w-none truncate focus:outline-none cursor-pointer"
                   >
                     {user.isGlobalAdmin && (
-                      <span className="text-red-600 hidden sm:inline">
-                        [{dict.nav.superAdmin}]
-                      </span>
+                      <span className="text-red-600 hidden sm:inline">[{dict.nav.superAdmin}]</span>
                     )}
                     <span className="truncate">{user.username}</span>
                     <span
                       className="text-xs transition-transform duration-200"
-                      style={{
-                        transform: showUserMenu
-                          ? "rotate(180deg)"
-                          : "rotate(0)",
-                      }}
+                      style={{ transform: showUserMenu ? "rotate(180deg)" : "rotate(0)" }}
                     >
                       ▼
                     </span>
                   </button>
 
-                  {/* 下拉登出菜单 */}
-                  {/* 移除了 group-hover:block，改用状态控制显示 */}
                   {showUserMenu && (
                     <div className="absolute right-0 top-full mt-2 w-32 bg-white border border-gray-200 shadow-lg rounded-sm z-50">
                       <button
@@ -278,7 +254,6 @@ export default function Navbar() {
                 <button
                   onClick={handleExternalLoginOpen}
                   className="px-3 py-2 text-sm font-bold rounded-sm border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
-                  title="外部登录"
                 >
                   外部登录
                 </button>
@@ -287,6 +262,77 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
+
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-50 md:hidden transition-opacity" 
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+      
+      <div 
+        className={`fixed top-0 left-0 bottom-0 w-64 bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-in-out md:hidden flex flex-col ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex justify-between items-center p-4 border-b border-gray-100">
+          <span className="font-bold text-xl font-serif">NovaJudge</span>
+          <button 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
+          >
+            <XMarkIcon className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto py-2">
+          <Link href="/" className={mobileLinkClass("/")}>{dict.nav.home}</Link>
+
+          {user && !user.contestId && (
+            <Link href="/train" className={mobileLinkClass("/train")}>训练中心</Link>
+          )}
+
+          {contestId && (
+            <>
+              <div className="px-4 py-2 mt-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                比赛菜单
+              </div>
+              <Link href={getContestLink("")} className={mobileLinkClass(`/contest/${contestId}`)}>
+                {dict.nav.contest}
+              </Link>
+              <Link href={getContestLink("/problems")} className={mobileLinkClass(`/contest/${contestId}/problems`)}>
+                {dict.nav.problems}
+              </Link>
+              <Link href={getContestLink("/status")} className={mobileLinkClass(`/contest/${contestId}/status`)}>
+                {dict.nav.status}
+              </Link>
+              <Link href={getContestLink("/rank")} className={mobileLinkClass(`/contest/${contestId}/rank`)}>
+                {dict.nav.rank}
+              </Link>
+              <Link href={getContestLink("/clarifications")} className={mobileLinkClass(`/contest/${contestId}/clarifications`)}>
+                {dict.nav.clarifications}
+              </Link>
+            </>
+          )}
+
+          {contestId && isContestAdmin && (
+            <Link href={getContestLink("/balloon")} className={mobileLinkClass(`/contest/${contestId}/balloon`, "text-orange-600")}>
+              🎈 {dict.nav.balloon}
+            </Link>
+          )}
+
+          {isAdmin && (
+            <>
+              <div className="px-4 py-2 mt-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                管理
+              </div>
+              <Link href="/admin" className={mobileLinkClass("/admin", "text-red-600")}>
+                {dict.nav.adminPanel}
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
 
       {showAdminLogin && (
         <AdminLoginModal onClose={() => setShowAdminLogin(false)} />

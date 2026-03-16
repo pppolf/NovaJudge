@@ -14,7 +14,26 @@ import { verifyAuth } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { ContestConfig } from "@/app/(main)/page";
 import { getDictionary } from "@/lib/get-dictionary";
+import { Metadata } from "next";
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const contestId = parseInt((await params).contestId);
+
+  const contest = await prisma.contest.findFirst({
+    where: {
+      id: contestId,
+    },
+  });
+
+  if (!contest) {
+    return {
+      title: "比赛未找到",
+    };
+  }
+  return {
+    title: `提交状态 - ${contest.title}`,
+  };
+}
 interface Props {
   searchParams: Promise<{
     page?: string;

@@ -18,10 +18,9 @@ export default function RootLayout({
       <footer className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto py-6 px-4 text-center">
           <p className="text-gray-500 text-xs">
-            China West Normal University
+            CWNU PAA (西华师范大学程序设计算法协会) @ Gao Ming
             <br />
-            NovaJudge © {new Date().getFullYear()} All rights
-            reserved.
+            NovaJudge © {new Date().getFullYear()} All rights reserved.
           </p>
         </div>
       </footer>

@@ -17,7 +17,26 @@ import {
 } from "@heroicons/react/24/outline";
 import { ContestStatus, ContestType } from "@/lib/generated/prisma/client";
 import { getDictionary } from "@/lib/get-dictionary";
+import { Metadata } from "next";
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const contestId = parseInt((await params).contestId);
+
+  const contest = await prisma.contest.findFirst({
+    where: {
+      id: contestId,
+    },
+  });
+
+  if (!contest) {
+    return {
+      title: "比赛未找到",
+    };
+  }
+  return {
+    title: `${contest.title}`,
+  };
+}
 interface Props {
   params: Promise<{
     contestId: string;

@@ -14,6 +14,26 @@ import { ContestConfig } from "@/app/(main)/page";
 import UnfreezeButton from "./UnfreezeButton";
 import ExportEventFeedButton from "./ExportEventFeedButton";
 import { getDictionary } from "@/lib/get-dictionary";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const contestId = parseInt((await params).contestId);
+
+  const contest = await prisma.contest.findFirst({
+    where: {
+      id: contestId,
+    },
+  });
+
+  if (!contest) {
+    return {
+      title: "比赛未找到",
+    };
+  }
+  return {
+    title: `排行榜 - ${contest.title}`,
+  };
+}
 
 // 辅助函数：计算时间差
 function formatTime(startTime: number, submissionTime: number): string {

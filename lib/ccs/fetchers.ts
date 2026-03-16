@@ -7,6 +7,10 @@ import {
   toCCSVerdict,
   getRelativeTime,
 } from "./utils";
+import { getOrganizationMap } from "@/lib/org-mapper";
+
+
+const organization_map = await getOrganizationMap();
 
 export async function getContest(id: number) {
   const contest = await prisma.contest.findUnique({
@@ -54,14 +58,14 @@ export async function getContestState(id: number) {
   const config = (contest.config as unknown as ContestConfig) || {};
 
   const frozenDuration = config.frozenDuration || 0; // minutes
-  const unfreezeDelay = config.unfreezeDelay || 300; // minutes
+  const unfreezeDelay = config.unfreezeDelay || 300; // hours
 
   let frozenTime = null;
   let thawedTime = null;
 
   if (frozenDuration > 0) {
     frozenTime = new Date(endTime.getTime() - frozenDuration * 60 * 1000);
-    thawedTime = new Date(endTime.getTime() + unfreezeDelay * 60 * 1000);
+    thawedTime = new Date(endTime.getTime() + unfreezeDelay * 60 * 60 * 1000);
   }
 
   const now = new Date();
@@ -107,7 +111,7 @@ export async function getTeams(contestId: number) {
       String(team.category === "1" ? "⭐" : "") + team.displayName ||
       team.username,
     group_ids: team.category ? [team.category] : [],
-    organization_id: team.school || null,
+    organization_id: organization_map[team.school!] || team.school || null,
   }));
 }
 
@@ -122,7 +126,7 @@ export async function getOrganizations(contestId: number) {
   });
 
   return organizations.map((o) => ({
-    id: o.school!,
+    id: organization_map[o.school!] || o.school!,
     name: o.school!,
     formal_name: o.school!,
     country: null,
@@ -178,21 +182,8 @@ export async function getProblems(contestId: number) {
       }
     }
 
-    // Attempt 2: If no judgeConfig or 0, fallback to a default safe value or 0
-    // ICPC Live needs this to know the max ordinal.
-    // If we return 0, it might ignore runs.
-    // If we return a large number (e.g. 100), it might show a long empty bar.
-    // Ideally we should know the real count.
-
-    // For now, if 0, let's default to a reasonable number if we can't find it,
-    // or keep 0 if we really don't know.
-    // But user says: "Must be between 1 and problem:test_data_count" for ordinals.
-    // So if we emit ordinals 1..N, test_data_count MUST be >= N.
-    // Since we don't know N for every submission ahead of time (it depends on test cases),
-    // we should probably set this to the maximum possible test cases for this problem.
-
     if (testDataCount === 0) {
-      testDataCount = 100; // Fallback to a high number to allow ordinals up to 100
+      testDataCount = 100;
     }
 
     return {

@@ -13,7 +13,27 @@ import { getCurrentUser } from "@/lib/auth";
 import { ClariCategory } from "@/lib/generated/prisma/client";
 import { getDictionary } from "@/lib/get-dictionary";
 import ClarificationForm from "./ClarificationForm";
+import { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const contestId = parseInt((await params).contestId);
+
+  const contest = await prisma.contest.findFirst({
+    where: {
+      id: contestId,
+    },
+  });
+
+  if (!contest) {
+    return {
+      title: "比赛未找到",
+    };
+  }
+  return {
+    title: `Q&A - ${contest.title}`,
+  };
+}
 interface Props {
   searchParams: Promise<{
     page?: string;

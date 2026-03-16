@@ -9,8 +9,11 @@ import {
   HomeIcon,
 } from "@heroicons/react/24/outline";
 import { TrainingNode } from "@/lib/generated/prisma/client";
+import { Metadata } from "next";
 
-// ================= 类型定义 =================
+export const metadata: Metadata = {
+  title: "训练中心",
+};
 
 interface FileItem {
   id: string; // contestId

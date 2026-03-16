@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     return {
       id: contest.id.toString(),
       name: contest.title,
-      formal_name: contest.description || contest.title,
+      formal_name: contest.title,
       start_time: toISO8601(contest.startTime),
       end_time: toISO8601(contest.endTime),
       duration: duration,

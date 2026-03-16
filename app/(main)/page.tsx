@@ -139,7 +139,7 @@ export default async function ContestList() {
                 <Link
                   key={contest.id}
                   href={`/contest/${contest.id}`}
-                  className="block bg-white rounded-xl p-5 shadow-sm border border-gray-200 active:scale-1 transition-transform"
+                  className="block bg-white rounded-xl p-5 shadow-sm border border-gray-200 "
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-2 text-xs font-mono text-gray-400">

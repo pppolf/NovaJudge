@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Merriweather, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { Toaster } from "sonner";
@@ -21,7 +22,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NovaJudge",
+  title: {
+    template: "%s | NovaJudge", 
+    default: "NovaJudge - 西华师范大学算法评测平台", 
+  },
   description: "High-performance Online Judge system",
 };
 

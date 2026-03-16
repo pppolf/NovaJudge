@@ -1,4 +1,5 @@
 import { Contest, ContestConfig } from "@/app/(main)/page";
+import ContestNoticeSniffer from "@/components/ContestNoticeSniffer";
 import ContestTimer from "@/components/ContestTimer";
 import { prisma } from "@/lib/prisma";
 
@@ -23,6 +24,7 @@ export default async function ContestLayout({ children, params }: Props) {
 
   return (
     <div className="w-full overflow-x-hidden">
+      <ContestNoticeSniffer contestId={Number(contestId)} />
       <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6">
         <div className="bg-white shadow-sm border border-gray-100 rounded-sm p-4 md:p-6">
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
