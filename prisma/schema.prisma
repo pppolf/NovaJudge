@@ -71,6 +71,7 @@ model GlobalUser {
   password    String?
   role        String       @default("GLOBAL_USER")
   externalId  String?      @unique
+  isBanned    Boolean      @default(false)
   displayName String?
   studentId   String?
   email       String?

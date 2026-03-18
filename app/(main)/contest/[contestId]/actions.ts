@@ -8,21 +8,35 @@ import { redirect } from "next/navigation";
 
 import { headers } from "next/headers";
 
+function redirectToContestLogin(contestId: number, error?: string): never {
+  const searchParams = new URLSearchParams();
+
+  if (error) {
+    searchParams.set("error", error);
+  }
+
+  const query = searchParams.toString();
+  redirect(`/contest/${contestId}${query ? `?${query}` : ""}`);
+}
+
 // 比赛用户登录
 export async function loginContestUser(contestId: number, formData: FormData) {
-  const username = formData.get("username") as string;
-  const password = formData.get("password") as string;
-  // console.log(username, password);
-  if (!username || !password) throw new Error("Username and password required");
+  const username = String(formData.get("username") || "").trim();
+  const password = String(formData.get("password") || "");
+
+  if (!username || !password) {
+    redirectToContestLogin(contestId, "missing_credentials");
+  }
+
   const user = await prisma.user.findFirst({
     where: {
       username,
       contestId: contestId,
     },
   });
-  // 2. 验证用户和密码
+
   if (!user || !(await bcrypt.compare(password, user.password))) {
-    throw new Error("Invalid credentials");
+    redirectToContestLogin(contestId, "invalid_credentials");
   }
 
   // 记录登录 IP 和时间

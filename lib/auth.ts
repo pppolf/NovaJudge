@@ -13,6 +13,13 @@ export interface UserJwtPayload {
   exp?: number;
 }
 
+export interface GlobalUserJwtPayload extends UserJwtPayload {
+  displayName?: string | null;
+  studentId?: string | null;
+  email?: string | null;
+  externalId?: string | null;
+}
+
 // 获取密钥并转换为 Uint8Array（jose 要求的格式）
 export const getJwtSecretKey = () => {
   const secret = process.env.JWT_SECRET;
@@ -57,6 +64,46 @@ export async function getCurrentUser() {
   }
 }
 
+export async function getVerifiedGlobalUser(
+  token: string
+): Promise<GlobalUserJwtPayload | null> {
+  try {
+    const payload = await verifyAuth(token);
+    const globalUser = await prisma.globalUser.findUnique({
+      where: { id: String(payload.userId) },
+      select: {
+        id: true,
+        username: true,
+        role: true,
+        externalId: true,
+        isBanned: true,
+        displayName: true,
+        studentId: true,
+        email: true,
+      },
+    });
+
+    if (!globalUser || globalUser.isBanned) {
+      return null;
+    }
+
+    return {
+      ...payload,
+      userId: globalUser.id,
+      username: globalUser.username,
+      role: globalUser.role,
+      isGlobalAdmin: globalUser.role === "SUPER_ADMIN",
+      displayName: globalUser.displayName,
+      studentId: globalUser.studentId,
+      email: globalUser.email,
+      externalId: globalUser.externalId,
+    };
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
 // 验证 API Key 并返回关联的用户 (GlobalUser)
 export async function validateApiKey(apiKey: string) {
   if (!apiKey) return null;
@@ -66,7 +113,7 @@ export async function validateApiKey(apiKey: string) {
     include: { user: true },
   });
 
-  if (!keyRecord || !keyRecord.isEnabled) return null;
+  if (!keyRecord || !keyRecord.isEnabled || keyRecord.user.isBanned) return null;
 
   // 异步更新最后使用时间，不阻塞主流程
   prisma.apiKey
@@ -85,11 +132,5 @@ export async function getCurrentSuper() {
 
   if (!token) return null;
 
-  try {
-    const payload = await verifyAuth(token);
-    return payload;
-  } catch (error) {
-    console.log(error);
-    return new Error("Your token has expired or is invalid.");
-  }
+  return getVerifiedGlobalUser(token);
 }

@@ -1,7 +1,7 @@
 "use server";
 
 import { ContestConfig } from "@/app/(main)/page";
-import { verifyAuth } from "@/lib/auth";
+import { getCurrentSuper, verifyAuth } from "@/lib/auth";
 import { ContestRole, Verdict } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { judgeQueue } from "@/lib/queue";
@@ -45,12 +45,11 @@ export async function submitCode(
   try {
     const cookieStore = await cookies();
     const teamToken = cookieStore.get("user_token")?.value;
-    const globalToken = cookieStore.get("auth_token")?.value;
-    if (!teamToken && !globalToken) return { error: "Unauthorized" };
+    const globalPayload = await getCurrentSuper();
+    if (!teamToken && !globalPayload) return { error: "请登录后再提交" };
 
     // 解析 Token 获取当前用户 ID
     const teamPayload = teamToken ? await verifyAuth(teamToken) : null;
-    const globalPayload = globalToken ? await verifyAuth(globalToken) : null;
     if (!teamPayload && !globalPayload) return { error: "Invalid Token" };
 
     const userId = teamPayload?.userId || null;

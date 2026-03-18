@@ -16,6 +16,19 @@ export async function POST(req: Request) {
   const username = String(body?.username || "");
   const password = String(body?.password || "");
   const appKey = process.env.APP_KEY || "";
+
+  const systemSetting = await prisma.systemSetting.findUnique({
+    where: { id: "default" },
+    select: { allowExternalLogin: true },
+  });
+
+  if (systemSetting && !systemSetting.allowExternalLogin) {
+    return NextResponse.json(
+      { error: "External login is disabled" },
+      { status: 403 },
+    );
+  }
+
   if (!username || !password) {
     return NextResponse.json(
       { error: "Username and password required" },
@@ -72,6 +85,13 @@ export async function POST(req: Request) {
       role: "GLOBAL_USER",
     },
   });
+
+  if (user.isBanned) {
+    return NextResponse.json(
+      { error: "Account has been banned" },
+      { status: 403 },
+    );
+  }
 
   const token = await signAuth({
     userId: user.id,

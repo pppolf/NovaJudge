@@ -97,6 +97,7 @@ export const GlobalUserScalarFieldEnum = {
   password: 'password',
   role: 'role',
   externalId: 'externalId',
+  isBanned: 'isBanned',
   displayName: 'displayName',
   studentId: 'studentId',
   email: 'email',

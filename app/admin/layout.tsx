@@ -16,7 +16,7 @@ const MENU_ITEMS = [
   { name: "Dashboard", href: "/admin", icon: HomeIcon },
   { name: "Contest Management", href: "/admin/contests", icon: TrophyIcon },
   { name: "Problem Bank", href: "/admin/problems", icon: ArchiveBoxIcon },
-  { name: "Admin Accounts", href: "/admin/accounts", icon: UserGroupIcon },
+  { name: "External Accounts", href: "/admin/accounts", icon: UserGroupIcon },
   { name: "Submissions", href: "/admin/submissions", icon: ChartBarIcon },
   { name: "API Keys", href: "/admin/api-keys", icon: KeyIcon },
   { name: "Monitor", href: "/admin/monitor", icon: GlobeAltIcon },

@@ -1,6 +1,6 @@
 // app/contest/[contestId]/page.tsx
 
-import { verifyAuth } from "@/lib/auth";
+import { getCurrentSuper, verifyAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -43,9 +43,31 @@ interface Props {
   }>;
 }
 
-export default async function ContestLogin({ params }: Props) {
+interface PageProps extends Props {
+  searchParams: Promise<{
+    error?: string;
+  }>;
+}
+
+function getContestLoginErrorMessage(error?: string) {
+  switch (error) {
+    case "missing_credentials":
+      return "请输入用户名和密码。";
+    case "invalid_credentials":
+      return "用户名或密码错误，请重新输入。";
+    default:
+      return null;
+  }
+}
+
+export default async function ContestLogin({
+  params,
+  searchParams,
+}: PageProps) {
   const contestId = (await params).contestId;
+  const { error } = await searchParams;
   const id = Number(contestId);
+  const loginErrorMessage = getContestLoginErrorMessage(error);
 
   const contest = await prisma.contest.findUnique({
     where: { id },
@@ -56,7 +78,7 @@ export default async function ContestLogin({ params }: Props) {
   // 检查是否已登录
   const cookieStore = await cookies();
   const user_token = cookieStore.get("user_token")?.value;
-  const auth_token = cookieStore.get("auth_token")?.value;
+  const globalSession = await getCurrentSuper();
   let user;
   let super_admin;
   let glabel_user;
@@ -71,15 +93,12 @@ export default async function ContestLogin({ params }: Props) {
       },
     });
   }
-  if (auth_token) {
-    const payload = await verifyAuth(auth_token);
-    if (!payload || !payload.userId) throw new Error("Invalid Token");
-    if (payload.isGlobalAdmin) super_admin = payload.username;
-    else glabel_user = await prisma.globalUser.findFirst({
-      where: {
-        username: payload.username
-      }
-    })
+  if (globalSession) {
+    if (globalSession.isGlobalAdmin) {
+      super_admin = globalSession.username;
+    } else {
+      glabel_user = globalSession;
+    }
   }
 
   const dict = await getDictionary();
@@ -105,8 +124,8 @@ export default async function ContestLogin({ params }: Props) {
                       contest.status === ContestStatus.RUNNING
                         ? "bg-green-50 text-green-700 border-green-200"
                         : contest.status === ContestStatus.ENDED
-                        ? "bg-gray-100 text-gray-600 border-gray-200"
-                        : "bg-blue-50 text-blue-700 border-blue-200"
+                          ? "bg-gray-100 text-gray-600 border-gray-200"
+                          : "bg-blue-50 text-blue-700 border-blue-200"
                     }`}
                   >
                     <span
@@ -114,8 +133,8 @@ export default async function ContestLogin({ params }: Props) {
                         contest.status === ContestStatus.RUNNING
                           ? "bg-green-500 animate-pulse"
                           : contest.status === ContestStatus.ENDED
-                          ? "bg-gray-400"
-                          : "bg-blue-500"
+                            ? "bg-gray-400"
+                            : "bg-blue-500"
                       }`}
                     />
                     {contest.status}
@@ -191,11 +210,16 @@ export default async function ContestLogin({ params }: Props) {
 
       {/* 右侧：登录框 */}
       <div className="w-full min-h-40 md:w-100">
-        {!user_token && !auth_token ? (
+        {!user && !globalSession ? (
           <div className="bg-white p-8 shadow-sm border border-gray-100 rounded-sm">
             <h2 className="text-2xl font-serif font-bold text-gray-900 mb-6 border-b pb-4">
               Sign In
             </h2>
+            {loginErrorMessage && (
+              <div className="mb-5 rounded-sm border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {loginErrorMessage}
+              </div>
+            )}
             <form
               action={async (fromData: FormData) => {
                 "use server";
@@ -326,7 +350,9 @@ export default async function ContestLogin({ params }: Props) {
                       队伍名称
                     </p>
                     <p className="text-base font-bold text-gray-900">
-                      {user?.displayName || glabel_user?.displayName || "未设置"}
+                      {user?.displayName ||
+                        glabel_user?.displayName ||
+                        "未设置"}
                     </p>
                   </div>
                 </div>

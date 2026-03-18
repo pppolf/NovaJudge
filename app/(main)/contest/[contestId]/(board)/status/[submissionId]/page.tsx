@@ -70,7 +70,7 @@ export default async function SubmissionDetail({ params }: Props) {
   // 如果是私有比赛，且未登录比赛账号且不是超管，则重定向
   if (
     contestInfo.type === "PRIVATE" &&
-    !(globalUser as unknown as UserJwtPayload)?.isGlobalAdmin &&
+    !globalUser?.isGlobalAdmin &&
     (!userPayload || userPayload.contestId !== cid)
   ) {
     redirect(`/contest/${contestId}`);
@@ -83,20 +83,7 @@ export default async function SubmissionDetail({ params }: Props) {
 
   // 3. 权限校验逻辑
   const isContestEnded = contestInfo.status === ContestStatus.ENDED;
-
-  const superAdminToken = cookieStore.get("auth_token")?.value;
-  let superAdmin = null;
-  if (superAdminToken) {
-    const superAdminPayload = (await verifyAuth(superAdminToken)) || null;
-    if (superAdminPayload?.userId) {
-      superAdmin = await prisma.globalUser.findUnique({
-        where: { id: superAdminPayload.userId },
-        select: {
-          id: true,
-        },
-      });
-    }
-  }
+  const isGlobalAdmin = !!globalUser?.isGlobalAdmin;
 
   const config = contestInfo.config as ContestConfig;
   const freezeTime =
@@ -105,7 +92,7 @@ export default async function SubmissionDetail({ params }: Props) {
     config.frozenDuration !== 0 &&
     (freezeTime ? new Date().getTime() >= freezeTime : false);
 
-  if (payload?.userId || superAdmin !== null) {
+  if (payload?.userId || isGlobalAdmin) {
     let currentUser = null;
     if (payload?.userId) {
       currentUser = await prisma.user.findUnique({
@@ -132,7 +119,7 @@ export default async function SubmissionDetail({ params }: Props) {
     const isOwner = submission?.user?.id === currentUser?.id;
 
     const isAdmin =
-      superAdmin !== null ||
+      isGlobalAdmin ||
       currentUser?.role === ContestRole.ADMIN ||
       currentUser?.role === ContestRole.JUDGE;
     const hasPermission =

@@ -1,6 +1,5 @@
-import { verifyAuth } from "@/lib/auth";
+import { getCurrentSuper } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
@@ -50,9 +49,7 @@ export default async function TrainingCenterPage({
   const { path = "/" } = await searchParams;
 
   // 1. 鉴权：必须是全局登录用户
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
-  const payload = token ? await verifyAuth(token) : null;
+  const payload = await getCurrentSuper();
 
   if (!payload || !payload.userId) {
     redirect("/?login=true"); // 未登录跳转首页并触发登录框

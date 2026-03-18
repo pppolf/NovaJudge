@@ -16,7 +16,16 @@ export async function POST(req: Request) {
     if (isGlobalAdmin) {
       // 1. 超级管理员登录逻辑
       user = await prisma.globalUser.findUnique({ where: { username } });
-      role = "SUPER_ADMIN";
+      if (!user || user.role !== "SUPER_ADMIN") {
+        return NextResponse.json({ error: "User not found" }, { status: 401 });
+      }
+      if (user.isBanned) {
+        return NextResponse.json(
+          { error: "Account has been banned" },
+          { status: 403 }
+        );
+      }
+      role = user.role;
     } else {
       // 2. 比赛用户登录逻辑
       if (!contestId) {
@@ -55,8 +64,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 401 });
     }
 
+    if (!user.password) {
+      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
+    }
+
     // 4. 验证密码 (假设数据库存的是 hash，如果是明文测试请直接比较)
-    const isPasswordValid = await bcrypt.compare(password, user.password!);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }

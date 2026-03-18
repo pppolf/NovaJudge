@@ -30,6 +30,7 @@ export type GlobalUserMinAggregateOutputType = {
   password: string | null
   role: string | null
   externalId: string | null
+  isBanned: boolean | null
   displayName: string | null
   studentId: string | null
   email: string | null
@@ -43,6 +44,7 @@ export type GlobalUserMaxAggregateOutputType = {
   password: string | null
   role: string | null
   externalId: string | null
+  isBanned: boolean | null
   displayName: string | null
   studentId: string | null
   email: string | null
@@ -56,6 +58,7 @@ export type GlobalUserCountAggregateOutputType = {
   password: number
   role: number
   externalId: number
+  isBanned: number
   displayName: number
   studentId: number
   email: number
@@ -71,6 +74,7 @@ export type GlobalUserMinAggregateInputType = {
   password?: true
   role?: true
   externalId?: true
+  isBanned?: true
   displayName?: true
   studentId?: true
   email?: true
@@ -84,6 +88,7 @@ export type GlobalUserMaxAggregateInputType = {
   password?: true
   role?: true
   externalId?: true
+  isBanned?: true
   displayName?: true
   studentId?: true
   email?: true
@@ -97,6 +102,7 @@ export type GlobalUserCountAggregateInputType = {
   password?: true
   role?: true
   externalId?: true
+  isBanned?: true
   displayName?: true
   studentId?: true
   email?: true
@@ -183,6 +189,7 @@ export type GlobalUserGroupByOutputType = {
   password: string | null
   role: string
   externalId: string | null
+  isBanned: boolean
   displayName: string | null
   studentId: string | null
   email: string | null
@@ -217,6 +224,7 @@ export type GlobalUserWhereInput = {
   password?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
   role?: Prisma.StringFilter<"GlobalUser"> | string
   externalId?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
+  isBanned?: Prisma.BoolFilter<"GlobalUser"> | boolean
   displayName?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
   studentId?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
   email?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
@@ -232,6 +240,7 @@ export type GlobalUserOrderByWithRelationInput = {
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   externalId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isBanned?: Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   studentId?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -250,6 +259,7 @@ export type GlobalUserWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.GlobalUserWhereInput | Prisma.GlobalUserWhereInput[]
   password?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
   role?: Prisma.StringFilter<"GlobalUser"> | string
+  isBanned?: Prisma.BoolFilter<"GlobalUser"> | boolean
   displayName?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
   studentId?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
   email?: Prisma.StringNullableFilter<"GlobalUser"> | string | null
@@ -265,6 +275,7 @@ export type GlobalUserOrderByWithAggregationInput = {
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   externalId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isBanned?: Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   studentId?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -284,6 +295,7 @@ export type GlobalUserScalarWhereWithAggregatesInput = {
   password?: Prisma.StringNullableWithAggregatesFilter<"GlobalUser"> | string | null
   role?: Prisma.StringWithAggregatesFilter<"GlobalUser"> | string
   externalId?: Prisma.StringNullableWithAggregatesFilter<"GlobalUser"> | string | null
+  isBanned?: Prisma.BoolWithAggregatesFilter<"GlobalUser"> | boolean
   displayName?: Prisma.StringNullableWithAggregatesFilter<"GlobalUser"> | string | null
   studentId?: Prisma.StringNullableWithAggregatesFilter<"GlobalUser"> | string | null
   email?: Prisma.StringNullableWithAggregatesFilter<"GlobalUser"> | string | null
@@ -297,6 +309,7 @@ export type GlobalUserCreateInput = {
   password?: string | null
   role?: string
   externalId?: string | null
+  isBanned?: boolean
   displayName?: string | null
   studentId?: string | null
   email?: string | null
@@ -312,6 +325,7 @@ export type GlobalUserUncheckedCreateInput = {
   password?: string | null
   role?: string
   externalId?: string | null
+  isBanned?: boolean
   displayName?: string | null
   studentId?: string | null
   email?: string | null
@@ -327,6 +341,7 @@ export type GlobalUserUpdateInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -342,6 +357,7 @@ export type GlobalUserUncheckedUpdateInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -357,6 +373,7 @@ export type GlobalUserCreateManyInput = {
   password?: string | null
   role?: string
   externalId?: string | null
+  isBanned?: boolean
   displayName?: string | null
   studentId?: string | null
   email?: string | null
@@ -370,6 +387,7 @@ export type GlobalUserUpdateManyMutationInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -383,6 +401,7 @@ export type GlobalUserUncheckedUpdateManyInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -396,6 +415,7 @@ export type GlobalUserCountOrderByAggregateInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  isBanned?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -409,6 +429,7 @@ export type GlobalUserMaxOrderByAggregateInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  isBanned?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -422,6 +443,7 @@ export type GlobalUserMinOrderByAggregateInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  isBanned?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -479,6 +501,7 @@ export type GlobalUserCreateWithoutApiKeysInput = {
   password?: string | null
   role?: string
   externalId?: string | null
+  isBanned?: boolean
   displayName?: string | null
   studentId?: string | null
   email?: string | null
@@ -493,6 +516,7 @@ export type GlobalUserUncheckedCreateWithoutApiKeysInput = {
   password?: string | null
   role?: string
   externalId?: string | null
+  isBanned?: boolean
   displayName?: string | null
   studentId?: string | null
   email?: string | null
@@ -523,6 +547,7 @@ export type GlobalUserUpdateWithoutApiKeysInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -537,6 +562,7 @@ export type GlobalUserUncheckedUpdateWithoutApiKeysInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -551,6 +577,7 @@ export type GlobalUserCreateWithoutSubmissionsInput = {
   password?: string | null
   role?: string
   externalId?: string | null
+  isBanned?: boolean
   displayName?: string | null
   studentId?: string | null
   email?: string | null
@@ -565,6 +592,7 @@ export type GlobalUserUncheckedCreateWithoutSubmissionsInput = {
   password?: string | null
   role?: string
   externalId?: string | null
+  isBanned?: boolean
   displayName?: string | null
   studentId?: string | null
   email?: string | null
@@ -595,6 +623,7 @@ export type GlobalUserUpdateWithoutSubmissionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -609,6 +638,7 @@ export type GlobalUserUncheckedUpdateWithoutSubmissionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -663,6 +693,7 @@ export type GlobalUserSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   password?: boolean
   role?: boolean
   externalId?: boolean
+  isBanned?: boolean
   displayName?: boolean
   studentId?: boolean
   email?: boolean
@@ -679,6 +710,7 @@ export type GlobalUserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   password?: boolean
   role?: boolean
   externalId?: boolean
+  isBanned?: boolean
   displayName?: boolean
   studentId?: boolean
   email?: boolean
@@ -692,6 +724,7 @@ export type GlobalUserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   password?: boolean
   role?: boolean
   externalId?: boolean
+  isBanned?: boolean
   displayName?: boolean
   studentId?: boolean
   email?: boolean
@@ -705,6 +738,7 @@ export type GlobalUserSelectScalar = {
   password?: boolean
   role?: boolean
   externalId?: boolean
+  isBanned?: boolean
   displayName?: boolean
   studentId?: boolean
   email?: boolean
@@ -712,7 +746,7 @@ export type GlobalUserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type GlobalUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "password" | "role" | "externalId" | "displayName" | "studentId" | "email" | "createdAt" | "updatedAt", ExtArgs["result"]["globalUser"]>
+export type GlobalUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "password" | "role" | "externalId" | "isBanned" | "displayName" | "studentId" | "email" | "createdAt" | "updatedAt", ExtArgs["result"]["globalUser"]>
 export type GlobalUserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   submissions?: boolean | Prisma.GlobalUser$submissionsArgs<ExtArgs>
   apiKeys?: boolean | Prisma.GlobalUser$apiKeysArgs<ExtArgs>
@@ -733,6 +767,7 @@ export type $GlobalUserPayload<ExtArgs extends runtime.Types.Extensions.Internal
     password: string | null
     role: string
     externalId: string | null
+    isBanned: boolean
     displayName: string | null
     studentId: string | null
     email: string | null
@@ -1168,6 +1203,7 @@ export interface GlobalUserFieldRefs {
   readonly password: Prisma.FieldRef<"GlobalUser", 'String'>
   readonly role: Prisma.FieldRef<"GlobalUser", 'String'>
   readonly externalId: Prisma.FieldRef<"GlobalUser", 'String'>
+  readonly isBanned: Prisma.FieldRef<"GlobalUser", 'Boolean'>
   readonly displayName: Prisma.FieldRef<"GlobalUser", 'String'>
   readonly studentId: Prisma.FieldRef<"GlobalUser", 'String'>
   readonly email: Prisma.FieldRef<"GlobalUser", 'String'>

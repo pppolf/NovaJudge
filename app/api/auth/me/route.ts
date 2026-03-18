@@ -1,7 +1,24 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getVerifiedGlobalUser, verifyAuth } from "@/lib/auth";
+import { serialize } from "cookie";
+
+function clearAuthTokenResponse() {
+  const cookie = serialize("auth_token", "", {
+    httpOnly: true,
+    secure:
+      process.env.NODE_ENV === "production" &&
+      process.env.ENABLE_SECURE_COOKIE === "true",
+    sameSite: "strict",
+    maxAge: 0,
+    path: "/",
+  });
+
+  return NextResponse.json(
+    { user: null },
+    { headers: { "Set-Cookie": cookie } },
+  );
+}
 
 export async function GET() {
   try {
@@ -10,34 +27,22 @@ export async function GET() {
     const userToken = store.get("user_token")?.value;
 
     if (authToken) {
-      try {
-        const u = await verifyAuth(authToken);
-        const gu = await prisma.globalUser.findUnique({
-          where: { id: String(u.userId) },
+      const user = await getVerifiedGlobalUser(authToken);
+      if (user) {
+        return NextResponse.json({
+          user: {
+            username: user.username,
+            role: user.role,
+            isGlobalAdmin: !!user.isGlobalAdmin,
+            contestId: user.contestId ?? null,
+            displayName: user.displayName,
+            studentId: user.studentId,
+            email: user.email,
+          },
         });
-        if (gu) {
-          return NextResponse.json({
-            user: {
-              username: gu.username,
-              role: u.role,
-              isGlobalAdmin: !!u.isGlobalAdmin,
-              contestId: u.contestId ?? null,
-              displayName: gu.displayName,
-              studentId: gu.studentId,
-              email: gu.email,
-            },
-          });
-        } else {
-          return NextResponse.json({
-            user: {
-              username: u.username,
-              role: u.role,
-              isGlobalAdmin: !!u.isGlobalAdmin,
-              contestId: u.contestId ?? null,
-            },
-          });
-        }
-      } catch {}
+      }
+
+      return clearAuthTokenResponse();
     }
 
     if (userToken) {

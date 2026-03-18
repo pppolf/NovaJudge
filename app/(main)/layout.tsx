@@ -18,9 +18,18 @@ export default function RootLayout({
       <footer className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto py-6 px-4 text-center">
           <p className="text-gray-500 text-xs">
-            CWNU PAA (西华师范大学程序设计算法协会) @ Gao Ming
+            Created by CWNU Programming Algorithm Association Gao Ming |
+            gaoyanghyy@163.com
             <br />
-            NovaJudge © {new Date().getFullYear()} All rights reserved.
+            Powered by{" "}
+            <a
+              className=" text-gray-800"
+              href="https://github.com/pppolf/NovaJudge"
+              target="_blank"
+            >
+              NovaJudge
+            </a>{" "}
+            Community © {new Date().getFullYear()} All rights reserved.
           </p>
         </div>
       </footer>
