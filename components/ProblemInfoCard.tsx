@@ -22,7 +22,7 @@ export default async function ProblemInfoCard({
   isAdmin = false,
 }: ProblemInfoProps) {
   const dict = await getDictionary();
-  const memoryLimit = info.memoryLimit * 1024;
+  const memoryLimit = info.memoryLimit;
   return (
     <div className="bg-white border border-gray-200 shadow-sm rounded-sm overflow-hidden w-full lg:w-72 shrink-0">
       <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
@@ -38,7 +38,7 @@ export default async function ProblemInfoCard({
             {dict.problemDetail.timeLimit} (Java / Others)
           </div>
           <div className="font-bold text-gray-800 text-lg">
-            {2 * info.timeLimit} / {info.timeLimit} MS
+            {2 * info.timeLimit} / <span className="time-limit">{info.timeLimit}</span> MS
           </div>
         </li>
         <li className="px-4 py-3">
@@ -46,7 +46,7 @@ export default async function ProblemInfoCard({
             {dict.problemDetail.memoryLimit} (Java / Others)
           </div>
           <div className="font-bold text-gray-800 text-lg">
-            {2 * memoryLimit} / {memoryLimit} K
+            {2 * memoryLimit} / <span className="memory-limit">{memoryLimit}</span> MB
           </div>
         </li>
         <li className="px-4 py-3 flex justify-between">

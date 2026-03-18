@@ -23,8 +23,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | NovaJudge", 
-    default: "NovaJudge - 西华师范大学算法评测平台", 
+    template: "%s | NovaJudge",
+    default: "NovaJudge - 西华师范大学算法评测平台",
   },
   description: "High-performance Online Judge system",
 };

@@ -74,6 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   return {
     title: `${displayId} - ${contestProblem.problem.title}`,
+    generator: "NovaJudge",
   };
 }
 
@@ -161,8 +162,19 @@ export default async function ProblemDetail({ params }: Props) {
 
   const dict = await getDictionary();
 
+  const ccData = {
+    name: `${problemId} - ${problem.title}`,
+    timeLimit: problem.defaultTimeLimit,
+    memoryLimit: problem.defaultMemoryLimit,
+    samples: (problem as unknown as Problem).samples,
+  };
+
+  const safeData =
+    "CC_START" + encodeURIComponent(JSON.stringify(ccData)) + "CC_END";
+
   return (
     <div className="flex flex-col w-full lg:flex-row gap-6 items-start">
+      <div style={{ display: "none" }}>{safeData}</div>
       {/* --- 左侧：题目基本信息卡片 --- */}
       <aside className="w-full lg:w-72 shrink-0 space-y-4">
         <ProblemInfoCard

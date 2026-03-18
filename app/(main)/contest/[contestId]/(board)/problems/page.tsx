@@ -28,6 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   return {
     title: `题目列表 - ${contest.title}`,
+    generator: "NovaJudge Contest",
   };
 }
 
@@ -194,7 +195,7 @@ export default async function Problems({ params }: Props) {
                         {prob.displayId}
                       </div>
                     </td>
-                    <td className="px-6 py-2">
+                    <td className="px-6 py-2 novajudge-problem-link">
                       <Link
                         href={`/contest/${contestId}/problems/${prob.displayId}`}
                         className="text-blue-600 hover:underline hover:text-blue-800"
