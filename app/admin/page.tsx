@@ -13,6 +13,8 @@ import {
   CommandLineIcon,
 } from "@heroicons/react/24/outline";
 
+export const dynamic = "force-dynamic";
+
 // 格式化字节大小
 function formatBytes(bytes: number, decimals = 2) {
   if (!+bytes) return "0 Bytes";

@@ -6,11 +6,51 @@
   --foreground: #171717;
 }
 
+@layer base {
+  body {
+    /* 英文/数字优先使用 Times New Roman，遇到中文时无缝平滑回退到 苹方/微软雅黑 */
+    font-family: "Times New Roman", "PingFang SC", "Microsoft YaHei", serif;
+  }
+
+  code,
+  pre {
+    font-family: Consolas, "Courier New", monospace;
+  }
+}
+
+/* 1. 拯救 UI 界面 (导航栏、按钮、列表等) */
+/* 强制把 font-sans 变成现代高清无锯齿字体 */
+.font-sans {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
+    "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* 2. 注入 ACM 灵魂 (题目标题等使用了 font-serif 的地方) */
+/* 英文使用新罗马，中文完美回退到微软雅黑 */
+.font-serif {
+  font-family:
+    "Times New Roman", "PingFang SC", "Microsoft YaHei", serif !important;
+}
+
+/* 3. 拯救 Markdown 题面正文 (终极镇压 .prose) */
+/* 让所有题面文字都变成新罗马体，仪式感拉满！ */
+.prose {
+  font-family:
+    "Times New Roman", "PingFang SC", "Microsoft YaHei", serif !important;
+}
+
+/* 4. 保护代码块不被新罗马体误伤 (必须保持等宽) */
+code,
+pre,
+.prose code,
+.prose pre {
+  font-family: Consolas, "Courier New", monospace !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {

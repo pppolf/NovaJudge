@@ -129,7 +129,10 @@ export default function RankTable({
               </td>
               <td>
                 <div className="flex flex-col items-center max-h-full max-w-full">
-                  <div className="font-bold text-blue-900 truncate w-full px-2">
+                  <div
+                    className="font-bold text-blue-900 truncate w-full max-w-50 px-2"
+                    title={team.displayName || team.username || ""}
+                  >
                     {team.category === "1"
                       ? "⭐"
                       : team.category === "2"
@@ -137,10 +140,16 @@ export default function RankTable({
                         : ""}
                     {team.displayName || team.username}
                   </div>
-                  <div className="text-gray-900 truncate w-full px-2 text-xs">
+                  <div
+                    className="text-gray-900 truncate w-full max-w-50 px-2 text-xs"
+                    title={team.members || team.username || ""}
+                  >
                     {team.members || team.username}
                   </div>
-                  <div className="text-gray-900 truncate w-full px-2 text-xs">
+                  <div
+                    className="text-gray-900 truncate w-full max-w-50 px-2 text-xs"
+                    title={team.school || ""}
+                  >
                     {team.school}
                   </div>
                 </div>
@@ -160,7 +169,7 @@ export default function RankTable({
                 return (
                   <td
                     key={idx}
-                    className={`p-1 border border-white relative group ${
+                    className={`p-0.5 border border-white relative group ${
                       isFrozenCell ? "bg-blue-700 text-white" : cellBg
                     }`}
                   >
@@ -179,8 +188,8 @@ export default function RankTable({
                             viewBox="0 0 1024 1024"
                             version="1.1"
                             xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
+                            width="15"
+                            height="15"
                           >
                             <path
                               d="M414.165333 652.501333L273.664 512l140.501333-140.501333a42.666667 42.666667 0 1 0-60.330666-60.330667l-170.666667 170.666667a42.666667 42.666667 0 0 0 0 60.330666l170.666667 170.666667a42.666667 42.666667 0 1 0 60.330666-60.330667zM609.834667 371.498667L750.336 512l-140.501333 140.501333a42.666667 42.666667 0 1 0 60.330666 60.330667l170.666667-170.666667c7.936-7.936 12.501333-18.944 12.501333-30.165333s-4.565333-22.186667-12.501333-30.165333l-170.666667-170.666667a42.666667 42.666667 0 1 0-60.330666 60.330667z"
