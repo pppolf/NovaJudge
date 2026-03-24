@@ -173,39 +173,24 @@ export default async function Status({ params, searchParams }: Props) {
 
   // 用户搜索（模糊匹配用户名或displayName）
   if (userSearch && canSearch) {
-    where.user = {
-      OR: [
-        {
-          username: {
-            contains: userSearch,
-            mode: "insensitive",
-          },
+    where.OR = [
+      {
+        user: {
+          OR: [
+            { username: { contains: userSearch, mode: "insensitive" } },
+            { displayName: { contains: userSearch, mode: "insensitive" } },
+          ],
         },
-        {
-          displayName: {
-            contains: userSearch,
-            mode: "insensitive",
-          },
+      },
+      {
+        globalUser: {
+          OR: [
+            { username: { contains: userSearch, mode: "insensitive" } },
+            { displayName: { contains: userSearch, mode: "insensitive" } },
+          ],
         },
-      ],
-    };
-
-    where.globalUser = {
-      OR: [
-        {
-          username: {
-            contains: userSearch,
-            mode: "insensitive",
-          },
-        },
-        {
-          displayName: {
-            contains: userSearch,
-            mode: "insensitive",
-          },
-        },
-      ],
-    };
+      },
+    ];
   }
 
   const [totalCount, submissions, allProblems, allLanguages, allVerdicts] =
