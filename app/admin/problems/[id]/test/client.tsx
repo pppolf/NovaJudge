@@ -4,17 +4,26 @@ import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
+import rehypeMathjax from "rehype-mathjax/svg";
 import rehypeRaw from "rehype-raw";
-import "katex/dist/katex.min.css";
-import { adminSubmit } from "./actions";
-import { PlayIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
+import { adminSubmit, debugAllSamples } from "./actions";
+import {
+  PlayIcon,
+  CheckCircleIcon,
+  BeakerIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/solid";
 import CodeBlock from "@/components/CodeBlock";
 import CodeEditor from "@/components/CodeEditor";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import type {
+  DebugAllSamplesResult,
+  SampleDebugResult,
+  SampleDebugVerdict,
+} from "@/lib/judge";
 
-// 提取公共样式：标题样式 (蓝色竖线)
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <h3 className="text-lg font-bold text-blue-800 border-l-4 border-blue-600 pl-3 mb-3 font-serif tracking-wide">
     {children}
@@ -41,12 +50,96 @@ interface ProblemDetail {
   hint: string;
 }
 
+const VERDICT_STYLES: Record<
+  SampleDebugVerdict,
+  { label: string; className: string }
+> = {
+  AC: { label: "AC", className: "text-green-700 bg-green-50 border-green-200" },
+  WA: { label: "WA", className: "text-red-700 bg-red-50 border-red-200" },
+  TLE: {
+    label: "TLE",
+    className: "text-orange-700 bg-orange-50 border-orange-200",
+  },
+  MLE: {
+    label: "MLE",
+    className: "text-orange-700 bg-orange-50 border-orange-200",
+  },
+  RE: {
+    label: "RE",
+    className: "text-purple-700 bg-purple-50 border-purple-200",
+  },
+  CE: {
+    label: "CE",
+    className: "text-yellow-700 bg-yellow-50 border-yellow-200",
+  },
+  SE: { label: "SE", className: "text-gray-700 bg-gray-100 border-gray-200" },
+};
+
+function ResultCard({ result }: { result: SampleDebugResult }) {
+  const verdictStyle = VERDICT_STYLES[result.verdict];
+
+  return (
+    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+      <div className="px-4 py-3 border-b bg-gray-50 flex flex-wrap items-center gap-3 justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-semibold text-gray-800">
+            Sample {result.sampleIndex}
+          </span>
+          <span
+            className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-bold ${verdictStyle.className}`}
+          >
+            {verdictStyle.label}
+          </span>
+        </div>
+        <div className="text-xs text-gray-500 flex items-center gap-3">
+          <span>Time: {result.timeUsedMs ?? "-"} ms</span>
+          <span>Memory: {result.memoryUsedKb ?? "-"} KB</span>
+        </div>
+      </div>
+
+      <div className="p-4 space-y-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+            Input
+          </p>
+          <CodeBlock code={result.input} />
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+            Expected Output
+          </p>
+          <CodeBlock code={result.expectedOutput} />
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+            Actual Output
+          </p>
+          <CodeBlock code={result.actualOutput} />
+        </div>
+        {result.message && (
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+              Message
+            </p>
+            <CodeBlock code={result.message} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function TestInterface({ problem }: { problem: ProblemDetail }) {
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("cpp");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDebugging, setIsDebugging] = useState(false);
   const [lastId, setLastId] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [debugResult, setDebugResult] = useState<DebugAllSamplesResult | null>(
+    null,
+  );
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -63,7 +156,7 @@ export default function TestInterface({ problem }: { problem: ProblemDetail }) {
   }, [problem.id]);
 
   useEffect(() => {
-    if (!isLoaded) return; // 防止未加载完成前的空状态覆盖了缓存
+    if (!isLoaded) return;
 
     const timer = setTimeout(() => {
       localStorage.setItem(`xcpc_admin_p${problem.id}_code`, code);
@@ -97,9 +190,43 @@ export default function TestInterface({ problem }: { problem: ProblemDetail }) {
     }
   };
 
+  const handleDebug = async () => {
+    if (!code.trim()) {
+      toast.error("Code cannot be empty");
+      return;
+    }
+
+    setIsDebugging(true);
+    try {
+      const res = await debugAllSamples(problem.id, code, language);
+      if (res.error) {
+        toast.error(res.error);
+        return;
+      }
+      if (res.success) {
+        setDebugResult(res.data);
+        setIsDrawerOpen(true);
+        if (res.data.compile.ok) {
+          if (res.data.summary.total === 0) {
+            toast.message(res.data.message || "No samples available");
+          } else {
+            toast.success(
+              `Debug finished: ${res.data.summary.passed}/${res.data.summary.total} passed`,
+            );
+          }
+        } else {
+          toast.error(res.data.compile.message || "Debug failed");
+        }
+      }
+    } catch (e) {
+      toast.error("Debug failed: " + e);
+    } finally {
+      setIsDebugging(false);
+    }
+  };
+
   return (
     <div className="h-[calc(100vh-6rem)] flex flex-col lg:flex-row gap-4">
-      {/* --- 左侧：题目预览区 (50%) --- */}
       <div className="flex-1 relative bg-white border border-gray-200 rounded-lg shadow-sm overflow-y-auto p-6 min-h-0">
         <div className="absolute inset-0 overflow-y-auto p-6">
           <h1 className="text-3xl font-serif font-bold text-gray-900 mb-8 text-center border-b pb-4">
@@ -107,23 +234,20 @@ export default function TestInterface({ problem }: { problem: ProblemDetail }) {
           </h1>
 
           <div className="space-y-8">
-            {/* 1. 渲染常规文本段落 (Description, Input, Output) */}
             {problem.sections.map((section: Section, index: number) => (
               <div key={`section-${index}`}>
                 <SectionTitle>{section.title}</SectionTitle>
                 <article className="prose prose-sm md:prose-base max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-pre:bg-gray-100 prose-pre:text-gray-800">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkMath]}
-                    rehypePlugins={[rehypeKatex, rehypeRaw]}
+                    rehypePlugins={[rehypeRaw, rehypeMathjax]}
                   >
                     {section.content}
                   </ReactMarkdown>
                 </article>
               </div>
             ))}
-            {/* 2. 渲染样例数组 */}
             {problem.samples.map((sample: Sample, index: number) => {
-              // 如果只有一组样例，标题不显示序号；如果有多组，显示 1, 2, 3...
               const suffix = problem.samples.length > 1 ? ` ${index + 1}` : "";
 
               return (
@@ -139,14 +263,13 @@ export default function TestInterface({ problem }: { problem: ProblemDetail }) {
                 </div>
               );
             })}
-            {/* 3. 渲染 Hint (如果有) */}
             {problem.hint && (
               <div>
                 <SectionTitle>Hint</SectionTitle>
                 <article className="prose prose-sm md:prose-base max-w-none">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkMath]}
-                    rehypePlugins={[rehypeKatex, rehypeRaw]}
+                    rehypePlugins={[rehypeRaw, rehypeMathjax]}
                   >
                     {problem.hint}
                   </ReactMarkdown>
@@ -157,9 +280,8 @@ export default function TestInterface({ problem }: { problem: ProblemDetail }) {
         </div>
       </div>
 
-      {/* --- 右侧：代码编辑区 (50%) --- */}
-      <div className="flex-1 flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-gray-50 border-b px-4 py-2 flex justify-between items-center">
+      <div className="flex-1 flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden min-h-0">
+        <div className="bg-gray-50 border-b px-4 py-2 flex flex-wrap justify-between items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="font-bold text-gray-700">Code Editor</span>
             <select
@@ -173,31 +295,120 @@ export default function TestInterface({ problem }: { problem: ProblemDetail }) {
               <option value="pypy3">PyPy3</option>
             </select>
           </div>
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-sm font-bold flex items-center gap-2 transition-colors disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              "Submitting..."
-            ) : (
-              <>
-                <PlayIcon className="w-4 h-4" /> Submit
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDebug}
+              disabled={isDebugging}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-bold flex items-center gap-2 transition-colors disabled:opacity-50"
+            >
+              {isDebugging ? (
+                "Debugging..."
+              ) : (
+                <>
+                  <BeakerIcon className="w-4 h-4" /> Debug All Samples
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-sm font-bold flex items-center gap-2 transition-colors disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                "Submitting..."
+              ) : (
+                <>
+                  <PlayIcon className="w-4 h-4" /> Submit
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* min-h-0 对于 flex 容器内的 Monaco 很重要 */}
-        <div className="flex-1 relative w-full min-h-0">
-          <div className="absolute inset-0">
-            {/* pb-2 留一点底部空隙防止贴底 */}
+        <div className="relative flex-1 min-h-0 bg-white">
+          <div
+            className={`absolute inset-x-0 top-0 p-3 transition-[bottom] duration-300 ease-out ${
+              isDrawerOpen ? "bottom-88 md:bottom-96" : "bottom-14"
+            }`}
+          >
             <CodeEditor
               value={code}
               language={language}
               onChange={setCode}
               height="100%"
             />
+          </div>
+
+          <div
+            className={`absolute inset-x-0 bottom-0 z-10 border-t border-gray-200 bg-gray-50/95 backdrop-blur transition-transform duration-300 ease-out ${
+              isDrawerOpen ? "translate-y-0" : "translate-y-[calc(100%-3.5rem)]"
+            }`}
+          >
+            <button
+              type="button"
+              onClick={() => setIsDrawerOpen((open) => !open)}
+              className="w-full px-4 py-3 border-b border-gray-200 bg-white/90 hover:bg-white transition-colors"
+            >
+              <div className="mx-auto mb-2 h-1.5 w-14 rounded-full bg-gray-300" />
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-left">
+                  <h2 className="text-sm font-bold text-gray-800">
+                    Sample Debug Results
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Click to {isDrawerOpen ? "hide" : "show"} per-sample outputs
+                    and verdicts.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {debugResult && debugResult.compile.ok && (
+                    <div className="text-sm font-semibold text-gray-700">
+                      Passed {debugResult.summary.passed}/
+                      {debugResult.summary.total}
+                    </div>
+                  )}
+                  {isDrawerOpen ? (
+                    <ChevronDownIcon className="w-5 h-5 text-gray-500" />
+                  ) : (
+                    <ChevronUpIcon className="w-5 h-5 text-gray-500" />
+                  )}
+                </div>
+              </div>
+            </button>
+
+            <div className="h-88 overflow-y-auto p-4 md:h-96">
+              <div className="space-y-4">
+                {!debugResult && (
+                  <div className="border border-dashed border-gray-300 rounded-lg bg-white px-4 py-8 text-center text-sm text-gray-500">
+                    Click{" "}
+                    <span className="font-semibold">Debug All Samples</span> to
+                    see per-sample outputs and verdicts here.
+                  </div>
+                )}
+
+                {debugResult && !debugResult.compile.ok && (
+                  <div className="border border-red-200 bg-red-50 rounded-lg p-4">
+                    <p className="text-sm font-semibold text-red-700 mb-2">
+                      Compile / Debug Error
+                    </p>
+                    <CodeBlock
+                      code={debugResult.compile.message || "Unknown error"}
+                    />
+                  </div>
+                )}
+
+                {debugResult?.compile.ok && debugResult.message && (
+                  <div className="border border-gray-200 bg-white rounded-lg px-4 py-3 text-sm text-gray-600">
+                    {debugResult.message}
+                  </div>
+                )}
+
+                {debugResult?.compile.ok &&
+                  debugResult.results.map((result) => (
+                    <ResultCard key={result.sampleIndex} result={result} />
+                  ))}
+              </div>
+            </div>
           </div>
         </div>
 

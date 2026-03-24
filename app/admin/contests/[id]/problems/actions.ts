@@ -60,3 +60,93 @@ export async function removeContestProblem(id: string, contestId: number) {
   });
   revalidatePath(`/admin/contests/${contestId}/problems`);
 }
+
+export async function updateProblemDisplayId(
+  contestProblemId: number,
+  newDisplayId: string,
+  contestId: number,
+) {
+  try {
+    if (!newDisplayId.trim()) {
+      return { error: "Display ID 不能为空" };
+    }
+
+    // 检查是否已有重复的 Display ID
+    const existing = await prisma.contestProblem.findFirst({
+      where: {
+        contestId: contestId,
+        displayId: newDisplayId,
+        problemId: { not: contestProblemId },
+      },
+    });
+
+    if (existing) {
+      return { error: `题号 ${newDisplayId} 已被其他题目使用` };
+    }
+
+    // 更新 displayId
+    await prisma.contestProblem.update({
+      where: {
+        contestId_problemId: {
+          contestId: contestId,
+          problemId: contestProblemId,
+        },
+      },
+      data: { displayId: newDisplayId.toUpperCase() }, // 建议转为大写
+    });
+
+    // 刷新相关页面的缓存
+    revalidatePath(`/admin/contests/${contestId}/problems`);
+    revalidatePath(`/contest/${contestId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update displayId:", error);
+    return { error: "更新失败，请重试" };
+  }
+}
+
+export async function swapProblemDisplayIds(
+  contestId: number,
+  problemId1: number,
+  problemId2: number
+) {
+  try {
+    // 1. 查出需要交换的两道题目
+    const problem1 = await prisma.contestProblem.findFirst({
+      where: { contestId: contestId, problemId: problemId1 },
+    });
+    const problem2 = await prisma.contestProblem.findFirst({
+      where: { contestId: contestId, problemId: problemId2 },
+    });
+
+    if (!problem1 || !problem2) {
+      return { error: "未找到对应的比赛题目" };
+    }
+
+    await prisma.$transaction([
+      prisma.contestProblem.update({
+        where: { id: problem1.id },
+        data: { displayId: `TEMP_SWAP_${problem1.id}` },
+      }),
+      prisma.contestProblem.update({
+        where: { id: problem2.id },
+        data: { displayId: problem1.displayId },
+      }),
+      prisma.contestProblem.update({
+        where: { id: problem1.id },
+        data: { displayId: problem2.displayId },
+      }),
+    ]);
+
+    // 3. 刷新前端路由缓存
+    revalidatePath(`/admin/contests/${contestId}/problems`);
+    revalidatePath(`/contest/${contestId}`);
+
+    return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    console.error("Failed to swap displayIds:", error);
+    return { error: "交换题目顺序失败" };
+  }
+}

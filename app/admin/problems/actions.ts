@@ -75,7 +75,7 @@ export async function saveProblem(formData: FormData) {
         data,
       });
     }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     return { error: e.message || "Failed to save problem" };
   }
@@ -89,7 +89,7 @@ export async function deleteProblem(id: number) {
   try {
     await prisma.problem.delete({ where: { id } });
     revalidatePath("/admin/problems");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     return { error: e.message || "Failed to delete problem" };
   }
@@ -138,7 +138,7 @@ export async function rejudgeProblem(problemId: number) {
 
     // 4. 刷新页面
     revalidatePath("/admin/problems");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     return { error: e.message || "Failed to rejudge problem" };
   }

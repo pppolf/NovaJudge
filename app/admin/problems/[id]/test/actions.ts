@@ -6,6 +6,7 @@ import { verifyAuth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { Verdict } from "@/lib/generated/prisma/enums";
 import { judgeQueue } from "@/lib/queue";
+import { debugProblemSamples } from "@/lib/judge";
 
 export async function adminSubmit(
   problemId: number,
@@ -47,6 +48,52 @@ export async function adminSubmit(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     return { error: e.message || "Failed to submit" };
+  }
+}
+
+export async function debugAllSamples(
+  problemId: number,
+  code: string,
+  language: string,
+) {
+  try {
+    const token = (await cookies()).get("auth_token")?.value;
+    if (!token) return { error: "Unauthorized" };
+
+    const payload = await verifyAuth(token);
+    if (!payload.isGlobalAdmin) {
+      return { error: "Only admin can perform this action" };
+    }
+
+    const problem = await prisma.problem.findUnique({
+      where: { id: problemId },
+      select: {
+        id: true,
+        type: true,
+        defaultTimeLimit: true,
+        defaultMemoryLimit: true,
+        judgeConfig: true,
+        samples: true,
+      },
+    });
+
+    if (!problem) {
+      return { error: "Problem not found" };
+    }
+
+    const result = await debugProblemSamples(
+      {
+        ...problem,
+        samples: problem.samples as { input: string; output: string }[],
+      },
+      code,
+      language,
+    );
+
+    return { success: true, data: result };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (e: any) {
+    return { error: e.message || "Failed to debug samples" };
   }
 }
 

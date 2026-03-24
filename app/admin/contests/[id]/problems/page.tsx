@@ -2,13 +2,17 @@ import {
   getContestProblems,
   addContestProblem,
   removeContestProblem,
+  swapProblemDisplayIds,
 } from "./actions";
 import {
   TrashIcon,
   PlusIcon,
   ArrowLeftIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import EditableDisplayId from "@/components/admin/EditableDisplayId";
 
 export default async function ContestProblemsPage({
   params,
@@ -60,49 +64,108 @@ export default async function ContestProblemsPage({
                 <thead className="bg-gray-50 text-gray-600 font-medium border-b">
                   <tr>
                     <th className="px-6 py-3 w-20">ID</th>
+                    <th className="px-6 py-3 w-20">Move</th>
                     <th className="px-6 py-3 w-20">Color</th>
                     <th className="px-6 py-3">Original Title (ID)</th>
                     <th className="px-6 py-3 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {contestProblems.map((cp) => (
-                    <tr key={cp.id} className="hover:bg-gray-50 group">
-                      <td className="px-6 py-4 font-bold text-lg font-mono text-gray-800">
-                        {cp.displayId}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div
-                          className="w-6 h-6 rounded-full border shadow-sm"
-                          style={{ backgroundColor: cp.color || "#ffffff" }}
-                          title={cp.color || "No color"}
-                        />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">
-                          {cp.problem.title}
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          Original ID: {cp.problemId}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <form
-                          action={async () => {
-                            "use server";
-                            await removeContestProblem(cp.id, contestId);
-                          }}
-                        >
-                          <button
-                            className="text-red-400 hover:text-red-600 p-2 rounded hover:bg-red-50 transition-colors"
-                            title="Remove from contest"
+                  {contestProblems.map((cp, index) => {
+                    const prevCp =
+                      index > 0 ? contestProblems[index - 1] : null;
+                    const nextCp =
+                      index < contestProblems.length - 1
+                        ? contestProblems[index + 1]
+                        : null;
+                    return (
+                      <tr key={cp.id} className="hover:bg-gray-50 group">
+                        <td className="px-6 py-4 font-bold text-lg font-mono text-gray-800">
+                          <EditableDisplayId
+                            contestProblemId={cp.problemId}
+                            contestId={contestId}
+                            initialDisplayId={cp.displayId}
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-1">
+                            {prevCp ? (
+                              <form
+                                action={async () => {
+                                  "use server";
+                                  await swapProblemDisplayIds(
+                                    contestId,
+                                    cp.problemId,
+                                    prevCp.problemId,
+                                  );
+                                }}
+                              >
+                                <button
+                                  type="submit"
+                                  className="hover:bg-gray-200 p-1 rounded text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
+                                >
+                                  <ArrowUpIcon className="w-4 h-4" />
+                                </button>
+                              </form>
+                            ) : (
+                              <div className="h-6 w-6" />
+                            )}
+                            {nextCp ? (
+                              <form
+                                action={async () => {
+                                  "use server";
+                                  await swapProblemDisplayIds(
+                                    contestId,
+                                    cp.problemId,
+                                    nextCp.problemId,
+                                  );
+                                }}
+                              >
+                                <button
+                                  type="submit"
+                                  className="hover:bg-gray-200 p-1 rounded text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
+                                >
+                                  <ArrowDownIcon className="w-4 h-4" />
+                                </button>
+                              </form>
+                            ) : (
+                              <div className="h-6 w-6" />
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div
+                            className="w-6 h-6 rounded-full border shadow-sm"
+                            style={{ backgroundColor: cp.color || "#ffffff" }}
+                            title={cp.color || "No color"}
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-gray-900">
+                            {cp.problem.title}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            Original ID: {cp.problemId}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <form
+                            action={async () => {
+                              "use server";
+                              await removeContestProblem(cp.id, contestId);
+                            }}
                           >
-                            <TrashIcon className="w-5 h-5" />
-                          </button>
-                        </form>
-                      </td>
-                    </tr>
-                  ))}
+                            <button
+                              className="text-red-400 hover:text-red-600 p-2 rounded hover:bg-red-50 transition-colors"
+                              title="Remove from contest"
+                            >
+                              <TrashIcon className="w-5 h-5" />
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}

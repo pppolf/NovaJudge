@@ -7,7 +7,6 @@ import { Verdict } from "@/lib/generated/prisma/enums";
 const GO_JUDGE_URL = process.env.GO_JUDGE_API || "http://localhost:5050";
 const STACK_SIZE_KB = Number(process.env.JUDGE_STACK_KB || 2097152);
 
-// --- 类型定义 ---
 interface LanguageConfig {
   srcName: string;
   exeName: string;
@@ -42,7 +41,53 @@ interface JudgeProgress {
   finished: boolean;
 }
 
-// --- 语言配置 ---
+interface SampleData {
+  input: string;
+  output: string;
+}
+
+interface ProblemForDebug {
+  id: number;
+  type: string;
+  defaultTimeLimit: number;
+  defaultMemoryLimit: number;
+  judgeConfig: unknown;
+  samples: SampleData[];
+}
+
+export type SampleDebugVerdict =
+  | "AC"
+  | "WA"
+  | "TLE"
+  | "MLE"
+  | "RE"
+  | "CE"
+  | "SE";
+
+export interface SampleDebugResult {
+  sampleIndex: number;
+  input: string;
+  expectedOutput: string;
+  actualOutput: string;
+  verdict: SampleDebugVerdict;
+  timeUsedMs?: number;
+  memoryUsedKb?: number;
+  message?: string;
+}
+
+export interface DebugAllSamplesResult {
+  compile: {
+    ok: boolean;
+    message?: string;
+  };
+  results: SampleDebugResult[];
+  summary: {
+    total: number;
+    passed: number;
+  };
+  message?: string;
+}
+
 export const LANGUAGES: Record<string, LanguageConfig> = {
   c: {
     srcName: "main.c",
@@ -99,9 +144,6 @@ export const LANGUAGES: Record<string, LanguageConfig> = {
   },
 };
 
-// --- 辅助函数 ---
-
-// 调用 go-judge 的 /run 接口
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function callGoJudge(payload: any) {
   const res = await fetch(`${GO_JUDGE_URL}/run`, {
@@ -125,19 +167,50 @@ async function deleteTmpFile(id: string) {
   }
 }
 
-// 清理文本 (去除末尾空白) 用于比对
 function cleanOutput(str: string) {
   if (!str) return "";
   return str.trim().replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 }
 
-// 辅助：更新进度到 Redis
+function getProblemDataDir(problemId: number) {
+  return path.join(
+    process.cwd(),
+    "uploads",
+    "problems",
+    problemId.toString(),
+    "data",
+  );
+}
+
 async function updateProgress(submissionId: string, data: JudgeProgress) {
   const key = `submission:${submissionId}:progress`;
   await redis.set(key, JSON.stringify(data), "EX", 3600);
 }
 
-// 编译 SPJ Checker
+function getLanguageLimits(
+  problem: Pick<
+    ProblemForDebug,
+    "defaultTimeLimit" | "defaultMemoryLimit" | "judgeConfig"
+  >,
+  language: string,
+) {
+  const judgeConfig = problem.judgeConfig as JudgeConfig | null;
+  let timeLimitRate =
+    judgeConfig?.time_limit_rate?.[language as keyof LanguageJudgeConfig] || 1;
+  let memoryLimitRate =
+    judgeConfig?.memory_limit_rate?.[language as keyof LanguageJudgeConfig] || 1;
+
+  if (language === "java") {
+    timeLimitRate *= 2;
+    memoryLimitRate *= 2;
+  }
+
+  return {
+    timeLimit: problem.defaultTimeLimit * 1000000 * timeLimitRate,
+    memoryLimit: problem.defaultMemoryLimit * 1024 * 1024 * memoryLimitRate,
+  };
+}
+
 async function compileChecker(dataDir: string, checkerName: string) {
   const checkerPath = path.join(dataDir, checkerName);
   let checkerCode = "";
@@ -175,7 +248,7 @@ async function compileChecker(dataDir: string, checkerName: string) {
           { name: "stderr", max: 1000000 },
         ],
         cpuLimit: 10000000000,
-        memoryLimit: 1024 * 1024 * 1024, // 1GB
+        memoryLimit: 1024 * 1024 * 1024,
         procLimit: 50,
         copyIn: {
           "checker.cpp": { content: checkerCode },
@@ -203,7 +276,6 @@ async function compileChecker(dataDir: string, checkerName: string) {
   return compileRes[0].fileIds["checker"];
 }
 
-// 编译 Interactor 交互文件
 async function compileInteractor(dataDir: string, interactorName: string) {
   const interactorPath = path.join(dataDir, interactorName);
 
@@ -253,6 +325,7 @@ async function compileInteractor(dataDir: string, interactorName: string) {
       },
     ],
   });
+
   if (compileRes[0].status !== "Accepted") {
     const fe = Array.isArray(compileRes[0].fileError)
       ? compileRes[0].fileError
@@ -269,9 +342,382 @@ async function compileInteractor(dataDir: string, interactorName: string) {
   return compileRes[0].fileIds["interactor"];
 }
 
-// --- 核心判题逻辑 ---
+async function compileUserCode(language: string, code: string) {
+  const langConfig = LANGUAGES[language];
+  if (!langConfig) {
+    throw new Error(`Unsupported Language: ${language}`);
+  }
+
+  if (!langConfig.compileCmd) {
+    return {
+      ok: true as const,
+      langConfig,
+      executableFileId: "",
+    };
+  }
+
+  const compileRes = await callGoJudge({
+    cmd: [
+      {
+        args: langConfig.compileCmd,
+        env: [
+          "PATH=/usr/bin:/bin:/usr/lib/jvm/java-21-openjdk-amd64/bin",
+          "LANG=en_US.UTF-8",
+          "LC_ALL=en_US.UTF-8",
+          "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64",
+        ],
+        files: [
+          { content: "" },
+          { name: "stdout", max: 1000000 },
+          { name: "stderr", max: 1000000 },
+        ],
+        cpuLimit: 10000000000,
+        memoryLimit: 1024 * 1024 * 1024,
+        procLimit: 50,
+        copyIn: {
+          [langConfig.srcName]: { content: code },
+        },
+        copyOut: ["stdout", "stderr"],
+        copyOutCached: [langConfig.exeName],
+      },
+    ],
+  });
+
+  const result = compileRes[0];
+  if (result.status !== "Accepted") {
+    return {
+      ok: false as const,
+      langConfig,
+      message: result.files?.stderr || result.files?.stdout || "Compilation Failed",
+    };
+  }
+
+  return {
+    ok: true as const,
+    langConfig,
+    executableFileId: result.fileIds?.[langConfig.exeName] || "",
+  };
+}
+
+function buildProgramCopyIn(params: {
+  executableFileId?: string;
+  langConfig: LanguageConfig;
+  code: string;
+}) {
+  const { executableFileId, langConfig, code } = params;
+  if (executableFileId) {
+    return {
+      [langConfig.exeName]: { fileId: executableFileId },
+    };
+  }
+
+  return {
+    [langConfig.srcName]: { content: code },
+  };
+}
+
+function mapRunStatusToDebugVerdict(status: string): SampleDebugVerdict {
+  if (status === "Time Limit Exceeded") return "TLE";
+  if (status === "Memory Limit Exceeded") return "MLE";
+  if (status === "Accepted") return "AC";
+  return "RE";
+}
+
+async function loadJudgeTestCases(problem: {
+  id: number;
+  judgeConfig: unknown;
+}) {
+  const judgeConfig = problem.judgeConfig as JudgeConfig;
+  if (!judgeConfig || !judgeConfig.cases || judgeConfig.cases.length === 0) {
+    throw new Error("No judge configuration or test cases found.");
+  }
+
+  const dataDir = getProblemDataDir(problem.id);
+  const testCases: { in: string; out: string }[] = [];
+
+  for (const caseItem of judgeConfig.cases) {
+    try {
+      let inputContent = "";
+      if (caseItem.input === "/dev/null") {
+        inputContent = "";
+      } else {
+        inputContent = await fs.readFile(path.join(dataDir, caseItem.input), "utf-8");
+      }
+
+      let outputContent = "";
+      if (caseItem.output === "/dev/null") {
+        outputContent = "";
+      } else {
+        outputContent = await fs.readFile(path.join(dataDir, caseItem.output), "utf-8");
+      }
+
+      testCases.push({
+        in: inputContent,
+        out: outputContent,
+      });
+    } catch (err) {
+      console.error(
+        `Error reading test case files: ${caseItem.input} / ${caseItem.output}`,
+        err,
+      );
+      throw new Error(
+        `Missing data files: ${caseItem.input} or ${caseItem.output}. Make sure they exist or use /dev/null.`,
+      );
+    }
+  }
+
+  return testCases;
+}
+
+async function runNonInteractiveSample(params: {
+  problem: ProblemForDebug;
+  language: string;
+  code: string;
+  sample: SampleData;
+  sampleIndex: number;
+  langConfig: LanguageConfig;
+  executableFileId?: string;
+  checkerFileId?: string;
+}) {
+  const {
+    problem,
+    language,
+    code,
+    sample,
+    sampleIndex,
+    langConfig,
+    executableFileId,
+    checkerFileId,
+  } = params;
+  const { timeLimit, memoryLimit } = getLanguageLimits(problem, language);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cmdObj: any = {
+    args: langConfig.runCmd,
+    env: [
+      "PATH=/usr/bin:/bin:/usr/lib/jvm/java-21-openjdk-amd64/bin",
+      "LANG=en_US.UTF-8",
+      "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64",
+    ],
+    files: [
+      { content: sample.input },
+      { name: "stdout", max: 10485760 },
+      { name: "stderr", max: 10485760 },
+    ],
+    cpuLimit: timeLimit,
+    memoryLimit: memoryLimit,
+    procLimit: 50,
+    stackLimit: STACK_SIZE_KB * 1024,
+    copyIn: buildProgramCopyIn({ executableFileId, langConfig, code }),
+  };
+
+  const runResults = await callGoJudge({ cmd: [cmdObj] });
+  const runResult = runResults[0];
+  const actualOutput = runResult.files?.stdout || "";
+  const timeUsedMs = Number.isFinite(runResult.time)
+    ? Math.floor(runResult.time / 1000000)
+    : undefined;
+  const memoryUsedKb = Number.isFinite(runResult.memory)
+    ? Math.floor(runResult.memory / 1024)
+    : undefined;
+
+  if (runResult.status !== "Accepted") {
+    return {
+      sampleIndex,
+      input: sample.input,
+      expectedOutput: sample.output,
+      actualOutput,
+      verdict: mapRunStatusToDebugVerdict(runResult.status),
+      timeUsedMs,
+      memoryUsedKb,
+      message: runResult.files?.stderr || runResult.status,
+    } satisfies SampleDebugResult;
+  }
+
+  if (problem.type === "spj") {
+    if (!checkerFileId) {
+      return {
+        sampleIndex,
+        input: sample.input,
+        expectedOutput: sample.output,
+        actualOutput,
+        verdict: "SE",
+        timeUsedMs,
+        memoryUsedKb,
+        message: "Checker is not available.",
+      } satisfies SampleDebugResult;
+    }
+
+    const checkerRes = await callGoJudge({
+      cmd: [
+        {
+          args: ["./checker", "input.in", "user.out", "answer.out"],
+          env: ["PATH=/usr/bin:/bin"],
+          files: [
+            { content: "", name: "stdout", max: 10485760 },
+            { content: "", name: "stderr", max: 10485760 },
+          ],
+          cpuLimit: 10000 * 1000000,
+          memoryLimit: 512 * 1024 * 1024,
+          procLimit: 50,
+          copyIn: {
+            checker: { fileId: checkerFileId },
+            "input.in": { content: sample.input },
+            "user.out": { content: actualOutput },
+            "answer.out": { content: sample.output },
+          },
+        },
+      ],
+    });
+
+    const checkerResult = checkerRes[0];
+    return {
+      sampleIndex,
+      input: sample.input,
+      expectedOutput: sample.output,
+      actualOutput,
+      verdict: checkerResult.exitStatus === 0 ? "AC" : "WA",
+      timeUsedMs,
+      memoryUsedKb,
+      message:
+        checkerResult.files?.stderr || checkerResult.files?.stdout || undefined,
+    } satisfies SampleDebugResult;
+  }
+
+  return {
+    sampleIndex,
+    input: sample.input,
+    expectedOutput: sample.output,
+    actualOutput,
+    verdict: cleanOutput(actualOutput) === cleanOutput(sample.output) ? "AC" : "WA",
+    timeUsedMs,
+    memoryUsedKb,
+  } satisfies SampleDebugResult;
+}
+
+export async function debugProblemSamples(
+  problem: ProblemForDebug,
+  code: string,
+  language: string,
+): Promise<DebugAllSamplesResult> {
+  if (problem.type === "interactive") {
+    return {
+      compile: {
+        ok: false,
+        message: "Interactive problems are not supported in sample debugging yet.",
+      },
+      results: [],
+      summary: {
+        total: 0,
+        passed: 0,
+      },
+    };
+  }
+
+  const samples = Array.isArray(problem.samples) ? problem.samples : [];
+  if (samples.length === 0) {
+    return {
+      compile: { ok: true },
+      results: [],
+      summary: {
+        total: 0,
+        passed: 0,
+      },
+      message: "No samples available for this problem.",
+    };
+  }
+
+  let executableFileId = "";
+  let checkerFileId = "";
+
+  try {
+    const compileResult = await compileUserCode(language, code);
+    if (!compileResult.ok) {
+      return {
+        compile: {
+          ok: false,
+          message: compileResult.message,
+        },
+        results: [],
+        summary: {
+          total: samples.length,
+          passed: 0,
+        },
+      };
+    }
+
+    executableFileId = compileResult.executableFileId;
+
+    if (problem.type === "spj") {
+      const judgeConfig = problem.judgeConfig as JudgeConfig | null;
+      if (!judgeConfig?.checker) {
+        return {
+          compile: {
+            ok: false,
+            message: "SPJ checker is not configured for this problem.",
+          },
+          results: [],
+          summary: {
+            total: samples.length,
+            passed: 0,
+          },
+        };
+      }
+
+      checkerFileId = await compileChecker(
+        getProblemDataDir(problem.id),
+        judgeConfig.checker,
+      );
+    }
+
+    const results: SampleDebugResult[] = [];
+    for (let i = 0; i < samples.length; i++) {
+      results.push(
+        await runNonInteractiveSample({
+          problem,
+          language,
+          code,
+          sample: samples[i],
+          sampleIndex: i + 1,
+          langConfig: compileResult.langConfig,
+          executableFileId,
+          checkerFileId,
+        }),
+      );
+    }
+
+    return {
+      compile: { ok: true },
+      results,
+      summary: {
+        total: results.length,
+        passed: results.filter((item) => item.verdict === "AC").length,
+      },
+    };
+  } catch (error) {
+    const err = error as Error;
+    return {
+      compile: {
+        ok: false,
+        message: err.message || "Sample debugging failed.",
+      },
+      results: [],
+      summary: {
+        total: samples.length,
+        passed: 0,
+      },
+    };
+  } finally {
+    if (executableFileId) {
+      deleteTmpFile(executableFileId);
+    }
+    if (checkerFileId) {
+      deleteTmpFile(checkerFileId);
+    }
+  }
+}
+
 export async function judgeSubmission(submissionId: string) {
-  // A. 获取提交记录和题目信息
   const submission = await prisma.submission.findUnique({
     where: { id: submissionId },
     include: { problem: true },
@@ -279,7 +725,6 @@ export async function judgeSubmission(submissionId: string) {
 
   if (!submission) return;
 
-  // 更新状态为 JUDGING
   await prisma.submission.update({
     where: { id: submissionId },
     data: { verdict: Verdict.JUDGING },
@@ -290,60 +735,10 @@ export async function judgeSubmission(submissionId: string) {
     const langConfig = LANGUAGES[language];
     if (!langConfig) throw new Error(`Unsupported Language: ${language}`);
 
-    const judgeConfig = problem.judgeConfig as unknown as JudgeConfig;
+    const judgeConfig = problem.judgeConfig as JudgeConfig;
+    const testCases = await loadJudgeTestCases(problem);
+    const dataDir = getProblemDataDir(problem.id);
 
-    if (!judgeConfig || !judgeConfig.cases || judgeConfig.cases.length === 0) {
-      throw new Error("No judge configuration or test cases found.");
-    }
-
-    const dataDir = path.join(
-      process.cwd(),
-      "uploads",
-      "problems",
-      problem.id.toString(),
-      "data",
-    );
-
-    // 配对输入输出
-    const testCases: { in: string; out: string }[] = [];
-    for (const caseItem of judgeConfig.cases) {
-      // 检查文件是否存在并读取
-      try {
-        let inputContent = "";
-        // 1. 如果输入配置为 /dev/null，内容置空，不读文件
-        if (caseItem.input === "/dev/null") {
-          inputContent = "";
-        } else {
-          const inputPath = path.join(dataDir, caseItem.input);
-          inputContent = await fs.readFile(inputPath, "utf-8");
-        }
-
-        let outputContent = "";
-        // 2. 如果输出配置为 /dev/null，内容置空，不读文件
-        if (caseItem.output === "/dev/null") {
-          outputContent = "";
-        } else {
-          const outputPath = path.join(dataDir, caseItem.output);
-          outputContent = await fs.readFile(outputPath, "utf-8");
-        }
-
-        testCases.push({
-          in: inputContent,
-          out: outputContent,
-        });
-      } catch (err) {
-        console.error(
-          `Error reading test case files: ${caseItem.input} / ${caseItem.output}`,
-          err,
-        );
-        // 提供更友好的错误提示
-        throw new Error(
-          `Missing data files: ${caseItem.input} or ${caseItem.output}. Make sure they exist or use /dev/null.`,
-        );
-      }
-    }
-
-    // 初始化 Redis 状态
     await updateProgress(submissionId, {
       verdict: Verdict.JUDGING,
       passedTests: 0,
@@ -351,60 +746,26 @@ export async function judgeSubmission(submissionId: string) {
       finished: false,
     });
 
-    // 编译用户代码 (如果需要)
     let executableFileId = "";
-
-    if (langConfig.compileCmd) {
-      const compileRes = await callGoJudge({
-        cmd: [
-          {
-            args: langConfig.compileCmd,
-            env: [
-              "PATH=/usr/bin:/bin:/usr/lib/jvm/java-21-openjdk-amd64/bin",
-              "LANG=en_US.UTF-8",
-              "LC_ALL=en_US.UTF-8",
-              "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64",
-            ],
-            files: [
-              { content: "" },
-              { name: "stdout", max: 1000000 },
-              { name: "stderr", max: 1000000 },
-            ],
-            cpuLimit: 10000000000,
-            memoryLimit: 1024 * 1024 * 1024,
-            procLimit: 50,
-            copyIn: {
-              [langConfig.srcName]: { content: code },
-            },
-            copyOut: ["stdout", "stderr"],
-            copyOutCached: [langConfig.exeName],
-          },
-        ],
-      });
-
-      const result = compileRes[0];
-      if (result.status !== "Accepted") {
-        await prisma.submission.update({
-          where: { id: submissionId },
-          data: {
-            verdict: Verdict.COMPILE_ERROR,
-            errorMessage: result.files?.stderr || "Compilation Failed",
-          },
-        });
-        await updateProgress(submissionId, {
+    const compileResult = await compileUserCode(language, code);
+    if (!compileResult.ok) {
+      await prisma.submission.update({
+        where: { id: submissionId },
+        data: {
           verdict: Verdict.COMPILE_ERROR,
-          passedTests: 0,
-          totalTests: testCases.length,
-          finished: true,
-        });
-        return;
-      }
-      if (result.fileIds && result.fileIds[langConfig.exeName]) {
-        executableFileId = result.fileIds[langConfig.exeName];
-      }
+          errorMessage: compileResult.message,
+        },
+      });
+      await updateProgress(submissionId, {
+        verdict: Verdict.COMPILE_ERROR,
+        passedTests: 0,
+        totalTests: testCases.length,
+        finished: true,
+      });
+      return;
     }
+    executableFileId = compileResult.executableFileId;
 
-    // 编译辅助程序 (Checker / Interactor)
     let checkerFileId = "";
     let interactorFileId = "";
     const isSpj = problem.type === "spj";
@@ -439,19 +800,6 @@ export async function judgeSubmission(submissionId: string) {
       }
     }
 
-    // D. 运行阶段
-    let time_limit_rate =
-      judgeConfig.time_limit_rate?.[language as keyof LanguageJudgeConfig] || 1;
-    let memory_limit_rate =
-      judgeConfig.memory_limit_rate?.[language as keyof LanguageJudgeConfig] ||
-      1;
-
-    // 如果是 Java 语言，时限和内存限制翻倍
-    if (language === "java") {
-      time_limit_rate *= 2;
-      memory_limit_rate *= 2;
-    }
-
     let finalVerdict: Verdict = Verdict.ACCEPTED;
     let maxTime = 0;
     let maxMemory = 0;
@@ -460,18 +808,14 @@ export async function judgeSubmission(submissionId: string) {
 
     for (let i = 0; i < testCases.length; i++) {
       const testCase = testCases[i];
-      const timeLimit = problem.defaultTimeLimit * 1000000 * time_limit_rate;
-      const memoryLimit =
-        problem.defaultMemoryLimit * 1024 * 1024 * memory_limit_rate;
+      const { timeLimit, memoryLimit } = getLanguageLimits(problem, language);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let res: any;
 
       if (isInteractive) {
-        // --- 交互题模式 ---
         const runResults = await callGoJudge({
           cmd: [
-            // Cmd 0: 用户程序
             {
               args: langConfig.runCmd,
               env: [
@@ -484,20 +828,17 @@ export async function judgeSubmission(submissionId: string) {
               memoryLimit: memoryLimit,
               procLimit: 50,
               stackLimit: STACK_SIZE_KB * 1024,
-              copyIn: executableFileId
-                ? { [langConfig.exeName]: { fileId: executableFileId } }
-                : { [langConfig.srcName]: { content: code } },
+              copyIn: buildProgramCopyIn({
+                executableFileId,
+                langConfig,
+                code,
+              }),
             },
-            // Cmd 1: 交互器
             {
               args: ["./interactor", "input.in", "output.xml"],
               env: ["PATH=/usr/bin:/bin"],
-              files: [
-                null,
-                null,
-                { name: "stderr", max: 10485760 }, // stderr (交互结果)
-              ],
-              cpuLimit: 10000 * 1000000, // 10s
+              files: [null, null, { name: "stderr", max: 10485760 }],
+              cpuLimit: 10000 * 1000000,
               memoryLimit: 512 * 1024 * 1024,
               procLimit: 50,
               copyIn: {
@@ -507,20 +848,15 @@ export async function judgeSubmission(submissionId: string) {
             },
           ],
           pipeMapping: [
-            // 用户(0) stdout -> 交互器(1) stdin
             { in: { index: 0, fd: 1 }, out: { index: 1, fd: 0 } },
-            // 交互器(1) stdout -> 用户(0) stdin
             { in: { index: 1, fd: 1 }, out: { index: 0, fd: 0 } },
           ],
         });
 
         const userRes = runResults[0];
         const interactorRes = runResults[1];
-        res = userRes; // 统计数据取用户的
+        res = userRes;
 
-        // 判定逻辑
-        // 1. 优先检查硬性资源限制 (TLE / MLE)
-        // 这些是绝对的错误，优先级最高
         if (userRes.status === "Time Limit Exceeded") {
           if (res.time > timeLimit) {
             finalVerdict = Verdict.TIME_LIMIT_EXCEEDED;
@@ -533,22 +869,14 @@ export async function judgeSubmission(submissionId: string) {
           } else {
             finalVerdict = Verdict.RUNTIME_ERROR;
           }
-        }
-        // 2. 其次检查交互器判定 (WA)
-        // 只要交互器认为不对 (ExitCode != 0)，哪怕用户程序后面 SIGPIPE 崩了，也算是 WA
-        else if (interactorRes.exitStatus !== 0) {
+        } else if (interactorRes.exitStatus !== 0) {
           finalVerdict = Verdict.WRONG_ANSWER;
-          // 使用交互器的 stderr 作为错误信息，它通常包含 "Wrong answer..."
           error = interactorRes.files?.stderr || "Interactive check failed";
-        }
-        // 3. 最后检查用户程序是否崩溃 (RE)
-        // 如果交互器都说 AC 了 (Exit 0)，但用户程序还是崩了 (非 SIGPIPE 的其他 RE)，那才是真 RE
-        else if (userRes.status !== "Accepted") {
+        } else if (userRes.status !== "Accepted") {
           finalVerdict = Verdict.RUNTIME_ERROR;
           error = userRes.files?.stderr || "Runtime Error";
         }
       } else {
-        // --- 普通/SPJ 模式 ---
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const cmdObj: any = {
           args: langConfig.runCmd,
@@ -559,42 +887,36 @@ export async function judgeSubmission(submissionId: string) {
           ],
           files: [
             { content: testCase.in },
-            { name: "stdout", max: 10485760 }, // 10MB
+            { name: "stdout", max: 10485760 },
             { name: "stderr", max: 10485760 },
           ],
           cpuLimit: timeLimit,
           memoryLimit: memoryLimit,
           procLimit: 50,
           stackLimit: STACK_SIZE_KB * 1024,
+          copyIn: buildProgramCopyIn({
+            executableFileId,
+            langConfig,
+            code,
+          }),
         };
-
-        if (executableFileId) {
-          cmdObj.copyIn = {
-            [langConfig.exeName]: { fileId: executableFileId },
-          };
-        } else {
-          cmdObj.copyIn = {
-            [langConfig.srcName]: { content: code },
-          };
-        }
 
         const runResults = await callGoJudge({ cmd: [cmdObj] });
         res = runResults[0];
 
-        // 判定逻辑
         if (res.status !== "Accepted") {
-          if (res.status === "Time Limit Exceeded")
+          if (res.status === "Time Limit Exceeded") {
             finalVerdict = Verdict.TIME_LIMIT_EXCEEDED;
-          else if (res.status === "Memory Limit Exceeded")
+          } else if (res.status === "Memory Limit Exceeded") {
             finalVerdict = Verdict.MEMORY_LIMIT_EXCEEDED;
-          else finalVerdict = Verdict.RUNTIME_ERROR;
+          } else {
+            finalVerdict = Verdict.RUNTIME_ERROR;
+          }
           error = res.files?.stderr || "";
         } else {
-          // 运行成功，检查答案
           const userOutput = res.files?.stdout || "";
 
           if (isSpj) {
-            // SPJ 检查
             const checkerRes = await callGoJudge({
               cmd: [
                 {
@@ -619,10 +941,8 @@ export async function judgeSubmission(submissionId: string) {
             const chkResult = checkerRes[0];
             if (chkResult.exitStatus !== 0) {
               finalVerdict = Verdict.WRONG_ANSWER;
-              // error = chkResult.files?.stderr || "SPJ Failed";
             }
           } else {
-            // 普通比对
             const stdOutput = cleanOutput(testCase.out);
             const myOutput = cleanOutput(userOutput);
             if (myOutput !== stdOutput) {
@@ -631,15 +951,13 @@ export async function judgeSubmission(submissionId: string) {
           }
         }
       }
-      // 统计资源
+
       const timeMs = Math.floor(res.time / 1000000);
       const memoryKB = Math.floor(res.memory / 1024);
       maxTime = Math.max(maxTime, timeMs);
       maxMemory = Math.max(maxMemory, memoryKB);
 
-      // 如果出错了，跳出循环
       if (finalVerdict !== Verdict.ACCEPTED) {
-        // 更新这一点的状态（失败）
         await updateProgress(submissionId, {
           verdict: finalVerdict,
           passedTests: i,
@@ -650,7 +968,6 @@ export async function judgeSubmission(submissionId: string) {
       }
 
       passedCount++;
-      // 更新成功进度
       await updateProgress(submissionId, {
         verdict: Verdict.JUDGING,
         passedTests: i + 1,
@@ -659,7 +976,6 @@ export async function judgeSubmission(submissionId: string) {
       });
     }
 
-    // 最终更新
     await updateProgress(submissionId, {
       verdict: finalVerdict,
       passedTests: passedCount,
@@ -679,7 +995,6 @@ export async function judgeSubmission(submissionId: string) {
       },
     });
 
-    // 清理文件
     if (executableFileId) deleteTmpFile(executableFileId);
     if (checkerFileId) deleteTmpFile(checkerFileId);
     if (interactorFileId) deleteTmpFile(interactorFileId);
