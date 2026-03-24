@@ -33,7 +33,7 @@ export default function MarkdownEditor({
     return <div className="h-75 bg-gray-50 border rounded animate-pulse" />;
 
   return (
-    <div data-color-mode="light">
+    <div data-color-mode="light" className="[&_mjx-container_svg]:inline-block">
       <MDEditor
         value={value}
         onChange={(val) => onChange(val || "")}

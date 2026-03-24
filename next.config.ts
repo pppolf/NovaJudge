@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     },
     proxyClientMaxBodySize: "1gb",
   },
+  serverExternalPackages: ["mathjax-full", "rehype-mathjax"],
 };
 
 export default nextConfig;

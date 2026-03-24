@@ -237,7 +237,7 @@ export default function TestInterface({ problem }: { problem: ProblemDetail }) {
             {problem.sections.map((section: Section, index: number) => (
               <div key={`section-${index}`}>
                 <SectionTitle>{section.title}</SectionTitle>
-                <article className="prose prose-sm md:prose-base max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-pre:bg-gray-100 prose-pre:text-gray-800">
+                <article className="prose prose-sm md:prose-base max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-pre:bg-gray-100 prose-pre:text-gray-800 [&_mjx-container_svg]:inline-block">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkMath]}
                     rehypePlugins={[rehypeRaw, rehypeMathjax]}
@@ -266,7 +266,7 @@ export default function TestInterface({ problem }: { problem: ProblemDetail }) {
             {problem.hint && (
               <div>
                 <SectionTitle>Hint</SectionTitle>
-                <article className="prose prose-sm md:prose-base max-w-none">
+                <article className="prose prose-sm md:prose-base max-w-none [&_mjx-container_svg]:inline-block">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkMath]}
                     rehypePlugins={[rehypeRaw, rehypeMathjax]}
