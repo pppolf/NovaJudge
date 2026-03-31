@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
-import rehypeMathjax from "rehype-mathjax/svg";
+import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import { adminSubmit, debugAllSamples } from "./actions";
 import {
@@ -18,6 +18,7 @@ import CodeBlock from "@/components/CodeBlock";
 import CodeEditor from "@/components/CodeEditor";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import "katex/dist/katex.min.css";
 import type {
   DebugAllSamplesResult,
   SampleDebugResult,
@@ -237,10 +238,10 @@ export default function TestInterface({ problem }: { problem: ProblemDetail }) {
             {problem.sections.map((section: Section, index: number) => (
               <div key={`section-${index}`}>
                 <SectionTitle>{section.title}</SectionTitle>
-                <article className="prose prose-sm md:prose-base max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-pre:bg-gray-100 prose-pre:text-gray-800 [&_mjx-container_svg]:inline-block">
+                <article className="prose prose-sm md:prose-base max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-pre:bg-gray-100 prose-pre:text-gray-800">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkMath]}
-                    rehypePlugins={[rehypeRaw, rehypeMathjax]}
+                    rehypePlugins={[rehypeKatex, rehypeRaw]}
                   >
                     {section.content}
                   </ReactMarkdown>
@@ -266,10 +267,10 @@ export default function TestInterface({ problem }: { problem: ProblemDetail }) {
             {problem.hint && (
               <div>
                 <SectionTitle>Hint</SectionTitle>
-                <article className="prose prose-sm md:prose-base max-w-none [&_mjx-container_svg]:inline-block">
+                <article className="prose prose-sm md:prose-base max-w-none">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkMath]}
-                    rehypePlugins={[rehypeRaw, rehypeMathjax]}
+                    rehypePlugins={[rehypeKatex, rehypeRaw]}
                   >
                     {problem.hint}
                   </ReactMarkdown>

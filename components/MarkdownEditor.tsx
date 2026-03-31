@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
 // 定义数学公式插件 (为了在编辑器预览里也能看到公式)
-import rehypeMathjax from "rehype-mathjax/svg";
+import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 
 interface MarkdownEditorProps {
@@ -33,14 +33,14 @@ export default function MarkdownEditor({
     return <div className="h-75 bg-gray-50 border rounded animate-pulse" />;
 
   return (
-    <div data-color-mode="light" className="[&_mjx-container_svg]:inline-block">
+    <div data-color-mode="light">
       <MDEditor
         value={value}
         onChange={(val) => onChange(val || "")}
         height={height}
         preview="live" // 默认显示编辑+预览
         previewOptions={{
-          rehypePlugins: [rehypeMathjax],
+          rehypePlugins: [rehypeKatex],
           remarkPlugins: [remarkMath],
         }}
         textareaProps={{
