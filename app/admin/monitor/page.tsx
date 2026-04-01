@@ -7,8 +7,11 @@ import { useEffect, useState } from "react";
 const CONTROL_SERVER_URL =
   process.env.NEXT_PUBLIC_CONTROL_SERVER_URL || "http://localhost:4000";
 // 2. MediaMTX (流媒体服务器) 的接收地址
-const RTSP_BASE_URL =
-  process.env.NEXT_PUBLIC_RTSP_BASE_URL || "rtsp://localhost:8554";
+// const RTSP_BASE_URL =
+//   process.env.NEXT_PUBLIC_RTSP_BASE_URL || "rtsp://localhost:8554";
+
+const PTMP_BASE_URL = 
+  process.env.NEXT_PUBLIC_PTMP_BASE_URL || "rtmp://localhost:1935";
 
 interface ClientAgent {
   socketId: string;
@@ -43,8 +46,8 @@ export default function MonitorPage() {
 
   // 2. 发送“开始推流”指令
   const handleStartStream = async (teamName: string) => {
-    // 动态生成推流目标地址，例如: rtsp://192.168.1.100:8554/PC-001
-    const streamUrl = `${RTSP_BASE_URL}/${teamName}`;
+    // 动态生成推流目标地址，例如: rtmp://ip:port/team001
+    const streamUrl = `${PTMP_BASE_URL}/${teamName}`;
     try {
       const res = await fetch(`${CONTROL_SERVER_URL}/api/stream/start`, {
         method: "POST",
