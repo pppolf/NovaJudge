@@ -49,7 +49,15 @@ export default function ExternalLoginModal({
         <div className="mb-4">
           <h3 className="text-xl font-bold text-gray-900">外部登录</h3>
           <p className="text-xs text-gray-500">
-            使用程序设计算法协会官网的账号密码登录
+            使用
+            <a
+              className=" text-blue-600"
+              href="https://www.cwnupaa.com/"
+              target="_black"
+            >
+              程序设计算法协会官网
+            </a>
+            的账号密码登录
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">

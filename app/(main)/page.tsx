@@ -124,6 +124,7 @@ export default async function ContestList() {
           <p className="text-lg font-medium">
             {dict.contestList.noContestsFound}
           </p>
+          <p>点击右上角外部登录进入训练中心看看？</p>
         </div>
       ) : (
         <>
