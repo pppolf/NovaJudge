@@ -1,6 +1,7 @@
 "use server";
 
 import { getCurrentSuper, verifyAuth } from "@/lib/auth";
+import { ContestRole } from "@/lib/generated/prisma/client";
 import { createContestSubmission } from "@/lib/contest-submission";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -26,6 +27,10 @@ export async function submitCode(
     }
 
     const userId = teamPayload?.userId || null;
+    if (userId && teamPayload?.role !== ContestRole.TEAM) {
+      return { error: "Only contest teams can submit code." };
+    }
+
     const globalUserId =
       !userId && globalPayload?.userId ? String(globalPayload.userId) : null;
 

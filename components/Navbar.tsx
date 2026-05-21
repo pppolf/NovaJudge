@@ -6,12 +6,13 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import AdminLoginModal from "./AdminLoginModal";
 import ExternalLoginModal from "./ExternalLoginModal";
+import PrintRequestModal from "./PrintRequestModal";
 import { ContestRole } from "@/lib/generated/prisma/enums";
-import { 
-  HomeIcon, 
-  LanguageIcon, 
-  Bars3Icon, 
-  XMarkIcon 
+import {
+  HomeIcon,
+  LanguageIcon,
+  Bars3Icon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -19,8 +20,9 @@ export default function Navbar() {
   const [clickCount, setClickCount] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showExternalLogin, setShowExternalLogin] = useState(false);
+  const [showPrintRequest, setShowPrintRequest] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  
+
   // 新增：移动端侧边栏状态
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -60,7 +62,9 @@ export default function Navbar() {
     } else {
       document.body.style.overflow = "unset";
     }
-    return () => { document.body.style.overflow = "unset"; };
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [isMobileMenuOpen]);
 
   const handleUserMenuClick = (e: React.MouseEvent) => {
@@ -83,6 +87,7 @@ export default function Navbar() {
 
   const match = pathname.match(/^\/contest\/(\d+)/);
   const contestId = match ? match[1] : null;
+  const numericContestId = contestId ? Number(contestId) : null;
 
   const getContestLink = (subPath: string) => `/contest/${contestId}${subPath}`;
 
@@ -103,7 +108,9 @@ export default function Navbar() {
   // 移动端侧边栏链接样式
   const mobileLinkClass = (path: string, extraClass: string = "") =>
     `block px-4 py-4 text-lg font-bold border-b border-gray-100 transition-colors ${
-      isActive(path) ? "text-blue-700 bg-blue-50" : "text-gray-900 active:bg-gray-50"
+      isActive(path)
+        ? "text-blue-700 bg-blue-50"
+        : "text-gray-900 active:bg-gray-50"
     } ${extraClass}`;
 
   useEffect(() => {
@@ -115,7 +122,11 @@ export default function Navbar() {
   const handleNavClick = (e: React.MouseEvent) => {
     if (user) return;
     const target = e.target as HTMLElement;
-    if (target.tagName === "NAV" || target?.className?.includes("max-w-7xl") || target?.className?.includes("nav-trigger")) {
+    if (
+      target.tagName === "NAV" ||
+      target?.className?.includes("max-w-7xl") ||
+      target?.className?.includes("nav-trigger")
+    ) {
       const newCount = clickCount + 1;
       setClickCount(newCount);
       if (newCount === 3) {
@@ -125,11 +136,20 @@ export default function Navbar() {
     }
   };
 
-  const isContestAdmin =
+  const isBalloonStaff =
     isAdmin ||
     user?.role === ContestRole.ADMIN ||
     user?.role === ContestRole.JUDGE ||
     user?.role === ContestRole.BALLOON;
+  const isPrintStaff =
+    isAdmin ||
+    user?.role === ContestRole.ADMIN ||
+    user?.role === ContestRole.JUDGE ||
+    user?.role === ContestRole.PRINT;
+  const isContestTeam =
+    !!numericContestId &&
+    user?.contestId === numericContestId &&
+    user?.role === ContestRole.TEAM;
 
   return (
     <>
@@ -139,12 +159,10 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 nav-trigger">
           <div className="flex justify-between items-center h-14 font-serif text-xl nav-trigger">
-            
             {/* 左侧：移动端汉堡菜单按钮 & 桌面端导航 */}
             <div className="flex items-center">
-              
               {/* 移动端汉堡菜单按钮 */}
-              <button 
+              <button
                 className="md:hidden mr-2 p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-md"
                 onClick={() => setIsMobileMenuOpen(true)}
               >
@@ -170,37 +188,89 @@ export default function Navbar() {
                 {contestId && (
                   <>
                     <span className="text-gray-300 shrink-0 mx-1">|</span>
-                    <Link href={getContestLink("")} className={desktopLinkClass(`/contest/${contestId}`)}>
+                    <Link
+                      href={getContestLink("")}
+                      className={desktopLinkClass(`/contest/${contestId}`)}
+                    >
                       {dict.nav.contest}
                     </Link>
-                    <Link href={getContestLink("/problems")} className={desktopLinkClass(`/contest/${contestId}/problems`)}>
+                    <Link
+                      href={getContestLink("/problems")}
+                      className={desktopLinkClass(
+                        `/contest/${contestId}/problems`,
+                      )}
+                    >
                       {dict.nav.problems}
                     </Link>
-                    <Link href={getContestLink("/status")} className={desktopLinkClass(`/contest/${contestId}/status`)}>
+                    <Link
+                      href={getContestLink("/status")}
+                      className={desktopLinkClass(
+                        `/contest/${contestId}/status`,
+                      )}
+                    >
                       {dict.nav.status}
                     </Link>
-                    <Link href={getContestLink("/rank")} className={desktopLinkClass(`/contest/${contestId}/rank`)}>
+                    <Link
+                      href={getContestLink("/rank")}
+                      className={desktopLinkClass(`/contest/${contestId}/rank`)}
+                    >
                       {dict.nav.rank}
                     </Link>
-                    <Link href={getContestLink("/clarifications")} className={desktopLinkClass(`/contest/${contestId}/clarifications`)}>
+                    <Link
+                      href={getContestLink("/clarifications")}
+                      className={desktopLinkClass(
+                        `/contest/${contestId}/clarifications`,
+                      )}
+                    >
                       {dict.nav.clarifications}
                     </Link>
+                    {isContestTeam && (
+                      <button
+                        type="button"
+                        onClick={() => setShowPrintRequest(true)}
+                        className="px-3 py-2 font-bold transition-colors whitespace-nowrap hidden md:block text-slate-700 hover:text-slate-900"
+                      >
+                        Print
+                      </button>
+                    )}
                   </>
                 )}
 
-                {contestId && isContestAdmin && (
+                {contestId && (isBalloonStaff || isPrintStaff) && (
                   <>
                     <span className="text-gray-300 shrink-0 mx-1">|</span>
-                    <Link href={getContestLink("/balloon")} className={desktopLinkClass(`/contest/${contestId}/balloon`, "text-orange-600 hover:text-orange-800")}>
+                    {isBalloonStaff && (
+                    <Link
+                      href={getContestLink("/balloon")}
+                      className={desktopLinkClass(
+                        `/contest/${contestId}/balloon`,
+                        "text-orange-600 hover:text-orange-800",
+                      )}
+                    >
                       🎈 {dict.nav.balloon}
                     </Link>
+                    )}
+                    {isPrintStaff && (
+                    <Link
+                      href={getContestLink("/print")}
+                      className={desktopLinkClass(
+                        `/contest/${contestId}/print`,
+                        "text-slate-700 hover:text-slate-900",
+                      )}
+                    >
+                      Print Queue
+                    </Link>
+                    )}
                   </>
                 )}
 
                 {isAdmin && (
                   <>
                     <span className="text-gray-300 shrink-0 mx-1">|</span>
-                    <Link href="/admin" className="text-red-600 hover:text-red-800 px-3 py-2 text-xl font-bold flex items-center shrink-0">
+                    <Link
+                      href="/admin"
+                      className="text-red-600 hover:text-red-800 px-3 py-2 text-xl font-bold flex items-center shrink-0"
+                    >
                       {dict.nav.adminPanel}
                     </Link>
                   </>
@@ -220,7 +290,7 @@ export default function Navbar() {
                   <span>{lang === "zh" ? "中" : "EN"}</span>
                 </div>
               </button>
-              
+
               {user ? (
                 <div className="relative">
                   <button
@@ -228,12 +298,18 @@ export default function Navbar() {
                     className="text-gray-700 font-bold flex items-center gap-1 max-w-30 sm:max-w-none truncate focus:outline-none cursor-pointer"
                   >
                     {user.isGlobalAdmin && (
-                      <span className="text-red-600 hidden sm:inline">[{dict.nav.superAdmin}]</span>
+                      <span className="text-red-600 hidden sm:inline">
+                        [{dict.nav.superAdmin}]
+                      </span>
                     )}
                     <span className="truncate">{user.username}</span>
                     <span
                       className="text-xs transition-transform duration-200"
-                      style={{ transform: showUserMenu ? "rotate(180deg)" : "rotate(0)" }}
+                      style={{
+                        transform: showUserMenu
+                          ? "rotate(180deg)"
+                          : "rotate(0)",
+                      }}
                     >
                       ▼
                     </span>
@@ -264,20 +340,20 @@ export default function Navbar() {
       </nav>
 
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-50 md:hidden transition-opacity" 
+        <div
+          className="fixed inset-0 bg-black/50 z-50 md:hidden transition-opacity"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
-      
-      <div 
+
+      <div
         className={`fixed top-0 left-0 bottom-0 w-64 bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-in-out md:hidden flex flex-col ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-100">
           <span className="font-bold text-xl font-serif">NovaJudge</span>
-          <button 
+          <button
             onClick={() => setIsMobileMenuOpen(false)}
             className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
           >
@@ -286,10 +362,14 @@ export default function Navbar() {
         </div>
 
         <div className="flex-1 overflow-y-auto py-2">
-          <Link href="/" className={mobileLinkClass("/")}>{dict.nav.home}</Link>
+          <Link href="/" className={mobileLinkClass("/")}>
+            {dict.nav.home}
+          </Link>
 
           {user && !user.contestId && (
-            <Link href="/train" className={mobileLinkClass("/train")}>训练中心</Link>
+            <Link href="/train" className={mobileLinkClass("/train")}>
+              训练中心
+            </Link>
           )}
 
           {contestId && (
@@ -297,28 +377,81 @@ export default function Navbar() {
               <div className="px-4 py-2 mt-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
                 比赛菜单
               </div>
-              <Link href={getContestLink("")} className={mobileLinkClass(`/contest/${contestId}`)}>
+              <Link
+                href={getContestLink("")}
+                className={mobileLinkClass(`/contest/${contestId}`)}
+              >
                 {dict.nav.contest}
               </Link>
-              <Link href={getContestLink("/problems")} className={mobileLinkClass(`/contest/${contestId}/problems`)}>
+              <Link
+                href={getContestLink("/problems")}
+                className={mobileLinkClass(`/contest/${contestId}/problems`)}
+              >
                 {dict.nav.problems}
               </Link>
-              <Link href={getContestLink("/status")} className={mobileLinkClass(`/contest/${contestId}/status`)}>
+              <Link
+                href={getContestLink("/status")}
+                className={mobileLinkClass(`/contest/${contestId}/status`)}
+              >
                 {dict.nav.status}
               </Link>
-              <Link href={getContestLink("/rank")} className={mobileLinkClass(`/contest/${contestId}/rank`)}>
+              <Link
+                href={getContestLink("/rank")}
+                className={mobileLinkClass(`/contest/${contestId}/rank`)}
+              >
                 {dict.nav.rank}
               </Link>
-              <Link href={getContestLink("/clarifications")} className={mobileLinkClass(`/contest/${contestId}/clarifications`)}>
+              <Link
+                href={getContestLink("/clarifications")}
+                className={mobileLinkClass(
+                  `/contest/${contestId}/clarifications`,
+                )}
+              >
                 {dict.nav.clarifications}
               </Link>
+              {isContestTeam && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPrintRequest(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={mobileLinkClass(
+                    `/contest/${contestId}/print-request`,
+                    "text-slate-700 text-left w-full cursor-pointer",
+                  )}
+                >
+                  Print
+                </button>
+              )}
             </>
           )}
 
-          {contestId && isContestAdmin && (
-            <Link href={getContestLink("/balloon")} className={mobileLinkClass(`/contest/${contestId}/balloon`, "text-orange-600")}>
-              🎈 {dict.nav.balloon}
-            </Link>
+          {contestId && (isBalloonStaff || isPrintStaff) && (
+            <>
+              {isBalloonStaff && (
+              <Link
+                href={getContestLink("/balloon")}
+                className={mobileLinkClass(
+                  `/contest/${contestId}/balloon`,
+                  "text-orange-600",
+                )}
+              >
+                🎈 {dict.nav.balloon}
+              </Link>
+              )}
+              {isPrintStaff && (
+              <Link
+                href={getContestLink("/print")}
+                className={mobileLinkClass(
+                  `/contest/${contestId}/print`,
+                  "text-slate-700",
+                )}
+              >
+                Print Queue
+              </Link>
+              )}
+            </>
           )}
 
           {isAdmin && (
@@ -326,7 +459,10 @@ export default function Navbar() {
               <div className="px-4 py-2 mt-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
                 管理
               </div>
-              <Link href="/admin" className={mobileLinkClass("/admin", "text-red-600")}>
+              <Link
+                href="/admin"
+                className={mobileLinkClass("/admin", "text-red-600")}
+              >
                 {dict.nav.adminPanel}
               </Link>
             </>
@@ -341,6 +477,12 @@ export default function Navbar() {
         <ExternalLoginModal
           onClose={() => setShowExternalLogin(false)}
           onSuccess={() => revalidate?.()}
+        />
+      )}
+      {showPrintRequest && numericContestId && (
+        <PrintRequestModal
+          contestId={numericContestId}
+          onClose={() => setShowPrintRequest(false)}
         />
       )}
     </>

@@ -57,6 +57,7 @@ export const ModelName = {
   User: 'User',
   Contest: 'Contest',
   Balloon: 'Balloon',
+  PrintJob: 'PrintJob',
   Problem: 'Problem',
   ContestProblem: 'ContestProblem',
   Submission: 'Submission',
@@ -172,6 +173,24 @@ export const BalloonScalarFieldEnum = {
 } as const
 
 export type BalloonScalarFieldEnum = (typeof BalloonScalarFieldEnum)[keyof typeof BalloonScalarFieldEnum]
+
+
+export const PrintJobScalarFieldEnum = {
+  id: 'id',
+  contestId: 'contestId',
+  userId: 'userId',
+  language: 'language',
+  code: 'code',
+  sourceFilename: 'sourceFilename',
+  status: 'status',
+  printerName: 'printerName',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  printedAt: 'printedAt'
+} as const
+
+export type PrintJobScalarFieldEnum = (typeof PrintJobScalarFieldEnum)[keyof typeof PrintJobScalarFieldEnum]
 
 
 export const ProblemScalarFieldEnum = {

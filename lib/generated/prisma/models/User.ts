@@ -309,6 +309,7 @@ export type UserWhereInput = {
   clarifications?: Prisma.ClarificationListRelationFilter
   replies?: Prisma.ReplyListRelationFilter
   balloons?: Prisma.BalloonListRelationFilter
+  printJobs?: Prisma.PrintJobListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -333,6 +334,7 @@ export type UserOrderByWithRelationInput = {
   clarifications?: Prisma.ClarificationOrderByRelationAggregateInput
   replies?: Prisma.ReplyOrderByRelationAggregateInput
   balloons?: Prisma.BalloonOrderByRelationAggregateInput
+  printJobs?: Prisma.PrintJobOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -361,6 +363,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   clarifications?: Prisma.ClarificationListRelationFilter
   replies?: Prisma.ReplyListRelationFilter
   balloons?: Prisma.BalloonListRelationFilter
+  printJobs?: Prisma.PrintJobListRelationFilter
 }, "id" | "contestId_username">
 
 export type UserOrderByWithAggregationInput = {
@@ -430,6 +433,7 @@ export type UserCreateInput = {
   clarifications?: Prisma.ClarificationCreateNestedManyWithoutUserInput
   replies?: Prisma.ReplyCreateNestedManyWithoutUserInput
   balloons?: Prisma.BalloonCreateNestedManyWithoutAssignedToInput
+  printJobs?: Prisma.PrintJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -453,6 +457,7 @@ export type UserUncheckedCreateInput = {
   clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutUserInput
   replies?: Prisma.ReplyUncheckedCreateNestedManyWithoutUserInput
   balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutAssignedToInput
+  printJobs?: Prisma.PrintJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -476,6 +481,7 @@ export type UserUpdateInput = {
   clarifications?: Prisma.ClarificationUpdateManyWithoutUserNestedInput
   replies?: Prisma.ReplyUpdateManyWithoutUserNestedInput
   balloons?: Prisma.BalloonUpdateManyWithoutAssignedToNestedInput
+  printJobs?: Prisma.PrintJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -499,6 +505,7 @@ export type UserUncheckedUpdateInput = {
   clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutUserNestedInput
   replies?: Prisma.ReplyUncheckedUpdateManyWithoutUserNestedInput
   balloons?: Prisma.BalloonUncheckedUpdateManyWithoutAssignedToNestedInput
+  printJobs?: Prisma.PrintJobUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -717,6 +724,20 @@ export type UserUpdateOneWithoutBalloonsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBalloonsInput, Prisma.UserUpdateWithoutBalloonsInput>, Prisma.UserUncheckedUpdateWithoutBalloonsInput>
 }
 
+export type UserCreateNestedOneWithoutPrintJobsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPrintJobsInput, Prisma.UserUncheckedCreateWithoutPrintJobsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPrintJobsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPrintJobsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPrintJobsInput, Prisma.UserUncheckedCreateWithoutPrintJobsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPrintJobsInput
+  upsert?: Prisma.UserUpsertWithoutPrintJobsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPrintJobsInput, Prisma.UserUpdateWithoutPrintJobsInput>, Prisma.UserUncheckedUpdateWithoutPrintJobsInput>
+}
+
 export type UserCreateNestedOneWithoutSubmissionsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutSubmissionsInput, Prisma.UserUncheckedCreateWithoutSubmissionsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutSubmissionsInput
@@ -783,6 +804,7 @@ export type UserCreateWithoutContestInput = {
   clarifications?: Prisma.ClarificationCreateNestedManyWithoutUserInput
   replies?: Prisma.ReplyCreateNestedManyWithoutUserInput
   balloons?: Prisma.BalloonCreateNestedManyWithoutAssignedToInput
+  printJobs?: Prisma.PrintJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutContestInput = {
@@ -805,6 +827,7 @@ export type UserUncheckedCreateWithoutContestInput = {
   clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutUserInput
   replies?: Prisma.ReplyUncheckedCreateNestedManyWithoutUserInput
   balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutAssignedToInput
+  printJobs?: Prisma.PrintJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutContestInput = {
@@ -875,6 +898,7 @@ export type UserCreateWithoutBalloonsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutUserInput
   clarifications?: Prisma.ClarificationCreateNestedManyWithoutUserInput
   replies?: Prisma.ReplyCreateNestedManyWithoutUserInput
+  printJobs?: Prisma.PrintJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBalloonsInput = {
@@ -897,6 +921,7 @@ export type UserUncheckedCreateWithoutBalloonsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
   clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutUserInput
   replies?: Prisma.ReplyUncheckedCreateNestedManyWithoutUserInput
+  printJobs?: Prisma.PrintJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBalloonsInput = {
@@ -935,6 +960,7 @@ export type UserUpdateWithoutBalloonsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutUserNestedInput
   clarifications?: Prisma.ClarificationUpdateManyWithoutUserNestedInput
   replies?: Prisma.ReplyUpdateManyWithoutUserNestedInput
+  printJobs?: Prisma.PrintJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBalloonsInput = {
@@ -957,6 +983,115 @@ export type UserUncheckedUpdateWithoutBalloonsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
   clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutUserNestedInput
   replies?: Prisma.ReplyUncheckedUpdateManyWithoutUserNestedInput
+  printJobs?: Prisma.PrintJobUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPrintJobsInput = {
+  id?: string
+  username: string
+  password: string
+  plainPassword?: string | null
+  displayName?: string | null
+  members?: string | null
+  school?: string | null
+  seat?: string | null
+  coach?: string | null
+  category?: string | null
+  role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  contest: Prisma.ContestCreateNestedOneWithoutUsersInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutUserInput
+  clarifications?: Prisma.ClarificationCreateNestedManyWithoutUserInput
+  replies?: Prisma.ReplyCreateNestedManyWithoutUserInput
+  balloons?: Prisma.BalloonCreateNestedManyWithoutAssignedToInput
+}
+
+export type UserUncheckedCreateWithoutPrintJobsInput = {
+  id?: string
+  username: string
+  password: string
+  plainPassword?: string | null
+  contestId: number
+  displayName?: string | null
+  members?: string | null
+  school?: string | null
+  seat?: string | null
+  coach?: string | null
+  category?: string | null
+  role?: $Enums.ContestRole
+  lastLoginIp?: string | null
+  lastLoginAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
+  clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutUserInput
+  replies?: Prisma.ReplyUncheckedCreateNestedManyWithoutUserInput
+  balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutAssignedToInput
+}
+
+export type UserCreateOrConnectWithoutPrintJobsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPrintJobsInput, Prisma.UserUncheckedCreateWithoutPrintJobsInput>
+}
+
+export type UserUpsertWithoutPrintJobsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPrintJobsInput, Prisma.UserUncheckedUpdateWithoutPrintJobsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPrintJobsInput, Prisma.UserUncheckedCreateWithoutPrintJobsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPrintJobsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPrintJobsInput, Prisma.UserUncheckedUpdateWithoutPrintJobsInput>
+}
+
+export type UserUpdateWithoutPrintJobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  plainPassword?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  members?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contest?: Prisma.ContestUpdateOneRequiredWithoutUsersNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutUserNestedInput
+  clarifications?: Prisma.ClarificationUpdateManyWithoutUserNestedInput
+  replies?: Prisma.ReplyUpdateManyWithoutUserNestedInput
+  balloons?: Prisma.BalloonUpdateManyWithoutAssignedToNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPrintJobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  plainPassword?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contestId?: Prisma.IntFieldUpdateOperationsInput | number
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  members?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coach?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumContestRoleFieldUpdateOperationsInput | $Enums.ContestRole
+  lastLoginIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
+  clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutUserNestedInput
+  replies?: Prisma.ReplyUncheckedUpdateManyWithoutUserNestedInput
+  balloons?: Prisma.BalloonUncheckedUpdateManyWithoutAssignedToNestedInput
 }
 
 export type UserCreateWithoutSubmissionsInput = {
@@ -979,6 +1114,7 @@ export type UserCreateWithoutSubmissionsInput = {
   clarifications?: Prisma.ClarificationCreateNestedManyWithoutUserInput
   replies?: Prisma.ReplyCreateNestedManyWithoutUserInput
   balloons?: Prisma.BalloonCreateNestedManyWithoutAssignedToInput
+  printJobs?: Prisma.PrintJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSubmissionsInput = {
@@ -1001,6 +1137,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutUserInput
   replies?: Prisma.ReplyUncheckedCreateNestedManyWithoutUserInput
   balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutAssignedToInput
+  printJobs?: Prisma.PrintJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSubmissionsInput = {
@@ -1039,6 +1176,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   clarifications?: Prisma.ClarificationUpdateManyWithoutUserNestedInput
   replies?: Prisma.ReplyUpdateManyWithoutUserNestedInput
   balloons?: Prisma.BalloonUpdateManyWithoutAssignedToNestedInput
+  printJobs?: Prisma.PrintJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubmissionsInput = {
@@ -1061,6 +1199,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutUserNestedInput
   replies?: Prisma.ReplyUncheckedUpdateManyWithoutUserNestedInput
   balloons?: Prisma.BalloonUncheckedUpdateManyWithoutAssignedToNestedInput
+  printJobs?: Prisma.PrintJobUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutClarificationsInput = {
@@ -1083,6 +1222,7 @@ export type UserCreateWithoutClarificationsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutUserInput
   replies?: Prisma.ReplyCreateNestedManyWithoutUserInput
   balloons?: Prisma.BalloonCreateNestedManyWithoutAssignedToInput
+  printJobs?: Prisma.PrintJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutClarificationsInput = {
@@ -1105,6 +1245,7 @@ export type UserUncheckedCreateWithoutClarificationsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
   replies?: Prisma.ReplyUncheckedCreateNestedManyWithoutUserInput
   balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutAssignedToInput
+  printJobs?: Prisma.PrintJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutClarificationsInput = {
@@ -1143,6 +1284,7 @@ export type UserUpdateWithoutClarificationsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutUserNestedInput
   replies?: Prisma.ReplyUpdateManyWithoutUserNestedInput
   balloons?: Prisma.BalloonUpdateManyWithoutAssignedToNestedInput
+  printJobs?: Prisma.PrintJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutClarificationsInput = {
@@ -1165,6 +1307,7 @@ export type UserUncheckedUpdateWithoutClarificationsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
   replies?: Prisma.ReplyUncheckedUpdateManyWithoutUserNestedInput
   balloons?: Prisma.BalloonUncheckedUpdateManyWithoutAssignedToNestedInput
+  printJobs?: Prisma.PrintJobUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRepliesInput = {
@@ -1187,6 +1330,7 @@ export type UserCreateWithoutRepliesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutUserInput
   clarifications?: Prisma.ClarificationCreateNestedManyWithoutUserInput
   balloons?: Prisma.BalloonCreateNestedManyWithoutAssignedToInput
+  printJobs?: Prisma.PrintJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRepliesInput = {
@@ -1209,6 +1353,7 @@ export type UserUncheckedCreateWithoutRepliesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutUserInput
   clarifications?: Prisma.ClarificationUncheckedCreateNestedManyWithoutUserInput
   balloons?: Prisma.BalloonUncheckedCreateNestedManyWithoutAssignedToInput
+  printJobs?: Prisma.PrintJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRepliesInput = {
@@ -1247,6 +1392,7 @@ export type UserUpdateWithoutRepliesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutUserNestedInput
   clarifications?: Prisma.ClarificationUpdateManyWithoutUserNestedInput
   balloons?: Prisma.BalloonUpdateManyWithoutAssignedToNestedInput
+  printJobs?: Prisma.PrintJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRepliesInput = {
@@ -1269,6 +1415,7 @@ export type UserUncheckedUpdateWithoutRepliesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutUserNestedInput
   clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutUserNestedInput
   balloons?: Prisma.BalloonUncheckedUpdateManyWithoutAssignedToNestedInput
+  printJobs?: Prisma.PrintJobUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyContestInput = {
@@ -1309,6 +1456,7 @@ export type UserUpdateWithoutContestInput = {
   clarifications?: Prisma.ClarificationUpdateManyWithoutUserNestedInput
   replies?: Prisma.ReplyUpdateManyWithoutUserNestedInput
   balloons?: Prisma.BalloonUpdateManyWithoutAssignedToNestedInput
+  printJobs?: Prisma.PrintJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutContestInput = {
@@ -1331,6 +1479,7 @@ export type UserUncheckedUpdateWithoutContestInput = {
   clarifications?: Prisma.ClarificationUncheckedUpdateManyWithoutUserNestedInput
   replies?: Prisma.ReplyUncheckedUpdateManyWithoutUserNestedInput
   balloons?: Prisma.BalloonUncheckedUpdateManyWithoutAssignedToNestedInput
+  printJobs?: Prisma.PrintJobUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutContestInput = {
@@ -1361,6 +1510,7 @@ export type UserCountOutputType = {
   clarifications: number
   replies: number
   balloons: number
+  printJobs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1368,6 +1518,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   clarifications?: boolean | UserCountOutputTypeCountClarificationsArgs
   replies?: boolean | UserCountOutputTypeCountRepliesArgs
   balloons?: boolean | UserCountOutputTypeCountBalloonsArgs
+  printJobs?: boolean | UserCountOutputTypeCountPrintJobsArgs
 }
 
 /**
@@ -1408,6 +1559,13 @@ export type UserCountOutputTypeCountBalloonsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.BalloonWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPrintJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PrintJobWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1431,6 +1589,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   clarifications?: boolean | Prisma.User$clarificationsArgs<ExtArgs>
   replies?: boolean | Prisma.User$repliesArgs<ExtArgs>
   balloons?: boolean | Prisma.User$balloonsArgs<ExtArgs>
+  printJobs?: boolean | Prisma.User$printJobsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1500,6 +1659,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   clarifications?: boolean | Prisma.User$clarificationsArgs<ExtArgs>
   replies?: boolean | Prisma.User$repliesArgs<ExtArgs>
   balloons?: boolean | Prisma.User$balloonsArgs<ExtArgs>
+  printJobs?: boolean | Prisma.User$printJobsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1517,6 +1677,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     clarifications: Prisma.$ClarificationPayload<ExtArgs>[]
     replies: Prisma.$ReplyPayload<ExtArgs>[]
     balloons: Prisma.$BalloonPayload<ExtArgs>[]
+    printJobs: Prisma.$PrintJobPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1934,6 +2095,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   clarifications<T extends Prisma.User$clarificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$clarificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClarificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   replies<T extends Prisma.User$repliesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$repliesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReplyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   balloons<T extends Prisma.User$balloonsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$balloonsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BalloonPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  printJobs<T extends Prisma.User$printJobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$printJobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PrintJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2468,6 +2630,30 @@ export type User$balloonsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.BalloonScalarFieldEnum | Prisma.BalloonScalarFieldEnum[]
+}
+
+/**
+ * User.printJobs
+ */
+export type User$printJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PrintJob
+   */
+  select?: Prisma.PrintJobSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PrintJob
+   */
+  omit?: Prisma.PrintJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PrintJobInclude<ExtArgs> | null
+  where?: Prisma.PrintJobWhereInput
+  orderBy?: Prisma.PrintJobOrderByWithRelationInput | Prisma.PrintJobOrderByWithRelationInput[]
+  cursor?: Prisma.PrintJobWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PrintJobScalarFieldEnum | Prisma.PrintJobScalarFieldEnum[]
 }
 
 /**

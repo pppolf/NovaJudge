@@ -41,6 +41,7 @@ export async function getContestUsers(
       : [
           ContestRole.JUDGE,
           ContestRole.BALLOON,
+          ContestRole.PRINT,
           ContestRole.OBSERVER,
           ContestRole.ADMIN,
         ];
@@ -95,7 +96,7 @@ export async function importUsers(
       let role: ContestRole = ContestRole.TEAM; // 默认
       if (user.role) {
         const r = user.role.toUpperCase();
-        if (["JUDGE", "BALLOON", "OBSERVER", "ADMIN"].includes(r)) {
+        if (["JUDGE", "BALLOON", "PRINT", "OBSERVER", "ADMIN"].includes(r)) {
           role = r as ContestRole;
         }
       }

@@ -277,6 +277,23 @@ export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
   _max?: Prisma.NestedJsonNullableFilter<$PrismaModel>
 }
 
+export type EnumPrintJobStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.PrintJobStatus | Prisma.EnumPrintJobStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PrintJobStatus[] | Prisma.ListEnumPrintJobStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PrintJobStatus[] | Prisma.ListEnumPrintJobStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPrintJobStatusFilter<$PrismaModel> | $Enums.PrintJobStatus
+}
+
+export type EnumPrintJobStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PrintJobStatus | Prisma.EnumPrintJobStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PrintJobStatus[] | Prisma.ListEnumPrintJobStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PrintJobStatus[] | Prisma.ListEnumPrintJobStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPrintJobStatusWithAggregatesFilter<$PrismaModel> | $Enums.PrintJobStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPrintJobStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPrintJobStatusFilter<$PrismaModel>
+}
+
 export type JsonFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -636,6 +653,23 @@ export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumPrintJobStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.PrintJobStatus | Prisma.EnumPrintJobStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PrintJobStatus[] | Prisma.ListEnumPrintJobStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PrintJobStatus[] | Prisma.ListEnumPrintJobStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPrintJobStatusFilter<$PrismaModel> | $Enums.PrintJobStatus
+}
+
+export type NestedEnumPrintJobStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PrintJobStatus | Prisma.EnumPrintJobStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PrintJobStatus[] | Prisma.ListEnumPrintJobStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PrintJobStatus[] | Prisma.ListEnumPrintJobStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPrintJobStatusWithAggregatesFilter<$PrismaModel> | $Enums.PrintJobStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPrintJobStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPrintJobStatusFilter<$PrismaModel>
 }
 
 export type NestedJsonFilter<$PrismaModel = never> =

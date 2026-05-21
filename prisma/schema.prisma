@@ -40,6 +40,7 @@ enum ContestRole {
   TEAM
   JUDGE
   BALLOON
+  PRINT
   OBSERVER
   ADMIN
 }
@@ -60,6 +61,14 @@ enum Verdict {
 enum ClariCategory {
   QUESTION
   NOTICE
+}
+
+enum PrintJobStatus {
+  PENDING
+  PRINTING
+  PRINTED
+  FAILED
+  CANCELLED
 }
 
 // ================= 用户模块 =================
@@ -125,6 +134,7 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   balloons  Balloon[]
+  printJobs PrintJob[]
 
   // 联合唯一索引：保证同一场比赛内 username 唯一
   @@unique([contestId, username])
@@ -156,6 +166,7 @@ model Contest {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   balloons  Balloon[]
+  printJobs PrintJob[]
 
   // 训练中心节点
   trainingNodes TrainingNode[]
@@ -183,6 +194,32 @@ model Balloon {
   updatedAt DateTime @updatedAt
 
   @@map("balloons")
+}
+
+model PrintJob {
+  id Int @id @default(autoincrement())
+
+  contestId Int
+  contest   Contest @relation(fields: [contestId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  language String
+  code     String @db.Text
+  sourceFilename String?
+
+  status PrintJobStatus @default(PENDING)
+
+  printerName  String?
+  errorMessage String? @db.Text
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  printedAt DateTime?
+
+  @@index([contestId, status])
+  @@map("print_jobs")
 }
 
 // ================= 题目模块 (题库) =================

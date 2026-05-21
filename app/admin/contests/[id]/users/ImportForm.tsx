@@ -117,7 +117,7 @@ export default function ImportForm({ contestId, type }: ImportFormProps) {
           ) : (
             <span>
               Username &emsp; Password &emsp; RealName &emsp;
-              Role(JUDGE/BALLOON/ADMIN)
+              Role(JUDGE/BALLOON/PRINT/ADMIN)
             </span>
           )}
         </div>

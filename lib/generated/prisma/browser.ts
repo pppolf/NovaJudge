@@ -48,6 +48,11 @@ export type Contest = Prisma.ContestModel
  */
 export type Balloon = Prisma.BalloonModel
 /**
+ * Model PrintJob
+ * 
+ */
+export type PrintJob = Prisma.PrintJobModel
+/**
  * Model Problem
  * 
  */

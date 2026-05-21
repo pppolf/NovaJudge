@@ -30,6 +30,7 @@ export const ContestRole = {
   TEAM: 'TEAM',
   JUDGE: 'JUDGE',
   BALLOON: 'BALLOON',
+  PRINT: 'PRINT',
   OBSERVER: 'OBSERVER',
   ADMIN: 'ADMIN'
 } as const
@@ -59,3 +60,14 @@ export const ClariCategory = {
 } as const
 
 export type ClariCategory = (typeof ClariCategory)[keyof typeof ClariCategory]
+
+
+export const PrintJobStatus = {
+  PENDING: 'PENDING',
+  PRINTING: 'PRINTING',
+  PRINTED: 'PRINTED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type PrintJobStatus = (typeof PrintJobStatus)[keyof typeof PrintJobStatus]

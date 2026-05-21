@@ -110,12 +110,11 @@ export async function createContestSubmission({
   }
 
   if (actor.type === "contest") {
-    const isAdmin =
-      actor.role === ContestRole.ADMIN ||
-      actor.role === ContestRole.JUDGE ||
-      actor.isGlobalAdmin;
+    if (actor.role !== ContestRole.TEAM) {
+      throw new Error("Only contest teams can submit code.");
+    }
 
-    if (isEnded && isFrozen && !isAdmin) {
+    if (isEnded && isFrozen) {
       throw new Error(
         "Submissions are disabled while the ended contest is still frozen.",
       );

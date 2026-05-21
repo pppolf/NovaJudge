@@ -65,10 +65,12 @@ export default async function SubmitPage({ params, searchParams }: Props) {
   const SuperAdmin = await getCurrentSuper();
   const user = await getCurrentUser();
 
+  const currentRole = (user as unknown as UserJwtPayload)?.role;
   const isAdmin =
     (SuperAdmin as unknown as UserJwtPayload)?.isGlobalAdmin ||
-    (user as unknown as UserJwtPayload)?.role === ContestRole.ADMIN ||
-    (user as unknown as UserJwtPayload)?.role === ContestRole.JUDGE;
+    currentRole === ContestRole.ADMIN ||
+    currentRole === ContestRole.JUDGE;
+  const isSubmitDisabled = !!user && currentRole !== ContestRole.TEAM;
   return (
     <div className="flex flex-col w-full lg:flex-row gap-6 items-start">
       <aside>
@@ -84,7 +86,7 @@ export default async function SubmitPage({ params, searchParams }: Props) {
       <SubmitForm
         contestId={contestId}
         problemId={displayId}
-        isAdmin={isAdmin}
+        isAdmin={isSubmitDisabled}
       />
     </div>
   );
