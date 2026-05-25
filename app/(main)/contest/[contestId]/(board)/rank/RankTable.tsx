@@ -4,6 +4,7 @@ import Link from "next/link";
 
 interface Team {
   rank: number | string;
+  medal?: "Gold" | "Silver" | "Bronze" | "";
   id: string;
   username: string;
   displayName: string | null;
@@ -77,6 +78,14 @@ export default function RankTable({
     return "text-white";
   };
 
+  const getRankCellColor = (team: Team) => {
+    if (team.category === "1" || team.rank === "*") return "bg-transparent";
+    if (team.medal === "Gold") return "bg-yellow-300 text-yellow-950";
+    if (team.medal === "Silver") return "bg-slate-300 text-slate-950";
+    if (team.medal === "Bronze") return "bg-amber-700 text-white";
+    return "text-gray-900";
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-center text-xs border-collapse">
@@ -124,7 +133,11 @@ export default function RankTable({
                   : "even:bg-[#eff5fa] odd:bg-white hover:bg-blue-100"
               }`}
             >
-              <td className="text-gray-900 text-base font-serif font-bold">
+              <td
+                className={`text-base font-serif font-bold ${getRankCellColor(
+                  team,
+                )}`}
+              >
                 {typeof team.rank === "number" ? team.rank : `${team.rank}`}
               </td>
               <td>

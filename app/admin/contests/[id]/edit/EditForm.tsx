@@ -10,6 +10,7 @@ import {
   GlobeAltIcon,
   AdjustmentsHorizontalIcon,
   CheckCircleIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import { Contest, ContestConfig } from "./page";
 
@@ -326,6 +327,51 @@ export default function EditForm({ contest }: Props) {
         </div>
 
         {/* 4. 榜单设置 */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+            <DocumentTextIcon className="w-5 h-5 text-red-600" />
+            <h2 className="font-semibold text-gray-800">Editorial PDF</h2>
+          </div>
+          <div className="p-6 space-y-4">
+            {config.editorialPdf ? (
+              <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                Current file: {config.editorialPdf.filename}
+              </div>
+            ) : (
+              <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                No editorial PDF uploaded yet.
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Upload PDF
+              </label>
+              <input
+                type="file"
+                name="editorialPdf"
+                accept="application/pdf,.pdf"
+                className="block w-full text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-red-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-red-700 hover:file:bg-red-100"
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                The file is shown to contestants after the contest ends.
+              </p>
+            </div>
+
+            {config.editorialPdf && (
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="removeEditorialPdf"
+                  value="true"
+                  className="w-4 h-4 text-red-600 focus:ring-red-500 rounded"
+                />
+                Remove current editorial PDF
+              </label>
+            )}
+          </div>
+        </div>
+
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
             <AdjustmentsHorizontalIcon className="w-5 h-5 text-purple-600" />

@@ -27,7 +27,8 @@ export default async function BalloonPage({ params }: Props) {
 
   const user = await getCurrentUser();
   const superAdmin = (await getCurrentSuper()) as UserJwtPayload;
-  const role = (user as UserJwtPayload)?.role;
+  const contestUser = user as UserJwtPayload | null;
+  const role = contestUser?.contestId === cid ? contestUser.role : null;
   const isAuthorized =
     role === ContestRole.ADMIN ||
     role === ContestRole.JUDGE ||

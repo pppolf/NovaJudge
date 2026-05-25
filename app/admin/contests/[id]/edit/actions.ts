@@ -2,8 +2,35 @@
 
 import { prisma } from "@/lib/prisma";
 import { ContestStatus, ContestType } from "@/lib/generated/prisma/client";
+import fs from "node:fs/promises";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import path from "node:path";
+
+type ContestConfig = {
+  frozenDuration?: number;
+  unfreezeDelay?: number;
+  editorialPdf?: {
+    filename: string;
+    uploadedAt: string;
+  };
+  medal?: {
+    mode: "ratio" | "fixed";
+    gold: number;
+    silver: number;
+    bronze: number;
+  };
+};
+
+const MAX_EDITORIAL_PDF_BYTES = 50 * 1024 * 1024;
+
+function getContestUploadDir(contestId: number) {
+  return path.join(process.cwd(), "uploads", "contests", contestId.toString());
+}
+
+function getEditorialPdfPath(contestId: number) {
+  return path.join(getContestUploadDir(contestId), "editorial.pdf");
+}
 
 export async function updateContest(contestId: number, formData: FormData) {
   const title = formData.get("title") as string;
@@ -22,8 +49,21 @@ export async function updateContest(contestId: number, formData: FormData) {
   const gold = Number(formData.get("medal_gold") || 0);
   const silver = Number(formData.get("medal_silver") || 0);
   const bronze = Number(formData.get("medal_bronze") || 0);
+  const editorialPdf = formData.get("editorialPdf") as File | null;
+  const removeEditorialPdf = formData.get("removeEditorialPdf") === "true";
 
-  const config = {
+  const contest = await prisma.contest.findUnique({
+    where: { id: contestId },
+    select: { config: true },
+  });
+
+  if (!contest) {
+    return { error: "Contest not found" };
+  }
+
+  const previousConfig = (contest.config as ContestConfig | null) || {};
+  const config: ContestConfig = {
+    ...previousConfig,
     frozenDuration,
     unfreezeDelay,
     medal: {
@@ -58,6 +98,39 @@ export async function updateContest(contestId: number, formData: FormData) {
   }
 
   try {
+    if (removeEditorialPdf) {
+      try {
+        await fs.unlink(getEditorialPdfPath(contestId));
+      } catch (error) {
+        const e = error as NodeJS.ErrnoException;
+        if (e.code !== "ENOENT") throw error;
+      }
+      delete config.editorialPdf;
+    }
+
+    if (editorialPdf && editorialPdf.size > 0) {
+      if (editorialPdf.type && editorialPdf.type !== "application/pdf") {
+        return { error: "Only PDF files can be uploaded as editorial." };
+      }
+
+      if (!editorialPdf.name.toLowerCase().endsWith(".pdf")) {
+        return { error: "Only .pdf files can be uploaded as editorial." };
+      }
+
+      if (editorialPdf.size > MAX_EDITORIAL_PDF_BYTES) {
+        return { error: "Editorial PDF must be 50MB or smaller." };
+      }
+
+      const dir = getContestUploadDir(contestId);
+      await fs.mkdir(dir, { recursive: true });
+      const buffer = Buffer.from(await editorialPdf.arrayBuffer());
+      await fs.writeFile(getEditorialPdfPath(contestId), buffer);
+      config.editorialPdf = {
+        filename: "editorial.pdf",
+        uploadedAt: new Date().toISOString(),
+      };
+    }
+
     await prisma.contest.update({
       where: { id: contestId },
       data: {
@@ -79,5 +152,8 @@ export async function updateContest(contestId: number, formData: FormData) {
 
   revalidatePath("/admin/contests");
   revalidatePath(`/admin/contests/${contestId}`);
+  revalidatePath(`/admin/contests/${contestId}/edit`);
+  revalidatePath(`/contest/${contestId}/editorial`);
+  revalidatePath(`/api/contests/${contestId}/editorial`);
   redirect("/admin/contests");
 }

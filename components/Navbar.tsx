@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -13,8 +13,25 @@ import {
   LanguageIcon,
   Bars3Icon,
   XMarkIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import { useLanguage } from "@/context/LanguageContext";
+
+type DesktopNavItem =
+  | {
+      type: "link";
+      key: string;
+      href: string;
+      label: string;
+      className?: string;
+    }
+  | {
+      type: "button";
+      key: string;
+      label: string;
+      className?: string;
+      onClick: () => void;
+    };
 
 export default function Navbar() {
   const [clickCount, setClickCount] = useState(0);
@@ -22,6 +39,14 @@ export default function Navbar() {
   const [showExternalLogin, setShowExternalLogin] = useState(false);
   const [showPrintRequest, setShowPrintRequest] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [visibleDesktopItemCount, setVisibleDesktopItemCount] = useState(99);
+  const [editorialContestId, setEditorialContestId] = useState<string | null>(
+    null,
+  );
+  const desktopNavRef = useRef<HTMLDivElement>(null);
+  const desktopMeasureRef = useRef<HTMLDivElement>(null);
+  const desktopMoreMeasureRef = useRef<HTMLButtonElement>(null);
 
   // 新增：移动端侧边栏状态
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -55,6 +80,14 @@ export default function Navbar() {
     return () => document.removeEventListener("click", closeMenu);
   }, [showUserMenu]);
 
+  useEffect(() => {
+    const closeMenu = () => setShowMoreMenu(false);
+    if (showMoreMenu) {
+      document.addEventListener("click", closeMenu);
+    }
+    return () => document.removeEventListener("click", closeMenu);
+  }, [showMoreMenu]);
+
   // 锁定侧边栏打开时的底层滚动
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -71,6 +104,14 @@ export default function Navbar() {
     e.stopPropagation();
     setShowUserMenu(!showUserMenu);
   };
+
+  const handleMoreMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMoreMenu(!showMoreMenu);
+  };
+
+  const openMoreMenu = () => setShowMoreMenu(true);
+  const closeMoreMenu = () => setShowMoreMenu(false);
 
   const [allowExternalLogin, setAllowExternalLogin] = useState(true);
 
@@ -89,7 +130,31 @@ export default function Navbar() {
   const contestId = match ? match[1] : null;
   const numericContestId = contestId ? Number(contestId) : null;
 
-  const getContestLink = (subPath: string) => `/contest/${contestId}${subPath}`;
+  const getContestLink = useCallback(
+    (subPath: string) => `/contest/${contestId}${subPath}`,
+    [contestId],
+  );
+
+  useEffect(() => {
+    let ignore = false;
+
+    if (!contestId) return;
+
+    fetch(`/api/contests/${contestId}/editorial/meta`, { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : { available: false }))
+      .then((data) => {
+        if (!ignore) setEditorialContestId(data.available ? contestId : null);
+      })
+      .catch(() => {
+        if (!ignore) setEditorialContestId(null);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [contestId]);
+
+  const hasEditorial = editorialContestId === contestId;
 
   const isActive = (path: string) => {
     if (path === `/contest/${contestId}`) {
@@ -104,6 +169,19 @@ export default function Navbar() {
     `px-3 py-2 font-bold transition-colors whitespace-nowrap hidden md:block ${
       isActive(path) ? "text-blue-700" : "text-gray-900 hover:text-blue-700"
     } ${extraClass}`;
+
+  const desktopMenuLinkClass = (path: string, extraClass: string = "") =>
+    `block w-full px-4 py-2 text-left text-sm font-bold transition-colors ${
+      isActive(path)
+        ? "bg-blue-50 text-blue-700"
+        : "text-gray-700 hover:bg-gray-50 hover:text-blue-700"
+    } ${extraClass}`;
+
+  const desktopButtonClass = (extraClass: string = "") =>
+    `px-3 py-2 font-bold transition-colors whitespace-nowrap hidden md:block cursor-pointer ${extraClass}`;
+
+  const desktopMenuButtonClass = (extraClass: string = "") =>
+    `block w-full px-4 py-2 text-left text-sm font-bold transition-colors hover:bg-gray-50 cursor-pointer ${extraClass}`;
 
   // 移动端侧边栏链接样式
   const mobileLinkClass = (path: string, extraClass: string = "") =>
@@ -136,20 +214,235 @@ export default function Navbar() {
     }
   };
 
+  const isSameContestUser =
+    !!numericContestId && user?.contestId === numericContestId;
   const isBalloonStaff =
     isAdmin ||
-    user?.role === ContestRole.ADMIN ||
-    user?.role === ContestRole.JUDGE ||
-    user?.role === ContestRole.BALLOON;
+    (isSameContestUser &&
+      (user?.role === ContestRole.ADMIN ||
+        user?.role === ContestRole.JUDGE ||
+        user?.role === ContestRole.BALLOON));
   const isPrintStaff =
     isAdmin ||
-    user?.role === ContestRole.ADMIN ||
-    user?.role === ContestRole.JUDGE ||
-    user?.role === ContestRole.PRINT;
-  const isContestTeam =
-    !!numericContestId &&
-    user?.contestId === numericContestId &&
-    user?.role === ContestRole.TEAM;
+    (isSameContestUser &&
+      (user?.role === ContestRole.ADMIN ||
+        user?.role === ContestRole.JUDGE ||
+        user?.role === ContestRole.PRINT));
+  const canRequestPrint = isSameContestUser && user?.role === ContestRole.TEAM;
+
+  const desktopContestItems = useMemo<DesktopNavItem[]>(() => {
+    if (!contestId) return [];
+
+    const items: DesktopNavItem[] = [
+      {
+        type: "link",
+        key: "contest",
+        href: getContestLink(""),
+        label: dict.nav.contest,
+      },
+      {
+        type: "link",
+        key: "problems",
+        href: getContestLink("/problems"),
+        label: dict.nav.problems,
+      },
+      {
+        type: "link",
+        key: "status",
+        href: getContestLink("/status"),
+        label: dict.nav.status,
+      },
+      {
+        type: "link",
+        key: "rank",
+        href: getContestLink("/rank"),
+        label: dict.nav.rank,
+      },
+      {
+        type: "link",
+        key: "clarifications",
+        href: getContestLink("/clarifications"),
+        label: dict.nav.clarifications,
+      },
+    ];
+
+    if (canRequestPrint) {
+      items.push({
+        type: "button",
+        key: "print-request",
+        label: dict.nav.print,
+        className: "text-slate-700 hover:text-slate-900",
+        onClick: () => setShowPrintRequest(true),
+      });
+    }
+
+    if (hasEditorial) {
+      items.push({
+        type: "link",
+        key: "editorial",
+        href: getContestLink("/editorial"),
+        label: dict.nav.editorial,
+        className: "text-red-600 hover:text-red-800",
+      });
+    }
+
+    if (isBalloonStaff) {
+      items.push({
+        type: "link",
+        key: "balloon",
+        href: getContestLink("/balloon"),
+        label: dict.nav.balloon,
+        className: "text-orange-600 hover:text-orange-800",
+      });
+    }
+
+    if (isPrintStaff) {
+      items.push({
+        type: "link",
+        key: "print-queue",
+        href: getContestLink("/print"),
+        label: dict.nav.printQueue,
+        className: "text-slate-700 hover:text-slate-900",
+      });
+    }
+
+    if (isAdmin) {
+      items.push({
+        type: "link",
+        key: "admin",
+        href: "/admin",
+        label: dict.nav.adminPanel,
+        className: "text-red-600 hover:text-red-800",
+      });
+    }
+
+    return items;
+  }, [
+    canRequestPrint,
+    contestId,
+    dict.nav.adminPanel,
+    dict.nav.balloon,
+    dict.nav.clarifications,
+    dict.nav.contest,
+    dict.nav.editorial,
+    dict.nav.print,
+    dict.nav.printQueue,
+    dict.nav.problems,
+    dict.nav.rank,
+    dict.nav.status,
+    hasEditorial,
+    getContestLink,
+    isAdmin,
+    isBalloonStaff,
+    isPrintStaff,
+  ]);
+
+  const measureDesktopNav = useCallback(() => {
+    const nav = desktopNavRef.current;
+    const measure = desktopMeasureRef.current;
+    if (!nav || !measure) return;
+
+    const itemWidths = Array.from(measure.children).map(
+      (child) => (child as HTMLElement).offsetWidth,
+    );
+    const availableWidth = nav.clientWidth;
+    const totalWidth = itemWidths.reduce((sum, width) => sum + width, 0);
+
+    if (totalWidth <= availableWidth) {
+      setVisibleDesktopItemCount(itemWidths.length);
+      return;
+    }
+
+    const moreWidth = desktopMoreMeasureRef.current?.offsetWidth || 76;
+    let usedWidth = moreWidth;
+    let nextVisibleCount = 0;
+
+    for (const width of itemWidths) {
+      if (usedWidth + width > availableWidth) break;
+      usedWidth += width;
+      nextVisibleCount += 1;
+    }
+
+    setVisibleDesktopItemCount(nextVisibleCount);
+  }, []);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(measureDesktopNav);
+    const nav = desktopNavRef.current;
+    if (!nav) return () => cancelAnimationFrame(frame);
+
+    const observer = new ResizeObserver(measureDesktopNav);
+    observer.observe(nav);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [desktopContestItems, measureDesktopNav]);
+
+  const visibleDesktopItems = desktopContestItems.slice(
+    0,
+    visibleDesktopItemCount,
+  );
+  const overflowDesktopItems = desktopContestItems.slice(
+    visibleDesktopItemCount,
+  );
+
+  const renderDesktopItem = (item: DesktopNavItem) => {
+    if (item.type === "link") {
+      return (
+        <Link
+          key={item.key}
+          href={item.href}
+          className={desktopLinkClass(item.href, item.className)}
+        >
+          {item.label}
+        </Link>
+      );
+    }
+
+    return (
+      <button
+        key={item.key}
+        type="button"
+        onClick={item.onClick}
+        className={desktopButtonClass(item.className)}
+      >
+        {item.label}
+      </button>
+    );
+  };
+
+  const renderDesktopMenuItem = (item: DesktopNavItem) => {
+    if (item.type === "link") {
+      return (
+        <Link
+          key={item.key}
+          href={item.href}
+          className={desktopMenuLinkClass(item.href, item.className)}
+          onClick={() => setShowMoreMenu(false)}
+        >
+          {item.label}
+        </Link>
+      );
+    }
+
+    return (
+      <button
+        key={item.key}
+        type="button"
+        onClick={() => {
+          item.onClick();
+          setShowMoreMenu(false);
+        }}
+        className={desktopMenuButtonClass(
+          item.className || "text-gray-700 hover:text-blue-700",
+        )}
+      >
+        {item.label}
+      </button>
+    );
+  };
 
   return (
     <>
@@ -158,9 +451,9 @@ export default function Navbar() {
         className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 nav-trigger">
-          <div className="flex justify-between items-center h-14 font-serif text-xl nav-trigger">
+          <div className="flex justify-between items-center h-14 font-serif text-xl nav-trigger gap-3">
             {/* 左侧：移动端汉堡菜单按钮 & 桌面端导航 */}
-            <div className="flex items-center">
+            <div className="flex min-w-0 flex-1 items-center">
               {/* 移动端汉堡菜单按钮 */}
               <button
                 className="md:hidden mr-2 p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-md"
@@ -178,7 +471,7 @@ export default function Navbar() {
               </Link>
 
               {/* ================= 桌面端导航项 (移动端隐藏) ================= */}
-              <div className="hidden md:flex items-center">
+              <div className="hidden md:flex min-w-0 flex-1 items-center">
                 {user && !user.contestId && (
                   <Link href="/train" className={desktopLinkClass("/train")}>
                     训练中心
@@ -188,83 +481,67 @@ export default function Navbar() {
                 {contestId && (
                   <>
                     <span className="text-gray-300 shrink-0 mx-1">|</span>
-                    <Link
-                      href={getContestLink("")}
-                      className={desktopLinkClass(`/contest/${contestId}`)}
-                    >
-                      {dict.nav.contest}
-                    </Link>
-                    <Link
-                      href={getContestLink("/problems")}
-                      className={desktopLinkClass(
-                        `/contest/${contestId}/problems`,
-                      )}
-                    >
-                      {dict.nav.problems}
-                    </Link>
-                    <Link
-                      href={getContestLink("/status")}
-                      className={desktopLinkClass(
-                        `/contest/${contestId}/status`,
-                      )}
-                    >
-                      {dict.nav.status}
-                    </Link>
-                    <Link
-                      href={getContestLink("/rank")}
-                      className={desktopLinkClass(`/contest/${contestId}/rank`)}
-                    >
-                      {dict.nav.rank}
-                    </Link>
-                    <Link
-                      href={getContestLink("/clarifications")}
-                      className={desktopLinkClass(
-                        `/contest/${contestId}/clarifications`,
-                      )}
-                    >
-                      {dict.nav.clarifications}
-                    </Link>
-                    {isContestTeam && (
+                    <div className="pointer-events-none absolute left-0 top-0 -z-10 flex opacity-0">
+                      <div ref={desktopMeasureRef} className="flex items-center">
+                        {desktopContestItems.map(renderDesktopItem)}
+                      </div>
                       <button
+                        ref={desktopMoreMeasureRef}
                         type="button"
-                        onClick={() => setShowPrintRequest(true)}
-                        className="px-3 py-2 font-bold transition-colors whitespace-nowrap hidden md:block text-slate-700 hover:text-slate-900"
+                        className="px-3 py-2 font-bold whitespace-nowrap flex items-center gap-1"
                       >
-                        Print
+                        More
+                        <ChevronDownIcon className="h-4 w-4" />
                       </button>
-                    )}
+                    </div>
+                    <div
+                      ref={desktopNavRef}
+                      className="relative flex min-w-0 flex-1 items-center"
+                    >
+                      {visibleDesktopItems.map(renderDesktopItem)}
+
+                      {overflowDesktopItems.length > 0 && (
+                        <div
+                          className="relative hidden md:block"
+                          onMouseEnter={openMoreMenu}
+                          onMouseLeave={closeMoreMenu}
+                        >
+                          <button
+                            type="button"
+                            onClick={handleMoreMenuClick}
+                            className={`px-3 py-2 font-bold transition-colors whitespace-nowrap flex items-center gap-1 cursor-pointer ${
+                              showMoreMenu
+                                ? "text-blue-700"
+                                : "text-gray-900 hover:text-blue-700"
+                            }`}
+                          >
+                            More
+                            <ChevronDownIcon
+                              className={`h-4 w-4 transition-transform ${
+                                showMoreMenu ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
+
+                          {showMoreMenu && (
+                            <div
+                              className="absolute left-0 top-full z-50 w-48 pt-2"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="overflow-hidden rounded-sm border border-gray-200 bg-white py-1 shadow-lg">
+                                {overflowDesktopItems.map(
+                                  renderDesktopMenuItem,
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
 
-                {contestId && (isBalloonStaff || isPrintStaff) && (
-                  <>
-                    <span className="text-gray-300 shrink-0 mx-1">|</span>
-                    {isBalloonStaff && (
-                    <Link
-                      href={getContestLink("/balloon")}
-                      className={desktopLinkClass(
-                        `/contest/${contestId}/balloon`,
-                        "text-orange-600 hover:text-orange-800",
-                      )}
-                    >
-                      🎈 {dict.nav.balloon}
-                    </Link>
-                    )}
-                    {isPrintStaff && (
-                    <Link
-                      href={getContestLink("/print")}
-                      className={desktopLinkClass(
-                        `/contest/${contestId}/print`,
-                        "text-slate-700 hover:text-slate-900",
-                      )}
-                    >
-                      Print Queue
-                    </Link>
-                    )}
-                  </>
-                )}
-
-                {isAdmin && (
+                {isAdmin && !contestId && (
                   <>
                     <span className="text-gray-300 shrink-0 mx-1">|</span>
                     <Link
@@ -409,19 +686,27 @@ export default function Navbar() {
               >
                 {dict.nav.clarifications}
               </Link>
-              {isContestTeam && (
+              {hasEditorial && (
+                <Link
+                  href={getContestLink("/editorial")}
+                  className={mobileLinkClass(
+                    `/contest/${contestId}/editorial`,
+                    "text-red-600",
+                  )}
+                >
+                  Editorial
+                </Link>
+              )}
+              {canRequestPrint && (
                 <button
                   type="button"
                   onClick={() => {
                     setShowPrintRequest(true);
                     setIsMobileMenuOpen(false);
                   }}
-                  className={mobileLinkClass(
-                    `/contest/${contestId}/print-request`,
-                    "text-slate-700 text-left w-full cursor-pointer",
-                  )}
+                  className="block px-4 py-4 text-lg font-bold border-b border-gray-100 transition-colors text-slate-700 text-left w-full cursor-pointer active:bg-gray-50"
                 >
-                  Print
+                  {dict.nav.print}
                 </button>
               )}
             </>
@@ -430,26 +715,26 @@ export default function Navbar() {
           {contestId && (isBalloonStaff || isPrintStaff) && (
             <>
               {isBalloonStaff && (
-              <Link
-                href={getContestLink("/balloon")}
-                className={mobileLinkClass(
-                  `/contest/${contestId}/balloon`,
-                  "text-orange-600",
-                )}
-              >
-                🎈 {dict.nav.balloon}
-              </Link>
+                <Link
+                  href={getContestLink("/balloon")}
+                  className={mobileLinkClass(
+                    `/contest/${contestId}/balloon`,
+                    "text-orange-600",
+                  )}
+                >
+                  🎈 {dict.nav.balloon}
+                </Link>
               )}
               {isPrintStaff && (
-              <Link
-                href={getContestLink("/print")}
-                className={mobileLinkClass(
-                  `/contest/${contestId}/print`,
-                  "text-slate-700",
-                )}
-              >
-                Print Queue
-              </Link>
+                <Link
+                  href={getContestLink("/print")}
+                  className={mobileLinkClass(
+                    `/contest/${contestId}/print`,
+                    "text-slate-700",
+                  )}
+                >
+                  Print Queue
+                </Link>
               )}
             </>
           )}

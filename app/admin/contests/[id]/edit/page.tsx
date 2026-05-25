@@ -7,6 +7,10 @@ import EditForm from "./EditForm";
 export interface ContestConfig {
   frozenDuration?: number;
   unfreezeDelay?: number;
+  editorialPdf?: {
+    filename: string;
+    uploadedAt: string;
+  };
   medal?: {
     mode: "ratio" | "fixed";
     gold: number;

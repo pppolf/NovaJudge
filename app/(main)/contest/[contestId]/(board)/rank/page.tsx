@@ -2,14 +2,12 @@ import { verifyAuth } from "@/lib/auth";
 import {
   ContestRole,
   ContestStatus,
-  Prisma,
   Verdict,
 } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import RankSearch from "./RankSearch";
 import RankTable from "./RankTable";
-import Pagination from "@/components/Pagination";
 import { ContestConfig } from "@/app/(main)/page";
 import UnfreezeButton from "./UnfreezeButton";
 import ExportEventFeedButton from "./ExportEventFeedButton";
@@ -48,9 +46,39 @@ function formatTime(startTime: number, submissionTime: number): string {
   )}:${String(seconds).padStart(2, "0")}`;
 }
 
+function isStarTeam(category: string | null) {
+  return category === "1";
+}
+
+function getMedalCounts(total: number, config: ContestConfig | null) {
+  const medal = config?.medal || {
+    mode: "ratio" as const,
+    gold: 0,
+    silver: 0,
+    bronze: 0,
+  };
+  const mode = medal.mode || "ratio";
+  const gold = Math.max(0, Number(medal.gold || 0));
+  const silver = Math.max(0, Number(medal.silver || 0));
+  const bronze = Math.max(0, Number(medal.bronze || 0));
+
+  if (mode === "fixed") {
+    return {
+      gold: Math.min(total, Math.floor(gold)),
+      silver: Math.min(total, Math.floor(silver)),
+      bronze: Math.min(total, Math.floor(bronze)),
+    };
+  }
+
+  return {
+    gold: Math.min(total, Math.ceil((total * gold) / 100)),
+    silver: Math.min(total, Math.ceil((total * silver) / 100)),
+    bronze: Math.min(total, Math.ceil((total * bronze) / 100)),
+  };
+}
+
 interface Props {
   searchParams: Promise<{
-    page?: string;
     teamName?: string;
     school?: string;
     category?: string;
@@ -62,11 +90,9 @@ interface Props {
 
 export default async function Rank({ params, searchParams }: Props) {
   const { contestId } = await params;
-  const { page = "1", teamName, school, category } = await searchParams;
+  const { teamName, school, category } = await searchParams;
 
   const cid = parseInt(contestId);
-  const currentPage = parseInt(page as string) || 1;
-  const pageSize = 50;
 
   // 1. 获取比赛信息
   const contestInfo = await prisma.contest.findUnique({
@@ -115,11 +141,6 @@ export default async function Rank({ params, searchParams }: Props) {
   }
 
   // 3. 构建查询条件
-  const where: Prisma.UserWhereInput = {
-    contestId: cid,
-    role: ContestRole.TEAM,
-  };
-
   const config = contestInfo.config as ContestConfig;
   const now = new Date();
   const freezeTime =
@@ -137,19 +158,12 @@ export default async function Rank({ params, searchParams }: Props) {
   // 普通用户（包括未登录）看到的榜单是否应该是封榜状态
   const shouldShowFrozenState = isFrozen && !canSeeLiveBoard;
 
-  if (teamName) where.displayName = { contains: teamName };
-  if (school) where.school = { contains: school };
-  if (category) {
-    if (category === "0") {
-      where.category = { in: ["0", "2"] };
-    } else {
-      where.category = category;
-    }
-  }
-
   // 4. 获取队伍和提交
   const allTeams = await prisma.user.findMany({
-    where,
+    where: {
+      contestId: cid,
+      role: ContestRole.TEAM,
+    },
     select: {
       id: true,
       username: true,
@@ -217,6 +231,7 @@ export default async function Rank({ params, searchParams }: Props) {
   // 排行榜数据接口定义
   interface TeamRankData {
     rank: number | string;
+    medal?: "Gold" | "Silver" | "Bronze" | "";
     id: string;
     username: string;
     displayName: string | null;
@@ -465,6 +480,7 @@ export default async function Rank({ params, searchParams }: Props) {
 
       return {
         rank: 0,
+        medal: "",
         id: team.id,
         username: team.username,
         displayName: team.displayName,
@@ -497,17 +513,50 @@ export default async function Rank({ params, searchParams }: Props) {
     }
   }
 
-  // 7. 获取当前用户的排名
-  const myTeamRank = isTeamMember
-    ? allTeamRankings.find((t) => t.id === currentUser?.id)
-    : null;
-
-  // 8. 分页
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedTeams = allTeamRankings.slice(
-    startIndex,
-    startIndex + pageSize,
+  const officialTeams = allTeamRankings.filter(
+    (team) => !isStarTeam(team.category),
   );
+  const medalCounts = getMedalCounts(officialTeams.length, config);
+  officialTeams.forEach((team, index) => {
+    if (index < medalCounts.gold) team.medal = "Gold";
+    else if (index < medalCounts.gold + medalCounts.silver)
+      team.medal = "Silver";
+    else if (
+      index <
+      medalCounts.gold + medalCounts.silver + medalCounts.bronze
+    )
+      team.medal = "Bronze";
+  });
+
+  const displayTeamRankings = allTeamRankings.filter((team) => {
+    if (
+      teamName &&
+      !`${team.displayName || ""} ${team.username}`
+        .toLowerCase()
+        .includes(teamName.toLowerCase())
+    ) {
+      return false;
+    }
+
+    if (
+      school &&
+      !`${team.school || ""}`.toLowerCase().includes(school.toLowerCase())
+    ) {
+      return false;
+    }
+
+    if (category) {
+      if (category === "0") {
+        return team.category === "0" || team.category === "2";
+      }
+      return team.category === category;
+    }
+
+    return true;
+  });
+  const myTeamRank = isTeamMember
+    ? allTeamRankings.find((team) => team.id === currentUser?.id)
+    : null;
 
   // 获取所有的 School 和 Category 用于筛选
   const allSchools = await prisma.user.findMany({
@@ -767,7 +816,7 @@ export default async function Rank({ params, searchParams }: Props) {
       ) : (
         <>
           {myTeamRank && (
-            <div className="mb-4">
+            <div className="mb-4 print:hidden">
               <RankTable
                 contestId={contestId}
                 teams={[myTeamRank]}
@@ -781,7 +830,7 @@ export default async function Rank({ params, searchParams }: Props) {
 
           <RankTable
             contestId={contestId}
-            teams={paginatedTeams}
+            teams={displayTeamRankings}
             isMyTeam={false}
             isContestEnded={contestInfo.status === ContestStatus.ENDED}
             contestProblems={contestProblems}
@@ -802,9 +851,6 @@ export default async function Rank({ params, searchParams }: Props) {
         </>
       )}
 
-      <div className="mt-6">
-        <Pagination totalItems={allTeamRankings.length} pageSize={pageSize} />
-      </div>
     </div>
   );
 }

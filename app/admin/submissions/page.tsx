@@ -7,15 +7,17 @@ import VerdictCell from "@/components/VerdictCell";
 export default async function GlobalSubmissionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; problem?: string }>;
 }) {
-  const { page } = await searchParams;
+  const { page, problem } = await searchParams;
   const currentPage = Number(page) || 1;
   const pageSize = 15;
+  const problemQuery = problem?.trim() || "";
 
   const { submissions, total } = await getGlobalSubmissions(
     currentPage,
-    pageSize
+    pageSize,
+    problemQuery,
   );
 
   return (
@@ -23,6 +25,35 @@ export default async function GlobalSubmissionsPage({
       <h1 className="text-2xl font-bold text-gray-800 mb-6">
         Global Submissions
       </h1>
+
+      <form className="mb-4 flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm md:flex-row md:items-end">
+        <div className="flex-1">
+          <label className="mb-2 block text-sm font-bold text-gray-700">
+            Filter by Problem
+          </label>
+          <input
+            type="text"
+            name="problem"
+            defaultValue={problemQuery}
+            placeholder="Problem ID or title"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          />
+        </div>
+        <button
+          type="submit"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-700"
+        >
+          Search
+        </button>
+        {problemQuery && (
+          <Link
+            href="/admin/submissions"
+            className="rounded-md border border-gray-300 px-4 py-2 text-center text-sm font-bold text-gray-700 transition hover:bg-gray-50"
+          >
+            Reset
+          </Link>
+        )}
+      </form>
 
       <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
         <div className="overflow-x-auto">

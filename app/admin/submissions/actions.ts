@@ -7,11 +7,35 @@ import { cookies } from "next/headers";
 import { Verdict } from "@/lib/generated/prisma/enums";
 import { judgeQueue } from "@/lib/queue";
 
-export async function getGlobalSubmissions(page = 1, pageSize = 20) {
+export async function getGlobalSubmissions(
+  page = 1,
+  pageSize = 20,
+  problemQuery = "",
+) {
   const skip = (page - 1) * pageSize;
+  const query = problemQuery.trim();
+  const problemId = Number(query);
+  const where = query
+    ? {
+        problem: {
+          OR: [
+            ...(Number.isInteger(problemId) && problemId > 0
+              ? [{ id: problemId }]
+              : []),
+            {
+              title: {
+                contains: query,
+                mode: "insensitive" as const,
+              },
+            },
+          ],
+        },
+      }
+    : {};
 
   const [submissions, total] = await Promise.all([
     prisma.submission.findMany({
+      where,
       skip,
       take: pageSize,
       orderBy: { submittedAt: "desc" },
@@ -22,7 +46,7 @@ export async function getGlobalSubmissions(page = 1, pageSize = 20) {
         contest: { select: { title: true, id: true } }, // 比赛信息
       },
     }),
-    prisma.submission.count(),
+    prisma.submission.count({ where }),
   ]);
 
   return { submissions, total };
