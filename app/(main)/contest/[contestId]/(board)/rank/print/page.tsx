@@ -112,6 +112,10 @@ export default async function RankPrintPage({ params }: Props) {
       : null;
   const shouldShowFrozenState =
     frozenDuration !== 0 && freezeTime !== null && Date.now() >= freezeTime;
+  const submissionEndTime =
+    shouldShowFrozenState && freezeTime
+      ? new Date(Math.min(freezeTime, contest.endTime.getTime()))
+      : contest.endTime;
 
   const teams = await prisma.user.findMany({
     where: {
@@ -129,9 +133,11 @@ export default async function RankPrintPage({ params }: Props) {
         where: {
           contestId,
           virtualParticipationId: null,
-          ...(shouldShowFrozenState && freezeTime
-            ? { submittedAt: { lt: new Date(freezeTime) } }
-            : {}),
+          submittedAt: {
+            gte: contest.startTime,
+            ...(shouldShowFrozenState ? { lt: submissionEndTime } : {}),
+            ...(!shouldShowFrozenState ? { lte: submissionEndTime } : {}),
+          },
           verdict: {
             notIn: [Verdict.COMPILE_ERROR, Verdict.SYSTEM_ERROR],
           },
