@@ -653,7 +653,25 @@ export default async function Rank({ params, searchParams }: Props) {
 
   const globalRanks: TeamRankData[] = [];
   // 收集所有在本比赛中有提交的全局用户
-  const globalIds = latestVirtualParticipations.map((vp) => vp.globalUserId);
+  const globalSubmissionUsers = showUpsolving
+    ? await prisma.submission.findMany({
+        where: {
+          contestId: cid,
+          globalUserId: { not: null },
+          virtualParticipationId: null,
+        },
+        select: { globalUserId: true },
+        distinct: ["globalUserId"],
+      })
+    : [];
+  const globalIds = Array.from(
+    new Set([
+      ...latestVirtualParticipations.map((vp) => vp.globalUserId),
+      ...globalSubmissionUsers
+        .map((submission) => submission.globalUserId)
+        .filter((id): id is string => Boolean(id)),
+    ]),
+  );
   if (globalIds.length > 0) {
     const globalUsers = await prisma.globalUser.findMany({
       where: { id: { in: globalIds } },
@@ -663,14 +681,13 @@ export default async function Rank({ params, searchParams }: Props) {
       const currentVp = latestVirtualParticipations.find(
         (vp) => vp.globalUserId === gu.id,
       );
-      if (!currentVp) continue;
-      const vpStartTimeMs = currentVp.startedAt.getTime();
-      const vpEndTimeMs = currentVp.endedAt.getTime();
+      const vpStartTimeMs = currentVp?.startedAt.getTime() ?? startTimeMs;
+      const vpEndTimeMs = currentVp?.endedAt.getTime() ?? startTimeMs;
       const globalSubs = await prisma.submission.findMany({
         where: {
           contestId: cid,
           globalUserId: gu.id,
-          virtualParticipationId: currentVp.id,
+          virtualParticipationId: currentVp?.id ?? "__NO_VP__",
         },
         select: {
           id: true,
@@ -686,9 +703,18 @@ export default async function Rank({ params, searchParams }: Props) {
             where: {
               contestId: cid,
               globalUserId: gu.id,
-              AND: [
-                { virtualParticipationId: { not: null } },
-                { virtualParticipationId: { not: currentVp.id } },
+              OR: [
+                { virtualParticipationId: null },
+                ...(currentVp
+                  ? [
+                      {
+                        AND: [
+                          { virtualParticipationId: { not: null } },
+                          { virtualParticipationId: { not: currentVp.id } },
+                        ],
+                      },
+                    ]
+                  : []),
               ],
             },
             select: {
@@ -714,10 +740,6 @@ export default async function Rank({ params, searchParams }: Props) {
               s.verdict !== Verdict.COMPILE_ERROR &&
               s.verdict !== Verdict.SYSTEM_ERROR,
           );
-          if (rawSubmissions.length === 0) return null;
-          const contestSubmissions = rawSubmissions.filter(
-            (s) => new Date(s.submittedAt).getTime() <= end,
-          );
           const afterContestSubmissions = showUpsolving
             ? previousVpSubs.filter(
                 (s) =>
@@ -726,6 +748,11 @@ export default async function Rank({ params, searchParams }: Props) {
                   s.verdict !== Verdict.SYSTEM_ERROR,
               )
             : [];
+          if (rawSubmissions.length === 0 && afterContestSubmissions.length === 0)
+            return null;
+          const contestSubmissions = rawSubmissions.filter(
+            (s) => new Date(s.submittedAt).getTime() <= end,
+          );
           const submissions = contestSubmissions.sort(
             (a, b) =>
               new Date(a.submittedAt).getTime() -
@@ -872,7 +899,7 @@ export default async function Rank({ params, searchParams }: Props) {
       );
       globalRanks.push({
         rank: "*",
-        id: currentVp.id,
+        id: currentVp?.id ?? `global-upsolve-${gu.id}`,
         username: gu.username,
         displayName: gu.displayName,
         members: null,
