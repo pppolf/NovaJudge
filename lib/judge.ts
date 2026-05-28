@@ -169,7 +169,13 @@ async function deleteTmpFile(id: string) {
 
 function cleanOutput(str: string) {
   if (!str) return "";
-  return str.trim().replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  return str
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .split("\n")
+    .map((line) => line.replace(/[ \t]+$/g, ""))
+    .join("\n")
+    .trim();
 }
 
 function getProblemDataDir(problemId: number) {
