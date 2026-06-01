@@ -130,11 +130,10 @@ export default async function SubmissionDetail({ params }: Props) {
       isGlobalAdmin ||
       currentUser?.role === ContestRole.ADMIN ||
       currentUser?.role === ContestRole.JUDGE;
-    const isGlobalParticipant = Boolean(globalUser?.userId && !isGlobalAdmin);
+    const isPublicOfficialSubmission =
+      isContestEnded && !isFrozen && submission.virtualParticipationId === null;
     const hasPermission =
-      isOwner ||
-      isAdmin ||
-      (!isGlobalParticipant && isContestEnded && !isFrozen && !isOwner);
+      isOwner || isAdmin || (!isOwner && isPublicOfficialSubmission);
 
     if (!hasPermission) {
       return notFound();
