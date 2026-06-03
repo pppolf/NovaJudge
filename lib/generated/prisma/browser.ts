@@ -18,11 +18,6 @@ export { Prisma }
 export * as $Enums from './enums'
 export * from './enums';
 /**
- * Model SystemSetting
- * 
- */
-export type SystemSetting = Prisma.SystemSettingModel
-/**
  * Model GlobalUser
  * 
  */

@@ -384,7 +384,6 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
-  SystemSetting: 'SystemSetting',
   GlobalUser: 'GlobalUser',
   ApiKey: 'ApiKey',
   User: 'User',
@@ -413,84 +412,10 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "systemSetting" | "globalUser" | "apiKey" | "user" | "contest" | "balloon" | "printJob" | "problem" | "contestProblem" | "submission" | "virtualParticipation" | "clarification" | "reply" | "trainingNode"
+    modelProps: "globalUser" | "apiKey" | "user" | "contest" | "balloon" | "printJob" | "problem" | "contestProblem" | "submission" | "virtualParticipation" | "clarification" | "reply" | "trainingNode"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
-    SystemSetting: {
-      payload: Prisma.$SystemSettingPayload<ExtArgs>
-      fields: Prisma.SystemSettingFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.SystemSettingFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.SystemSettingFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
-        }
-        findFirst: {
-          args: Prisma.SystemSettingFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.SystemSettingFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
-        }
-        findMany: {
-          args: Prisma.SystemSettingFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
-        }
-        create: {
-          args: Prisma.SystemSettingCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
-        }
-        createMany: {
-          args: Prisma.SystemSettingCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.SystemSettingCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
-        }
-        delete: {
-          args: Prisma.SystemSettingDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
-        }
-        update: {
-          args: Prisma.SystemSettingUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
-        }
-        deleteMany: {
-          args: Prisma.SystemSettingDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.SystemSettingUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.SystemSettingUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
-        }
-        upsert: {
-          args: Prisma.SystemSettingUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
-        }
-        aggregate: {
-          args: Prisma.SystemSettingAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateSystemSetting>
-        }
-        groupBy: {
-          args: Prisma.SystemSettingGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SystemSettingGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.SystemSettingCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SystemSettingCountAggregateOutputType> | number
-        }
-      }
-    }
     GlobalUser: {
       payload: Prisma.$GlobalUserPayload<ExtArgs>
       fields: Prisma.GlobalUserFieldRefs
@@ -1492,23 +1417,11 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const SystemSettingScalarFieldEnum = {
-  id: 'id',
-  allowExternalLogin: 'allowExternalLogin',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
-
-
 export const GlobalUserScalarFieldEnum = {
   id: 'id',
   username: 'username',
   password: 'password',
   role: 'role',
-  externalId: 'externalId',
-  isBanned: 'isBanned',
   displayName: 'displayName',
   studentId: 'studentId',
   email: 'email',
@@ -1784,13 +1697,6 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-/**
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -1801,6 +1707,13 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -2024,7 +1937,6 @@ export type PrismaClientOptions = ({
   comments?: runtime.SqlCommenterPlugin[]
 }
 export type GlobalOmitConfig = {
-  systemSetting?: Prisma.SystemSettingOmit
   globalUser?: Prisma.GlobalUserOmit
   apiKey?: Prisma.ApiKeyOmit
   user?: Prisma.UserOmit

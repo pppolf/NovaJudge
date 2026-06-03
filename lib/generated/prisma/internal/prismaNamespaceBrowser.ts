@@ -51,7 +51,6 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  SystemSetting: 'SystemSetting',
   GlobalUser: 'GlobalUser',
   ApiKey: 'ApiKey',
   User: 'User',
@@ -83,23 +82,11 @@ export const TransactionIsolationLevel = {
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const SystemSettingScalarFieldEnum = {
-  id: 'id',
-  allowExternalLogin: 'allowExternalLogin',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
-
-
 export const GlobalUserScalarFieldEnum = {
   id: 'id',
   username: 'username',
   password: 'password',
   role: 'role',
-  externalId: 'externalId',
-  isBanned: 'isBanned',
   displayName: 'displayName',
   studentId: 'studentId',
   email: 'email',

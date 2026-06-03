@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Switch } from "@headlessui/react";
 
 type EnvSetting = {
   key: string;
@@ -14,14 +13,12 @@ type EnvSetting = {
 };
 
 type SettingsResponse = {
-  allowExternalLogin: boolean;
   envSettings: EnvSetting[];
 };
 
 export default function SystemSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [allowExternalLogin, setAllowExternalLogin] = useState(true);
   const [envSettings, setEnvSettings] = useState<EnvSetting[]>([]);
   const [envValues, setEnvValues] = useState<Record<string, string>>({});
 
@@ -32,7 +29,6 @@ export default function SystemSettingsPage() {
         return res.json() as Promise<SettingsResponse>;
       })
       .then((data) => {
-        setAllowExternalLogin(data.allowExternalLogin);
         setEnvSettings(data.envSettings || []);
         setEnvValues(
           Object.fromEntries(
@@ -53,14 +49,13 @@ export default function SystemSettingsPage() {
     [envSettings],
   );
 
-  const saveSettings = async (nextAllowExternalLogin = allowExternalLogin) => {
+  const saveSettings = async () => {
     setSaving(true);
     try {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          allowExternalLogin: nextAllowExternalLogin,
           envSettings: envValues,
         }),
       });
@@ -68,7 +63,6 @@ export default function SystemSettingsPage() {
       if (!res.ok) throw new Error("Failed to save settings");
 
       const data = (await res.json()) as SettingsResponse;
-      setAllowExternalLogin(data.allowExternalLogin);
       setEnvSettings(data.envSettings || []);
       setEnvValues(
         Object.fromEntries(
@@ -81,16 +75,6 @@ export default function SystemSettingsPage() {
       throw new Error("Failed to save settings");
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleToggle = async (checked: boolean) => {
-    const previous = allowExternalLogin;
-    setAllowExternalLogin(checked);
-    try {
-      await saveSettings(checked);
-    } catch {
-      setAllowExternalLogin(previous);
     }
   };
 
@@ -110,38 +94,9 @@ export default function SystemSettingsPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">System Settings</h1>
         <p className="mt-2 text-sm text-gray-500">
-          Manage global login behavior and runtime service links.
+          Manage runtime service links for the judge platform.
         </p>
       </div>
-
-      <section className="rounded-lg bg-white p-6 shadow">
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <h2 className="text-lg font-medium text-gray-900">
-              Allow External Login
-            </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              When enabled, users can sign in through the configured external
-              identity provider.
-            </p>
-          </div>
-
-          <Switch
-            checked={allowExternalLogin}
-            onChange={handleToggle}
-            disabled={saving}
-            className={`${
-              allowExternalLogin ? "bg-blue-600" : "bg-gray-200"
-            } relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`}
-          >
-            <span
-              className={`${
-                allowExternalLogin ? "translate-x-6" : "translate-x-1"
-              } inline-block h-4 w-4 rounded-full bg-white transition-transform`}
-            />
-          </Switch>
-        </div>
-      </section>
 
       <form onSubmit={handleSubmit} className="rounded-lg bg-white p-6 shadow">
         <div className="flex flex-col gap-2 border-b border-gray-200 pb-5">

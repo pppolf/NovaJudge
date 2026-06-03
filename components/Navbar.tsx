@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import AdminLoginModal from "./AdminLoginModal";
-import ExternalLoginModal from "./ExternalLoginModal";
 import PrintRequestModal from "./PrintRequestModal";
 import { ContestRole } from "@/lib/generated/prisma/enums";
 import {
@@ -36,7 +35,6 @@ type DesktopNavItem =
 export default function Navbar() {
   const [clickCount, setClickCount] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [showExternalLogin, setShowExternalLogin] = useState(false);
   const [showPrintRequest, setShowPrintRequest] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
@@ -112,19 +110,6 @@ export default function Navbar() {
 
   const openMoreMenu = () => setShowMoreMenu(true);
   const closeMoreMenu = () => setShowMoreMenu(false);
-
-  const [allowExternalLogin, setAllowExternalLogin] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/public/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        setAllowExternalLogin(data.allowExternalLogin);
-      })
-      .catch((err) => console.error(err));
-  }, []);
-
-  const handleExternalLoginOpen = () => setShowExternalLogin(true);
 
   const match = pathname.match(/^\/contest\/(\d+)/);
   const contestId = match ? match[1] : null;
@@ -603,13 +588,6 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-              ) : allowExternalLogin ? (
-                <button
-                  onClick={handleExternalLoginOpen}
-                  className="px-3 py-2 text-sm font-bold rounded-sm border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
-                >
-                  外部登录
-                </button>
               ) : null}
             </div>
           </div>
@@ -757,12 +735,6 @@ export default function Navbar() {
 
       {showAdminLogin && (
         <AdminLoginModal onClose={() => setShowAdminLogin(false)} />
-      )}
-      {showExternalLogin && (
-        <ExternalLoginModal
-          onClose={() => setShowExternalLogin(false)}
-          onSuccess={() => revalidate?.()}
-        />
       )}
       {showPrintRequest && numericContestId && (
         <PrintRequestModal
