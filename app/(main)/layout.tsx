@@ -18,9 +18,6 @@ export default function RootLayout({
       <footer className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto py-6 px-4 text-center">
           <p className="text-gray-500 text-xs">
-            Created by CWNU Programming Algorithm Association Gao Ming |
-            gaoyanghyy@163.com
-            <br />
             Powered by{" "}
             <a
               className=" text-gray-800"
@@ -29,7 +26,7 @@ export default function RootLayout({
             >
               NovaJudge
             </a>{" "}
-            Community © {new Date().getFullYear()} All rights reserved.
+            Community © {new Date().getFullYear()}.
           </p>
         </div>
       </footer>

@@ -17,7 +17,6 @@ export interface GlobalUserJwtPayload extends UserJwtPayload {
   displayName?: string | null;
   studentId?: string | null;
   email?: string | null;
-  externalId?: string | null;
 }
 
 // 获取密钥并转换为 Uint8Array（jose 要求的格式）
@@ -75,15 +74,13 @@ export async function getVerifiedGlobalUser(
         id: true,
         username: true,
         role: true,
-        externalId: true,
-        isBanned: true,
         displayName: true,
         studentId: true,
         email: true,
       },
     });
 
-    if (!globalUser || globalUser.isBanned) {
+    if (!globalUser) {
       return null;
     }
 
@@ -96,7 +93,6 @@ export async function getVerifiedGlobalUser(
       displayName: globalUser.displayName,
       studentId: globalUser.studentId,
       email: globalUser.email,
-      externalId: globalUser.externalId,
     };
   } catch (error) {
     console.log(error);
@@ -113,7 +109,7 @@ export async function validateApiKey(apiKey: string) {
     include: { user: true },
   });
 
-  if (!keyRecord || !keyRecord.isEnabled || keyRecord.user.isBanned) return null;
+  if (!keyRecord || !keyRecord.isEnabled) return null;
 
   // 异步更新最后使用时间，不阻塞主流程
   prisma.apiKey

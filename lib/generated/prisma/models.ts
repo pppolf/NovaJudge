@@ -8,7 +8,6 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/SystemSetting'
 export type * from './models/GlobalUser'
 export type * from './models/ApiKey'
 export type * from './models/User'

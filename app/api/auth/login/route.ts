@@ -19,12 +19,6 @@ export async function POST(req: Request) {
       if (!user || user.role !== "SUPER_ADMIN") {
         return NextResponse.json({ error: "User not found" }, { status: 401 });
       }
-      if (user.isBanned) {
-        return NextResponse.json(
-          { error: "Account has been banned" },
-          { status: 403 }
-        );
-      }
       role = user.role;
     } else {
       // 2. 比赛用户登录逻辑
