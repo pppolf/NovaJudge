@@ -12,6 +12,7 @@ interface User {
   school: string | null;
   members: string | null;
   seat: string | null;
+  autoLoginIp: string | null;
   role: string;
   coach: string | null;
   category: string | null;
@@ -34,6 +35,7 @@ export default function EditUserModal({
     school: user.school || "",
     members: user.members || "",
     seat: user.seat || "",
+    autoLoginIp: user.autoLoginIp || "",
     coach: user.coach || "",
     category: user.category || "0",
   });
@@ -186,6 +188,25 @@ export default function EditUserModal({
               </div>
 
               {/* [新增] Coach 字段 */}
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  Auto Login IP
+                </label>
+                <input
+                  type="text"
+                  placeholder="Leave empty to disable"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm"
+                  value={formData.autoLoginIp}
+                  onChange={(e) =>
+                    setFormData({ ...formData, autoLoginIp: e.target.value })
+                  }
+                />
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Exact IPv4 or IPv6 only. Duplicate IPs in the same contest are
+                  rejected.
+                </p>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-1">
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1">

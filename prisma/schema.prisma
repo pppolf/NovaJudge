@@ -110,6 +110,7 @@ model User {
   category    String? // 队伍类别
 
   role ContestRole @default(TEAM)
+  autoLoginIp String? // IP auto-login binding
 
   lastLoginIp String? // 最近登录 IP
   lastLoginAt DateTime? // 最近登录时间
@@ -125,6 +126,7 @@ model User {
 
   // 联合唯一索引：保证同一场比赛内 username 唯一
   @@unique([contestId, username])
+  @@unique([contestId, autoLoginIp])
   @@map("users")
 }
 

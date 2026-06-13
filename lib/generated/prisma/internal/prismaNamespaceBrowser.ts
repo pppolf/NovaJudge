@@ -123,6 +123,7 @@ export const UserScalarFieldEnum = {
   coach: 'coach',
   category: 'category',
   role: 'role',
+  autoLoginIp: 'autoLoginIp',
   lastLoginIp: 'lastLoginIp',
   lastLoginAt: 'lastLoginAt',
   createdAt: 'createdAt',
