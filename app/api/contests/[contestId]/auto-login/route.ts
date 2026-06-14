@@ -15,15 +15,25 @@ function getClientIp(req: NextRequest) {
   return req.headers.get("x-real-ip")?.trim() || null;
 }
 
-function contestRedirect(req: NextRequest, contestId: number, query: string) {
-  return NextResponse.redirect(new URL(`/contest/${contestId}${query}`, req.url));
+function contestRedirect(contestId: number, query: string) {
+  return new NextResponse(null, {
+    status: 302,
+    headers: {
+      Location: `/contest/${contestId}${query}`,
+    },
+  });
 }
 
 export async function GET(req: NextRequest, { params }: Props) {
   const { contestId } = await params;
   const cid = Number(contestId);
   if (!Number.isInteger(cid)) {
-    return NextResponse.redirect(new URL("/", req.url));
+    return new NextResponse(null, {
+      status: 302,
+      headers: {
+        Location: "/",
+      },
+    });
   }
 
   const existingUserToken = req.cookies.get("user_token")?.value;
@@ -31,7 +41,7 @@ export async function GET(req: NextRequest, { params }: Props) {
     try {
       const payload = await verifyAuth(existingUserToken);
       if (payload.contestId === cid) {
-        return contestRedirect(req, cid, "?login=true");
+        return contestRedirect(cid, "?login=true");
       }
     } catch {}
   }
@@ -41,14 +51,14 @@ export async function GET(req: NextRequest, { params }: Props) {
     try {
       const payload = await verifyAuth(authToken);
       if (payload.isGlobalAdmin) {
-        return contestRedirect(req, cid, "");
+        return contestRedirect(cid, "");
       }
     } catch {}
   }
 
   const clientIp = getClientIp(req);
   if (!clientIp) {
-    return contestRedirect(req, cid, "?autoLogin=miss");
+    return contestRedirect(cid, "?autoLogin=miss");
   }
 
   const user = await prisma.user.findFirst({
@@ -66,7 +76,7 @@ export async function GET(req: NextRequest, { params }: Props) {
   });
 
   if (!user) {
-    return contestRedirect(req, cid, "?autoLogin=miss");
+    return contestRedirect(cid, "?autoLogin=miss");
   }
 
   await prisma.user.update({
@@ -85,7 +95,7 @@ export async function GET(req: NextRequest, { params }: Props) {
     isGlobalAdmin: false,
   });
 
-  const response = contestRedirect(req, cid, "?login=true");
+  const response = contestRedirect(cid, "?login=true");
   response.cookies.set("user_token", token, {
     httpOnly: true,
     path: "/",
