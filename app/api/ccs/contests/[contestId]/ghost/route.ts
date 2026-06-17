@@ -1,6 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkCCSAuth, unauthorizedResponse } from "@/lib/ccs/auth";
 import { prisma } from "@/lib/prisma";
+import { Verdict } from "@/lib/generated/prisma/client";
+
+function escapeDatString(value: string) {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function verdictToGymDatStatus(verdict: Verdict) {
+  switch (verdict) {
+    case "ACCEPTED":
+      return "OK";
+    case "WRONG_ANSWER":
+      return "WA";
+    case "TIME_LIMIT_EXCEEDED":
+      return "TL";
+    case "MEMORY_LIMIT_EXCEEDED":
+      return "ML";
+    case "RUNTIME_ERROR":
+      return "RT";
+    case "COMPILE_ERROR":
+      return "CE";
+    case "PRESENTATION_ERROR":
+      return "PE";
+    case "PENDING":
+    case "JUDGING":
+      return "PD";
+    case "SYSTEM_ERROR":
+    default:
+      return "RJ";
+  }
+}
 
 export async function GET(
   request: NextRequest,
@@ -33,6 +63,9 @@ export async function GET(
         where: {
           role: "TEAM",
         },
+        orderBy: {
+          username: "asc",
+        },
       },
       submissions: {
         orderBy: {
@@ -49,103 +82,81 @@ export async function GET(
     return new NextResponse("Contest not found", { status: 404 });
   }
 
-  // Filter valid submissions first to get count
-  const validSubmissions = contest.submissions.filter(
-    (s) =>
-      s.verdict !== "PENDING" &&
-      s.verdict !== "JUDGING" &&
-      s.user &&
-      s.user.role === "TEAM",
+  const problemLabelMap = new Map<number, string>();
+  contest.problems.forEach((cp) => {
+    problemLabelMap.set(cp.problemId, cp.displayId);
+  });
+
+  const teamIdMap = new Map<string, number>();
+  const submissionsIdMap = new Map<string, Map<number, number>>();
+
+  contest.users.forEach((team, index) => {
+    teamIdMap.set(team.id, index + 1);
+
+    const attempts = new Map<number, number>();
+    contest.problems.forEach((cp) => {
+      attempts.set(cp.problemId, 0);
+    });
+    submissionsIdMap.set(team.id, attempts);
+  });
+
+  const exportableSubmissions = contest.submissions.filter(
+    (submission) =>
+      submission.userId &&
+      submission.user?.role === "TEAM" &&
+      teamIdMap.has(submission.userId) &&
+      problemLabelMap.has(submission.problemId),
   );
 
   let output = "";
 
-  // Header
-  // @contest "Title"
-  output += `@contest "${contest.title.replace(/"/g, '\\"')}"\n`;
+  output += `@contest "${escapeDatString(contest.title)}"\n`;
 
-  // @contlen Duration in minutes
   const durationMinutes = Math.floor(
     (contest.endTime.getTime() - contest.startTime.getTime()) / 60000,
   );
   output += `@contlen ${durationMinutes}\n`;
-
-  // @problems Count
   output += `@problems ${contest.problems.length}\n`;
-
-  // @teams Count
   output += `@teams ${contest.users.length}\n`;
+  output += `@submissions ${exportableSubmissions.length}\n`;
 
-  // @submissions Count
-  output += `@submissions ${validSubmissions.length}\n`;
-
-  // Problems
-  // @p <Letter>,<Title>,<TimeLimit>,<MemoryLimit>
-  const problemMap = new Map<number, string>();
   contest.problems.forEach((cp) => {
-    const letter = cp.displayId;
-    problemMap.set(cp.problemId, letter);
-    // Time limit in seconds
-    const timeLimitSec = Math.floor(
-      (cp.realTimeLimit || cp.problem.defaultTimeLimit) / 1000,
-    );
-    // Memory limit in MB (assuming defaultMemoryLimit is MB)
-    const memoryLimitMB = cp.realMemoryLimit || cp.problem.defaultMemoryLimit;
-    output += `@p ${letter},"${cp.problem.title.replace(/"/g, '\\"')}",${timeLimitSec},${memoryLimitMB}\n`;
+    output += `@p ${cp.displayId},${cp.displayId},20,0\n`;
   });
 
-  // Submissions
-  // TeamName, ProblemLetter, Attempts, Time(sec), Result
-  const attemptsMap = new Map<string, number>();
+  contest.users.forEach((team, index) => {
+    const nameParts = [];
+    if (team.school) {
+      nameParts.push(team.school);
+    }
 
-  for (const sub of validSubmissions) {
-    if (!sub.user) continue;
-    const letter = problemMap.get(sub.problemId);
+    nameParts.push(team.displayName || team.username);
+
+    if (team.members) {
+      nameParts.push(team.members);
+    }
+
+    output += `@t ${index + 1},0,1,"${escapeDatString(nameParts.join(" - "))}"\n`;
+  });
+
+  for (const sub of exportableSubmissions) {
+    const teamIndex = teamIdMap.get(sub.userId!);
+    const letter = problemLabelMap.get(sub.problemId);
+    const attempts = submissionsIdMap.get(sub.userId!);
+
+    if (!teamIndex) continue;
     if (!letter) continue;
+    if (!attempts) continue;
 
-    // Use displayName as team name, sanitize commas
-    let teamName = sub.user.displayName || sub.user.username;
-    teamName = teamName.replace(/,/g, " ");
+    const attempt = (attempts.get(sub.problemId) ?? 0) + 1;
+    attempts.set(sub.problemId, attempt);
 
-    const key = `${sub.userId}-${sub.problemId}`;
-    const attempt = (attemptsMap.get(key) || 0) + 1;
-    attemptsMap.set(key, attempt);
-
-    // Time in seconds from start
     let time = Math.floor(
       (sub.submittedAt.getTime() - contest.startTime.getTime()) / 1000,
     );
     if (time < 0) time = 0;
 
-    let result = "RJ";
-    switch (sub.verdict) {
-      case "ACCEPTED":
-        result = "OK";
-        break;
-      case "WRONG_ANSWER":
-        result = "WA";
-        break;
-      case "TIME_LIMIT_EXCEEDED":
-        result = "TL";
-        break;
-      case "MEMORY_LIMIT_EXCEEDED":
-        result = "ML";
-        break;
-      case "RUNTIME_ERROR":
-        result = "RE";
-        break;
-      case "COMPILE_ERROR":
-        result = "CE";
-        break;
-      case "PRESENTATION_ERROR":
-        result = "PE";
-        break;
-      default:
-        result = "RJ";
-        break;
-    }
-
-    output += `${teamName},${letter},${attempt},${time},${result}\n`;
+    output += `@s ${teamIndex},${letter},${attempt},${time},${verdictToGymDatStatus(sub.verdict)}\n`;
   }
 
   return new NextResponse(output, {
