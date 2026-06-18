@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { signAuth } from "@/lib/auth";
 import { ContestStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getPrimaryClientIp } from "@/lib/request-ip";
 
 export async function POST(req: Request) {
   try {
@@ -72,7 +73,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const ip = getPrimaryClientIp(req.headers) || "unknown";
     await prisma.user.update({
       where: { id: user.id },
       data: {

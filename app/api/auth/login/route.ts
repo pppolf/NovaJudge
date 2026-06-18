@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getPrimaryClientIp } from "@/lib/request-ip";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
         effectiveContestId = user.contestId;
 
         // 记录登录 IP 和时间
-        const ip = req.headers.get("x-forwarded-for") || "unknown";
+        const ip = getPrimaryClientIp(req.headers) || "unknown";
         await prisma.user.update({
           where: { id: user.id },
           data: {

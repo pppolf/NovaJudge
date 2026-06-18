@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ContestRole } from "@/lib/generated/prisma/client";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
-import { isIP } from "node:net";
+import { normalizeIp } from "@/lib/request-ip";
 
 export interface ImportUsersData {
   password?: string;
@@ -34,11 +34,12 @@ export interface UpdateUsersData {
 }
 
 function normalizeAutoLoginIp(value?: string | null) {
-  const ip = value?.trim();
-  if (!ip) return null;
+  const raw = value?.trim();
+  if (!raw) return null;
 
-  if (!isIP(ip)) {
-    throw new Error(`Invalid auto login IP: ${ip}`);
+  const ip = normalizeIp(raw);
+  if (!ip) {
+    throw new Error(`Invalid auto login IP: ${raw}`);
   }
 
   return ip;

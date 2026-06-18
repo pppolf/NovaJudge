@@ -2,6 +2,7 @@
 
 import { getCurrentSuper, signAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getPrimaryClientIp } from "@/lib/request-ip";
 import { startVirtualParticipation } from "@/lib/virtual-participation";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
@@ -43,7 +44,7 @@ export async function loginContestUser(contestId: number, formData: FormData) {
 
   // 记录登录 IP 和时间
   const headersList = await headers();
-  const ip = headersList.get("x-forwarded-for") || "unknown";
+  const ip = getPrimaryClientIp(headersList) || "unknown";
 
   await prisma.user.update({
     where: { id: user.id },
