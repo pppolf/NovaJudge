@@ -3,7 +3,7 @@
 import { getCurrentSuper, verifyAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
@@ -55,6 +55,7 @@ interface Props {
 interface PageProps extends Props {
   searchParams: Promise<{
     error?: string;
+    autoLogin?: string;
   }>;
 }
 
@@ -74,7 +75,7 @@ export default async function ContestLogin({
   searchParams,
 }: PageProps) {
   const contestId = (await params).contestId;
-  const { error } = await searchParams;
+  const { error, autoLogin } = await searchParams;
   const id = Number(contestId);
   const loginErrorMessage = getContestLoginErrorMessage(error);
 
@@ -108,6 +109,10 @@ export default async function ContestLogin({
     } else {
       glabel_user = globalSession;
     }
+  }
+
+  if (!user && !super_admin && autoLogin !== "miss") {
+    redirect(`/api/contests/${id}/auto-login`);
   }
 
   const now = new Date();

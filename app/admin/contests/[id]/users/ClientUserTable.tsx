@@ -109,6 +109,7 @@ export default function ClientUserTable({
             "Seat",
             "Coach",
             "Category",
+            "AutoLoginIP",
           ]
         : ["Username", "Password", "DisplayName", "Role"];
 
@@ -128,6 +129,7 @@ export default function ClientUserTable({
                 u.seat,
                 u.coach,
                 u.category,
+                u.autoLoginIp,
               ]
             : [u.username, pass, u.displayName, u.role];
         return row
@@ -243,6 +245,7 @@ export default function ClientUserTable({
                   <th className="px-6 py-3">School</th>
                   <th className="px-6 py-3">Coach</th>
                   <th className="px-6 py-3">Seat</th>
+                  <th className="px-6 py-3">Auto Login IP</th>
                   <th className="px-6 py-3">Last Login IP</th>
                 </>
               ) : (
@@ -298,6 +301,9 @@ export default function ClientUserTable({
                     </td>
                     <td className="px-6 py-3 font-mono text-gray-500">
                       {user.seat || "-"}
+                    </td>
+                    <td className="px-6 py-3 font-mono text-xs text-gray-500">
+                      {user.autoLoginIp || "-"}
                     </td>
                     <td className="px-6 py-3 font-mono text-xs text-gray-500">
                       {user.lastLoginIp ? (
@@ -362,7 +368,7 @@ export default function ClientUserTable({
             {initialUsers.length === 0 && (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={activeTab === "TEAM" ? 11 : 7}
                   className="px-6 py-8 text-center text-gray-400 italic"
                 >
                   No users found. Import them above.

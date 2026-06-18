@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ContestRole } from "@/lib/generated/prisma/client";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { isIP } from "node:net";
 
 export interface ImportUsersData {
   password?: string;
@@ -12,6 +13,7 @@ export interface ImportUsersData {
   school?: string;
   members?: string;
   seat?: string;
+  autoLoginIp?: string;
   role?: string;
   coach?: string;
   category?: string;
@@ -25,9 +27,44 @@ export interface UpdateUsersData {
   school?: string | null;
   members?: string | null;
   seat?: string | null;
+  autoLoginIp?: string | null;
   role?: ContestRole;
   coach?: string | null;
   category?: string | null;
+}
+
+function normalizeAutoLoginIp(value?: string | null) {
+  const ip = value?.trim();
+  if (!ip) return null;
+
+  if (!isIP(ip)) {
+    throw new Error(`Invalid auto login IP: ${ip}`);
+  }
+
+  return ip;
+}
+
+async function assertAutoLoginIpAvailable(
+  contestId: number,
+  autoLoginIp: string | null,
+  excludeUserId?: string,
+) {
+  if (!autoLoginIp) return;
+
+  const existing = await prisma.user.findFirst({
+    where: {
+      contestId,
+      autoLoginIp,
+      ...(excludeUserId ? { id: { not: excludeUserId } } : {}),
+    },
+    select: { username: true },
+  });
+
+  if (existing) {
+    throw new Error(
+      `Auto login IP ${autoLoginIp} is already bound to ${existing.username}.`,
+    );
+  }
 }
 
 // 获取用户列表 (根据角色分组)
@@ -62,6 +99,40 @@ export async function importUsers(
   roleType: "TEAM" | "STAFF"
 ) {
   const dataToInsert = [];
+  const batchAutoLoginIps = new Map<string, string>();
+
+  if (roleType === "TEAM") {
+    for (const user of usersData) {
+      const autoLoginIp = normalizeAutoLoginIp(user.autoLoginIp);
+      if (!autoLoginIp) continue;
+
+      const previousUsername = batchAutoLoginIps.get(autoLoginIp);
+      if (previousUsername) {
+        throw new Error(
+          `Auto login IP ${autoLoginIp} is duplicated by ${previousUsername} and ${user.username}.`,
+        );
+      }
+
+      batchAutoLoginIps.set(autoLoginIp, user.username);
+    }
+
+    const ips = Array.from(batchAutoLoginIps.keys());
+    if (ips.length > 0) {
+      const existing = await prisma.user.findFirst({
+        where: {
+          contestId,
+          autoLoginIp: { in: ips },
+        },
+        select: { username: true, autoLoginIp: true },
+      });
+
+      if (existing?.autoLoginIp) {
+        throw new Error(
+          `Auto login IP ${existing.autoLoginIp} is already bound to ${existing.username}.`,
+        );
+      }
+    }
+  }
 
   for (const user of usersData) {
     // 1. 处理密码 (如果没有密码，生成随机的)
@@ -90,6 +161,7 @@ export async function importUsers(
         seat: user.seat || null,
         coach: user.coach || null,
         category: user.category || "0",
+        autoLoginIp: normalizeAutoLoginIp(user.autoLoginIp),
       });
     } else {
       // 员工角色映射
@@ -130,9 +202,11 @@ export async function updateUser(
     role?: ContestRole;
     coach?: string; 
     category?: string;
+    autoLoginIp?: string | null;
   }
 ) {
   const updateData: UpdateUsersData = {};
+  const normalizedAutoLoginIp = normalizeAutoLoginIp(data.autoLoginIp);
 
   if (data.displayName) updateData.displayName = data.displayName;
   if (data.school !== undefined) updateData.school = data.school;
@@ -141,6 +215,19 @@ export async function updateUser(
   if (data.role) updateData.role = data.role;
   if (data.coach !== undefined) updateData.coach = data.coach;
   if (data.category !== undefined) updateData.category = data.category;
+  if (data.autoLoginIp !== undefined) {
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (normalizedAutoLoginIp && currentUser?.role !== ContestRole.TEAM) {
+      throw new Error("Auto login IP can only be bound to TEAM users.");
+    }
+
+    await assertAutoLoginIpAvailable(contestId, normalizedAutoLoginIp, userId);
+    updateData.autoLoginIp = normalizedAutoLoginIp;
+  }
 
   // 如果修改了密码，同时更新 Hash 和 明文
   if (data.password && data.password.trim() !== "") {

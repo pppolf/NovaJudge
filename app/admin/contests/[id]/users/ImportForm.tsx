@@ -18,6 +18,7 @@ interface PreviewRow {
   school?: string;
   members?: string;
   seat?: string;
+  autoLoginIp?: string;
   role?: string;
   coach?: string;
   category?: string;
@@ -49,6 +50,7 @@ export default function ImportForm({ contestId, type }: ImportFormProps) {
             seat: cols[5],
             coach: cols[6],
             category: cols[7],
+            autoLoginIp: cols[8],
           };
         } else {
           // 格式: Username | Password | RealName | Role
@@ -112,7 +114,8 @@ export default function ImportForm({ contestId, type }: ImportFormProps) {
           {type === "TEAM" ? (
             <span>
               Username &emsp; Password &emsp; TeamName &emsp; School &emsp;
-              Members &emsp; Seat &emsp; Coach &emsp; Type(0/1/2)
+              Members &emsp; Seat &emsp; Coach &emsp; Type(0/1/2) &emsp;
+              AutoLoginIP
             </span>
           ) : (
             <span>
@@ -139,7 +142,7 @@ export default function ImportForm({ contestId, type }: ImportFormProps) {
             className="w-full h-64 p-3 border border-gray-300 rounded-lg font-mono text-xs focus:ring-2 focus:ring-blue-500 outline-none whitespace-pre"
             placeholder={
               type === "TEAM"
-                ? `team001\t123456\tMy Team\tXCPC Univ\tAlice,Bob\tA-101\tProf.Zhang\t0`
+                ? `team001\t123456\tMy Team\tXCPC Univ\tAlice,Bob\tA-101\tProf.Zhang\t0\t192.168.1.101`
                 : `admin01\t123456\tJohn Doe\tJUDGE`
             }
             value={text}
@@ -172,6 +175,7 @@ export default function ImportForm({ contestId, type }: ImportFormProps) {
                       <th className="px-3 py-2">Seat</th>
                       <th className="px-3 py-2">Coach</th>
                       <th className="px-3 py-2">Type</th>
+                      <th className="px-3 py-2">Auto IP</th>
                     </>
                   ) : (
                     <th className="px-3 py-2">Role</th>
@@ -199,6 +203,9 @@ export default function ImportForm({ contestId, type }: ImportFormProps) {
                         <td className="px-3 py-1.5 text-gray-500">
                           {getCategoryLabel(row.category as string)}
                         </td>
+                        <td className="px-3 py-1.5 font-mono text-gray-500">
+                          {row.autoLoginIp || "-"}
+                        </td>
                       </>
                     ) : (
                       <td className="px-3 py-1.5">
@@ -211,7 +218,10 @@ export default function ImportForm({ contestId, type }: ImportFormProps) {
                 ))}
                 {preview.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-gray-400">
+                    <td
+                      colSpan={type === "TEAM" ? 7 : 3}
+                      className="p-8 text-center text-gray-400"
+                    >
                       Paste data to preview
                     </td>
                   </tr>
